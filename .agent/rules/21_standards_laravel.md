@@ -79,7 +79,7 @@ description: Apply when writing, reviewing, or modifying Laravel backend code (P
 - Always define `$fillable` on models (see `50_security.md` Mass Assignment).
 - Use relationships and scopes — avoid raw DB queries unless performance demands it.
 - Factories for every model.
-- Use `$casts` for attribute casting — dates, booleans, enums, JSON.
+- Use the `casts()` method for attribute casting (Laravel 12) — dates, booleans, enums, JSON. Follow existing model conventions if the project uses `$casts` property instead.
 
 ## Enums
 
