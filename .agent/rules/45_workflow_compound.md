@@ -24,14 +24,13 @@ Do **not** suggest compounding for:
 
 When starting work on a new feature or bug fix:
 
-1. **Scan conversation summaries** — they're already loaded. Check if a recent conversation addressed a similar problem.
-2. **Search `docs/solutions/`** for related prior solutions:
-   ```bash
-   find docs/solutions/ -name "*.md" | head -20
-   grep -rl "[keyword]" docs/solutions/ 2>/dev/null
-   ```
+1. **Scan conversation summaries** — they're already loaded.
+2. **Search `docs/solutions/`** for related prior solutions. (See `research-solutions` skill).
 
-Reference relevant solutions or prior conversations in the implementation plan if found.
+## Workflow
+
+To capture knowledge, run the `/compound` workflow.
+Follow the steps defined in `.agent/workflows/compound.md`.
 
 ## Solution Docs → Rule Promotion
 
