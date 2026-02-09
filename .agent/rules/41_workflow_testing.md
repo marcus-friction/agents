@@ -10,6 +10,7 @@ description: Apply when writing, reviewing, or running tests (Pest, Vitest), or 
 - Aim for high coverage across all layers — actions, controllers, models, composables, components.
 - No hard coverage gate in CI, but every new feature and bugfix should ship with tests.
 - Untested code is a liability. If you touch it, test it.
+- For test-first workflow, read the `test-driven-development` skill if available.
 
 ---
 

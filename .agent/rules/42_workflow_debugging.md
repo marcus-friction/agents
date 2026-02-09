@@ -7,6 +7,8 @@ description: Apply when diagnosing errors, fixing bugs, or troubleshooting faili
 
 **This rule is strict. No exceptions.**
 
+If the `systematic-debugging` skill exists, read it for methodology on how to approach each attempt.
+
 When encountering a bug, error, or failing test, follow this exact protocol:
 
 ## Try 1 — Targeted Fix

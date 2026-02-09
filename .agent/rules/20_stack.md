@@ -115,7 +115,7 @@ frontend/
 
 - **Never upgrade major versions, add new dependencies, or swap packages without explicit approval.**
 - Always check `composer.json` and `package.json` before installing to avoid duplicates or conflicts.
-- Pin exact versions in `composer.json` (`"laravel/framework": "^12.0"`) — no wildcards.
+- Use semantic versioning constraints in `composer.json` (`"laravel/framework": "^12.0"`) — no wildcards.
 - Run `composer outdated` / `npm outdated` to check before proposing upgrades.
 
 ## Quality Tooling
