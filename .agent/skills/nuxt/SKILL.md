@@ -1,15 +1,19 @@
 ---
 name: nuxt
-description: Nuxt full-stack Vue framework with SSR, auto-imports, and file-based routing. Use when working with Nuxt apps, server routes, useFetch, middleware, or hybrid rendering.
+description: Reference Library for Nuxt 4 full-stack development. Contains authoritative documentation on file structure, auto-imports, data fetching, and SSR patterns. Use this skill to "look up" framework specifics, not as a procedural checklist.
 metadata:
+  type: reference-library
   author: Anthony Fu
-  version: "2026.1.28"
+  version: "2026.1.28.1"
   source: Generated from https://github.com/nuxt/nuxt, scripts located at https://github.com/antfu/skills
 ---
 
-Nuxt is a full-stack Vue framework that provides server-side rendering, file-based routing, auto-imports, and a powerful module system. It uses Nitro as its server engine for universal deployment across Node.js, serverless, and edge platforms.
+# Nuxt Reference Library
 
-> The skill is based on Nuxt 3.x, generated at 2026-01-28.
+This is a **Reference Skill**. It serves as an offline knowledge base for Nuxt 4.
+**Usage**: Search the tables below to find the relevant topic, then read the referenced file in `references/` for detailed implementation patterns. Do not read every file; treat this like a documentation site.
+
+> The skill is based on Nuxt 3.x/4.x patterns, generated at 2026-01-28.
 
 ## Core
 

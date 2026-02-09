@@ -1,13 +1,17 @@
 ---
 name: vue-best-practices
-description: MUST be used for Vue.js tasks. Strongly recommends Composition API with `<script setup>` and TypeScript as the standard approach. Covers Vue 3, SSR, Volar, vue-tsc. Load for any Vue, .vue files, Vue Router, Pinia, or Vite with Vue work. ALWAYS use Composition API unless the project explicitly requires Options API.
+description: Reference Library for Vue.js patterns and anti-patterns. MUST be consulted for Vue tasks. Strongly recommends Composition API with `<script setup>` and TypeScript. Use to look up specific "gotchas" or patterns, not as a linear checklist.
 license: MIT
 metadata:
+  type: reference-library
   author: github.com/vuejs-ai
-  version: "17.0.0"
+  version: "17.0.1"
 ---
 
-Vue 3 best practices, common gotchas, and performance optimization.
+# Vue Best Practices Reference
+
+This is a **Reference Skill**. It catalogs common Vue 3 patterns, gotchas, and performance optimizations.
+**Usage**: Check the index below for topics relevant to your current task. Read the referenced file to understand the specific pattern or anti-pattern.
 
 ### Reactivity
 - Accessing ref() values without .value in scripts → See [ref-value-access](reference/ref-value-access.md)
