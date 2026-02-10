@@ -5,7 +5,7 @@ description: Performance analysis checklist for code review
 
 # Performance Review Skill
 
-Systematic performance analysis for code changes. Use during the performance pass of `/review` or when optimizing.
+Systematic performance analysis for code changes. Use during the performance pass of `/review` or when optimizing. See `25_caching_performance.md` rule for implementation standards.
 
 ## Checklist
 
@@ -19,13 +19,29 @@ Systematic performance analysis for code changes. Use during the performance pas
 - [ ] **Select specifics**: Use `select()` when only a few columns are needed
 - [ ] **Chunk processing**: Large datasets processed with `chunk()` or `lazy()` — never load all into memory
 
+### Backend — Caching
+
+- [ ] **Cache appropriateness**: Expensive computations or slow queries cached with appropriate TTL
+- [ ] **Method choice**: High-traffic endpoints use `Cache::flexible()` (SWR); standard queries use `Cache::remember()`
+- [ ] **Tagged caching**: Related cache entries grouped with tags for collective invalidation
+- [ ] **Cache invalidation**: Cache cleared on data mutation — no stale data risk
+- [ ] **Event-driven invalidation**: Model observers or event listeners handle invalidation, not manual `forget()` scattered through code
+- [ ] **TTL alignment**: TTL matches data volatility (see tiered strategy in `25_caching_performance.md`)
+- [ ] **Null handling**: `Cache::remember()` closures don't return bare `null` (treated as cache miss)
+- [ ] **Key naming**: Cache keys follow `entity:id:attribute` convention — descriptive and hierarchical
+
 ### Backend — Application
 
-- [ ] **Caching**: Expensive computations or slow queries cached with appropriate TTL
-- [ ] **Cache invalidation**: Cache cleared on data mutation — no stale data
 - [ ] **Queue offloading**: Slow operations (email, PDF, API calls) dispatched to queues — not inline
 - [ ] **Serialization**: API Resources aren't loading unnecessary relationships
 - [ ] **Middleware**: No expensive operations in globally-applied middleware
+- [ ] **Job payloads**: Queue jobs pass IDs, not full models — data fetched in `handle()`
+
+### Backend — Redis
+
+- [ ] **Connection isolation**: Cache, session, and queue use separate Redis databases (not all on DB 0)
+- [ ] **Memory awareness**: No unbounded `Cache::forever()` without versioning or deploy-time flush
+- [ ] **Tag cleanup**: Tagged cache sets monitored — they grow even when individual items have TTL
 
 ### Frontend — Rendering
 
@@ -34,16 +50,22 @@ Systematic performance analysis for code changes. Use during the performance pas
 - [ ] **Component reactivity**: No unnecessary re-renders from poorly-scoped watchers
 - [ ] **Bundle size**: No large libraries imported for small features
 
-### Frontend — Data Fetching
+### Frontend — Data Fetching & Caching
 
 - [ ] **useFetch/useAsyncData**: Data-fetching composables used — no raw `fetch()` in lifecycle hooks
 - [ ] **Deduplication**: Same data not fetched multiple times (key your requests)
+- [ ] **getCachedData**: Navigation-heavy pages use `getCachedData` to prevent redundant API calls
 - [ ] **Payload optimization**: API responses contain only needed fields
 - [ ] **SSR vs Client**: Data needed for SEO/initial render fetched on server; interactive data can be client-side
+- [ ] **routeRules**: Appropriate caching strategy set per route (prerender/ISR/SWR/SSR)
 
-### Infrastructure
+### Infrastructure — HTTP & CDN
 
-- [ ] **CDN**: Static assets served through Cloudflare
+- [ ] **Cache-Control headers**: API responses include appropriate directives (`public`/`private`/`no-store`)
+- [ ] **s-maxage**: CDN edge TTL set independently from browser TTL where needed
+- [ ] **Set-Cookie check**: Cacheable responses don't include `Set-Cookie` headers (blocks Cloudflare caching)
+- [ ] **Cloudflare Cache Rules**: Static assets and SSR pages configured in Cache Rules (not deprecated Page Rules)
+- [ ] **Asset immutability**: `/_nuxt/*` served with `Cache-Control: public, max-age=31536000, immutable`
 - [ ] **Compression**: Responses gzipped/brotli compressed
 - [ ] **Connection pooling**: Database connections not exhausted under load
 
@@ -58,3 +80,9 @@ These patterns almost always indicate a performance problem:
 | `DB::` inside a loop | Repeated queries | Batch query before the loop |
 | `sleep()` in request | Blocks worker | Queue job |
 | `file_get_contents()` for URLs | No timeout, blocking | HTTP client with timeout, or queue |
+| `Cache::forever()` without invalidation | Stale data after changes | Version keys or tag-flush on deploy |
+| `Cache::remember()` returning `null` | Infinite re-computation | Wrap in DTO or sentinel |
+| Caching with `public` on auth responses | Data leaks between users | `private` or `no-store` |
+| `Cache::tags()` with `file` driver | Runtime exception | Enforce Redis driver |
+| Raw `fetch()` in Nuxt lifecycle hooks | No SSR dedup, no caching | `useFetch` / `useAsyncData` |
+| Missing `key` on `useFetch` | Cache collisions | Always set explicit key |
