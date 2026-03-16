@@ -14,55 +14,59 @@ Before opening a PR, or when the user asks for a review of recent changes.
 
 ## Steps
 
-1. **Identify scope.** Determine which files changed. Use `git diff` against the base branch.
+### 1. Identify Scope
+Determine which files changed. Use `git diff` against the base branch.
 
-2. **Standards pass.** Check all changes against the relevant coding standards:
-   - PHP changes → `21_standards_laravel.md`
-   - Vue/Nuxt changes → `22_standards_nuxt.md`
-   - Styling changes → `23_design_system.md`
-   - Flag any deviations.
+### 2. The Ultra-Thinking Phase
+Before listing any findings, perform two deep-dive analyses:
 
-3. **Security pass.** Review changes through the lens of `50_security.md`:
-   - User input handling — is everything validated?
-   - Authorization — are policies enforced?
-   - Secrets — any hardcoded values or exposed keys?
-   - SQL injection, XSS, CSRF — applicable?
-   If the `security-review` skill exists, read it for deeper guidance.
+**A. Stakeholder Perspective Analysis**
+Examine the changes from these angles:
+- **Developer:** Is the code maintainable, readable, and well-tested?
+- **Ops:** Are there missing logs, bad error handling, or deployment risks?
+- **End User:** Is the UI/UX negatively impacted? Is accessibility compromised?
+- **Security:** Are we introducing vulnerabilities?
+- **Business:** Does this align with the project goals?
 
-4. **Performance pass.** Look for:
-   - N+1 queries (missing eager loading)
-   - Unnecessary database calls in loops
-   - Missing indexes for new query patterns
-   - Large payloads without pagination
-   - Frontend: unnecessary re-renders, missing `lazy` loading
-   If the `performance-review` skill exists, read it for deeper guidance.
+**B. Scenario Exploration**
+Imagine how the code behaves under stress:
+- **Happy Path:** Does it work when everything is perfect?
+- **Boundary Conditions:** What happens with empty inputs, massive inputs, or malformed data?
+- **State Changes:** What if a database transaction fails halfway through?
+- **Concurrent Access:** What if two users do this at exactly the same time?
 
-5. **Architecture pass.** Verify:
-   - Business logic in Actions, not controllers
-   - Thin controllers pattern maintained
-   - API versioning respected
-   - No circular dependencies introduced
-   - Design system tokens used (not hardcoded values)
-   If the `architecture-review` skill exists, read it for deeper guidance.
+### 3. Review Passes
+Execute the following passes against the codebase, keeping the Ultra-Thinking insights in mind:
+- **Standards:** Check `21_standards_laravel.md`, `22_standards_nuxt.md`, `23_design_system.md`.
+- **Security:** Check `50_security.md` (injection, auth, secrets).
+- **Performance:** Look for N+1 queries, missing indexes, large payloads.
+- **Architecture:** Check Component boundaries, Action usage, API versioning.
+- **SEO & UI:** Check semantic HTML, Core Web Vitals, Schema, and GEO readiness.
+- **Accessibility:** Check WCAG contrast, keyboard navigation, responsive design.
+- **Testing:** Verify test coverage and edge cases.
 
-6. **Accessibility & UI pass.** For changes touching frontend code:
-   - Design system tokens used (no hardcoded colors, spacing)
-   - Responsive at all breakpoints (320px → 1440px)
-   - Semantic HTML, keyboard accessible, WCAG AA contrast
-   - Loading, empty, and error states handled
-   If the `ui-accessibility-review` skill exists, read it for the full checklist.
+### 4. Findings & File-Todos Generation
+Do NOT just list the findings lazily in chat. For EVERY finding, you MUST create a structured markdown file in the `todos/` directory.
 
-7. **Test coverage pass.** Check:
-   - New code has test coverage
-   - Edge cases are tested
-   - Test naming follows conventions
-   - No tests were removed or skipped without justification
+File naming format: `todos/YYYYMMDD-pending-[P1/P2/P3]-[short-description].md`
 
-8. **Report.** Present findings organized by severity:
-   - 🔴 **Must fix** — security issues, broken tests, data integrity risks
-   - 🟡 **Should fix** — standards violations, missing tests, performance concerns
-   - 🟢 **Consider** — style suggestions, minor improvements
-   Include specific file/line references and suggested fixes.
+Inside each todo file, include:
+```markdown
+# [Short Description]
+**Severity:** [P1 (Critical) / P2 (Important) / P3 (Minor)]
+**File(s):** [path/to/file.ext]
+
+## Issue
+[Detailed description of what is wrong]
+
+## Recommended Fix
+[Specific instructions or code snippet to resolve]
+```
+
+### 5. Report & Blocking
+Summarize the created `todos/` files for the user.
+
+**GATE: STOP.** If ANY `P1` (Critical) findings exist (e.g., security flaws, broken tests, severe data integrity risks), you MUST explicitly state that the workflow is BLOCKED. Require the user to fix the P1 findings (or authorize you to fix them) before the review can be considered "passed".
 
 ## Rules
 

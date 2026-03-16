@@ -10,22 +10,15 @@ Capture a recently solved problem as structured documentation so future work ben
 
 After solving a non-trivial bug, debugging session, or tricky implementation. Trivial fixes (typos, obvious errors) don't need compounding.
 
-## Steps
+## The 5-Step Extraction
 
-1. **Identify the problem.** Determine what was solved from conversation context or user description. Ask the user if unclear.
+To generate a high-quality solution document, explicitly process the information through these 5 analytical steps before writing:
 
-2. **Extract context.** Gather:
-   - Exact error messages or observable symptoms
-   - Which component/layer was affected
-   - Investigation steps tried (including dead ends)
-
-3. **Analyze root cause.** Write a concise technical explanation of why the problem occurred.
-
-4. **Extract the solution.** Document the working fix with code examples where applicable.
-
-5. **Check for prior art.** Search `docs/solutions/` for related existing documentation. Cross-reference if found.
-
-6. **Determine category.** Classify into one of:
+1. **Context Analyzer:** Identify the exact error messages, observable symptoms, and affected components.
+2. **Solution Extractor:** Extract the precise technical solution, including working code snippets and configuration changes.
+3. **Related Docs Finder:** Search `docs/solutions/` for related existing documentation.
+4. **Prevention Strategist:** Determine how to prevent this issue in the future (e.g., tests, linting rules, architectural patterns).
+5. **Category Classifier:** Choose the most appropriate category:
    - `build-errors/`
    - `runtime-errors/`
    - `performance/`
@@ -35,11 +28,17 @@ After solving a non-trivial bug, debugging session, or tricky implementation. Tr
    - `ui-bugs/`
    - `integration/`
 
-7. **Write the solution doc.** Create `docs/solutions/[category]/[slug].md` using the template below.
+## Writing the Document
 
-8. **Evaluate knowledge tier.** Decide where the learning belongs (see Knowledge Tiers below). Ask the user before modifying rules.
+Create `docs/solutions/[category]/[slug].md` using the template below.
 
-9. **Summarize.** Tell the user what was documented and where.
+## Auto-Triggered Post-Review
+
+Immediately after generating the solution document, perform a targeted review based on the category:
+- **Performance:** Does the solution prevent N+1 queries or memory bloat?
+- **Security:** Does the solution introduce any injection risks or bypass authorization?
+- **Database:** Are any migrations or schema changes documented correctly?
+If the review identifies gaps, update the solution document before concluding.
 
 ## Knowledge Tiers
 
