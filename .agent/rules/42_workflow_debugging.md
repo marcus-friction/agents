@@ -5,52 +5,22 @@ description: Apply when diagnosing errors, fixing bugs, or troubleshooting faili
 
 # Debugging Workflow — Three Tries Rule
 
-**This rule is strict. No exceptions.**
+**Strict Rule: Three tries, then escalate. No exceptions. No fix-loops.** Read the `systematic-debugging` skill if available.
 
-If the `systematic-debugging` skill exists, read it for methodology on how to approach each attempt.
-
-When encountering a bug, error, or failing test, follow this exact protocol:
-
-## Try 1 — Targeted Fix
-
-1. Read the error message, stack trace, and relevant code.
-2. Identify the most likely root cause.
-3. Apply a single, focused fix.
-4. Run the failing test or reproduce the issue to verify.
-
-If fixed → done. If not → proceed to Try 2.
-
-## Try 2 — Re-evaluate
-
-1. **Do not** repeat the same approach. Step back.
-2. Re-read logs, check related code, question your assumptions.
-3. Try a fundamentally different approach.
-4. Run the failing test or reproduce the issue to verify.
-
-If fixed → done. If not → proceed to Try 3.
-
-## Try 3 — Final Attempt
-
-1. Broaden investigation — check dependencies, config, environment.
-2. Apply the fix.
-3. Run the failing test or reproduce the issue to verify.
-
-If fixed → done. If not → **stop immediately and escalate.**
+## Protocol
+1. **Try 1 (Targeted Fix):** Read error > Identify root cause > Apply single focused fix > Verify.
+2. **Try 2 (Re-evaluate):** If Try 1 fails, **do not repeat**. Re-read logs, question assumptions, try a fundamentally different approach > Verify.
+3. **Try 3 (Final Attempt):** Broaden investigation (dependencies, env, config) > Apply fix > Verify.
 
 ## Escalation
-
-After three failed attempts, you **must**:
-
-1. **Stop making changes.** Do not attempt a fourth fix.
-2. **Report to the user** with:
-   - What the original error was.
-   - What you tried at each step and why it failed.
-   - What you think the root cause might be.
-   - Suggested next steps or areas to investigate.
+If Try 3 fails, **Stop making changes.** Escalate to the user with:
+- The original error.
+- What was tried and why it failed.
+- Hypothesis for the root cause.
+- Suggested next steps.
 
 ## Anti-Patterns
-
-- **No fix-loops.** Three tries, then escalate. Period.
-- **No cascading changes.** If a fix requires touching unrelated code, stop and reassess.
-- **No guessing.** Each attempt must have a clear hypothesis — not random changes.
-- **No silent failures.** Always verify the fix actually resolves the issue before marking it done.
+- **No fix-loops:** Stop at 3 failed tries.
+- **No cascading changes:** If a fix requires touching unrelated code, stop and reassess.
+- **No guessing:** Base attempts on clear hypotheses.
+- **No silent failures:** Always verify fix actually resolves the issue.

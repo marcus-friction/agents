@@ -5,75 +5,28 @@ description: Apply when creating branches, opening PRs, committing code, or disc
 
 # Development Workflow
 
-## Branching
+## Branching & Flow
+- **Model:** GitHub Flow. `master` = production, `staging` = pre-production.
+- **Naming:** `feature/*`, `fix/*`, `hotfix/*`.
+- **Lifecycle:** 
+  1. Branch from `master`.
+  2. Open PR to `staging`.
+  3. CI Passes + Human Review → Squash Merge.
+  4. Auto-deploy and verify on `staging`.
+  5. Open PR `staging` → `master` → Squash Merge → Auto-deploy production.
+- **Cleanup:** Delete feature branch after merge. No WIP commits on `staging`/`master`. Write imperative commit messages ("Add feature").
 
-- **Model**: GitHub Flow with a `staging` branch.
-- **Default branch**: `master` (production).
-- **Staging branch**: `staging` (pre-production verification).
+## PRs & CI Requirements
+- **Rules:** Human review is mandatory (no self-mergers). Squash merges only.
+- **Backend CI:** `phpstan analyse` (Level 9), `pint --test`, `sail test`.
+- **Frontend CI:** `eslint .`, `nuxi typecheck`, `vitest run`.
+- All checks must pass before merging.
 
-### Branch Naming
+## Review Checklist
+- Check naming conventions (`21_standards_laravel`, `22_standards_nuxt`).
+- Ensure new code has test coverage.
+- Verify security implications (`50_security`).
+- Ensure accessibility basics are met (`24_accessibility`).
+- Ensure implementation details do not leak into API contracts.
 
-```
-feature/short-description
-fix/short-description
-hotfix/short-description
-```
-
-### Flow
-
-1. Create feature branch from `master`.
-2. Develop and commit.
-3. Open PR targeting `staging`.
-4. CI checks must pass + human reviewer approves.
-5. Squash merge into `staging` → auto-deploys to staging environment.
-6. Verify on staging.
-7. Open PR from `staging` → `master`.
-8. Squash merge into `master` → auto-deploys to production.
-
-## Pull Requests
-
-- **Human review required** on every PR — no self-merges.
-- **Squash merge only** — one clean commit per PR on the target branch.
-- PR title becomes the squash commit message — make it descriptive.
-- Delete feature branches after merge.
-
-### Required CI Checks
-
-**Backend:**
-1. `./vendor/bin/phpstan analyse` (Larastan)
-2. `./vendor/bin/pint --test` (formatting check)
-3. `sail test` (Pest)
-
-**Frontend (from `frontend/`):**
-1. `npx eslint .`
-2. `npx nuxi typecheck`
-3. `npx vitest run`
-
-All checks must pass before merge is allowed.
-
-## Commits
-
-- Write clear, imperative commit messages: "Add order export", not "Added order export".
-- No WIP commits on `master` or `staging` — squash handles cleanup.
-- Reference issue/ticket numbers where applicable.
-
-### Review Checklist
-
-Reviewers should verify beyond CI green:
-
-- [ ] Naming follows conventions (`21_standards_laravel.md`, `22_standards_nuxt.md`).
-- [ ] New code has test coverage — or a clear reason why not.
-- [ ] Security-sensitive areas flagged (see `50_security.md` Code Review).
-- [ ] No leaking of implementation details into the API contract.
-- [ ] Accessibility basics met for UI changes (`24_accessibility.md`).
-
-## Git Hooks (Recommended)
-
-Use a pre-push hook to run local checks before code reaches CI:
-
-```bash
-# .git/hooks/pre-push
-./vendor/bin/pint --test && ./vendor/bin/phpstan analyse
-```
-
-Optional but strongly recommended. Not enforced in CI — CI catches anything missed.
+*Optional:* Use a pre-push hook for local checks (`pint --test && phpstan analyse`).

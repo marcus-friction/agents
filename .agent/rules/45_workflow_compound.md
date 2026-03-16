@@ -5,33 +5,19 @@ description: Apply after solving bugs, completing debugging sessions, or finishi
 
 # Compound Knowledge Workflow
 
-## When to Suggest Compounding
+## When to Compound
+Suggest the `/compound` workflow after solving **non-trivial** problems:
+- Complex bug fixes requiring investigation.
+- Successful resolution of deployment/performance issues.
+- Implementations requiring research of an unfamiliar API/pattern.
 
-After solving a non-trivial problem, suggest running `/compound`:
+*Do not suggest for trivial fixes, typos, or straightforward feature implementations.*
 
-- Bug fix that required investigation (not an obvious typo)
-- Debugging session that uncovered a root cause
-- Implementation where you had to research an unfamiliar API or pattern
-- Deployment issue that was resolved
-- Performance optimization with measurable results
+## Planning Check
+Before starting new work:
+1. Scan active conversation summaries.
+2. Search prior solutions in `docs/solutions/` (Use `research-solutions` skill if available).
 
-Do **not** suggest compounding for:
-- Trivial fixes (typos, simple config changes)
-- Straightforward feature implementations following established patterns
-- Changes that don't add new knowledge
-
-## Before Planning
-
-When starting work on a new feature or bug fix:
-
-1. **Scan conversation summaries** — they're already loaded.
-2. **Search `docs/solutions/`** for related prior solutions. (See `research-solutions` skill).
-
-## Workflow
-
-To capture knowledge, run the `/compound` workflow.
-Follow the steps defined in `.agent/workflows/compound.md`.
-
-## Solution Docs → Rule Promotion
-
-If a pattern appears in 3+ solution docs, it should become a rule. When documenting a solution, check if the category already has multiple similar entries. If so, propose consolidating the pattern into the appropriate `.agent/rules/` file.
+## Workflow to Rule Promotion
+1. Run the `/compound` workflow to capture knowledge.
+2. **Promotion:** If a pattern appears in 3+ solution documents, it must be consolidated into a permanent rule in the appropriate `.agent/rules/` file.
