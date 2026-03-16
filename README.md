@@ -45,7 +45,10 @@ Skills live in `.agent/skills/` and provide deep, on-demand guidance when a task
 | `architecture-review` | Architecture compliance checklist for code review | Adapted from [Compound Engineering](https://github.com/kieranklaassen) |
 | `performance-review` | Performance analysis checklist for code review | Adapted from [Compound Engineering](https://github.com/kieranklaassen) |
 | `security-review` | Security audit checklist for code review | Adapted from [Compound Engineering](https://github.com/kieranklaassen) |
+| `seo-review` | Comprehensive SEO, Core Web Vitals, and Semantic HTML review. | Adapted from [Agentic-SEO-Skill](https://github.com/Bhanunamikaze/Agentic-SEO-Skill) |
 | `research-solutions` | Search prior solutions before planning new work | Adapted from [Compound Engineering](https://github.com/kieranklaassen) |
+| `heal-skill` | Self-repair skill for fixing malfunctioning skills or workflows | Adapted from [Compound Engineering](https://github.com/kieranklaassen) |
+| `changelog` | Generates engaging changelogs from recent merges | Adapted from [Compound Engineering](https://github.com/kieranklaassen) |
 | `systematic-debugging` | Reproduce → Isolate → Hypothesize → Verify → Fix | Adapted from [Vercel Skills.sh](https://skills.sh) |
 | `test-driven-development` | Red → Green → Refactor TDD cycle | Adapted from [Vercel Skills.sh](https://skills.sh) |
 | `ui-accessibility-review` | Design system, responsive, WCAG AA checklist | Adapted from [Vercel Skills.sh](https://skills.sh) |
@@ -67,6 +70,7 @@ Workflows live in `.agent/workflows/` and define multi-step procedures:
 | `/lfg` | Full engineering loop — plan, execute, verify, compound | Adapted from [Compound Engineering](https://github.com/kieranklaassen) |
 | `/review` | Multi-angle code review (standards, security, performance, architecture, accessibility, tests) | Adapted from [Compound Engineering](https://github.com/kieranklaassen) |
 | `/compound` | Document a solved problem to compound team knowledge | Adapted from [Compound Engineering](https://github.com/kieranklaassen) |
+| `/brainstorm` | Structured brainstorming divergent/convergent workflow | Adapted from [Compound Engineering](https://github.com/kieranklaassen) |
 | `/project` | Interactive onboarding — collects project context | Original |
 | `/wrap` | Atomic commits and push to origin | Original |
 | `/stats` | Summarize the day's work and put it in context | Original |
