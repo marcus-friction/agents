@@ -13,6 +13,7 @@ description: Apply when writing, reviewing, or modifying code that handles user 
 - Audit packages (`composer audit`, `npm audit`). Pin major versions.
 - **Headers:** HTTPS everywhere. Set Strict-Transport-Security, X-Frame-Options: DENY, X-Content-Type-Options: nosniff, CSP, and Referrer-Policy: strict-origin-when-cross-origin.
 - **Logging:** Log auth failures and permission denials. Never log passwords, API keys, or PII. Use structured JSON formatting in production.
+- **Service Exposure:** Redis, Meilisearch, and PostgreSQL must bind to `127.0.0.1` only — never `0.0.0.0` or public interfaces. Redis has **no authentication by default** and is trivially exploitable when internet-exposed. Verify binding with `ss -tlnp` after any server provisioning or configuration change. In Docker/Sail (dev), use `FORWARD_*_PORT` env vars which only expose ports to the host — never publish container ports to `0.0.0.0` in `docker-compose.yml`.
 
 ## Laravel Security
 - **Mass Assignment:** Always define `$fillable`. Do not use `$guarded = []`.

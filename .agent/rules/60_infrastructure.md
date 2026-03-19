@@ -25,3 +25,9 @@ trigger: always_on
 - **Storage:** DO Spaces (Local in Dev).
 - **Mail:** Mailgun / SES.
 - **Monitoring & CDN:** Sentry / Cloudflare.
+
+## Network Binding Policy
+- **Redis must bind to `127.0.0.1` only.** Never expose Redis on `0.0.0.0` or a public interface. Redis has no authentication by default and must only accept local connections.
+- **Meilisearch must bind to `127.0.0.1` only.** Same rationale — master key auth exists but network exposure is unnecessary.
+- **PostgreSQL:** Accept connections from `127.0.0.1` and private network IPs only. Never allow public access. Forge manages `pg_hba.conf` — do not override.
+- **Verify after provisioning:** Run `ss -tlnp | grep -E '6379|7700|5432'` on any new server to confirm services listen on `127.0.0.1`, not `0.0.0.0`.
