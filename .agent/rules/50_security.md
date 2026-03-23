@@ -13,13 +13,13 @@ description: Apply when writing, reviewing, or modifying code that handles user 
 - Audit packages (`composer audit`, `npm audit`). Pin major versions.
 - **Headers:** HTTPS everywhere. Set Strict-Transport-Security, X-Frame-Options: DENY, X-Content-Type-Options: nosniff, CSP, and Referrer-Policy: strict-origin-when-cross-origin.
 - **Logging:** Log auth failures and permission denials. Never log passwords, API keys, or PII. Use structured JSON formatting in production.
-- **Service Exposure:** Redis, Meilisearch, and PostgreSQL must bind to `127.0.0.1` only — never `0.0.0.0` or public interfaces. Redis has **no authentication by default** and is trivially exploitable when internet-exposed. Verify binding with `ss -tlnp` after any server provisioning or configuration change. In Docker/Sail (dev), use `FORWARD_*_PORT` env vars which only expose ports to the host — never publish container ports to `0.0.0.0` in `docker-compose.yml`.
 
 ## Laravel Security
 - **Mass Assignment:** Always define `$fillable`. Do not use `$guarded = []`.
 - **Validation:** Always pass `$request->validated()` to domain logic (never `$request->all()`).
 - **SQLi:** Use Eloquent/Query Builder. If raw SQL is needed, use parameter bindings strictly.
 - **XSS & CSRF:** Blade `{{ }}` auto-escapes. Never use `{!! !!}` with user content unless sanitized. Enforce `@csrf` on forms/AJAX headers.
+- **SSRF & HTTP:** When fetching user-provided URLs (like scraped images), never rely on `gethostbyname()` (IPv4 only). Use `dns_get_record($host, DNS_A | DNS_AAAA)` and bind the validated IP to cURL via `CURLOPT_RESOLVE` to prevent DNS Rebinding (TOCTOU).
 - **Auth & Roles:** Use Sanctum (API) / Filament (Admin). Use Policy classes for authorization (call `$this->authorize()`), never inline in controllers. Do not trust client-side role claims.
 - **Access Limits:** Use `throttle` middleware for auth, APIs, and expensive routes. 
 - **Passwords & Files:** Use `Hash::make()`. Validate all file uploads (type, size, extension), generate safe filenames server-side, and store outside the web root.

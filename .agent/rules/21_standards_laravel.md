@@ -25,7 +25,7 @@ description: Apply when writing, reviewing, or modifying Laravel backend code (P
   - **Eager-Loading:** Never eager-load circular paths (e.g., `variants.bikeModel.bikeType` when `bikeType` is already on the parent). Review `with()` arrays for redundancy.
   - **Aggregates First:** Use `loadCount()` / `loadExists()` / `withCount()` instead of loading full relations just to call `->count()` or `->contains()`.
   - **Query Scoping:** Always wrap `orWhere` inside a `where(fn ($q) => ...)` group to prevent scope leaks across unrelated conditions.
-  - **Batch Operations:** For bulk imports (>100 rows), use `upsert()` / `insert()` in chunks instead of per-row `updateOrCreate()`. Pre-load lookup data into memory maps.
+  - **Batch Operations:** For bulk imports (>100 rows), use `upsert()` / `insert()` in chunks instead of per-row `updateOrCreate()`. Pre-load lookup data into memory maps. **Note:** If `upsert()` fails due to PostgreSQL `NOT NULL` constraints on partial payloads, fallback to a `foreach` loop strictly wrapped inside a `DB::transaction()` to eliminate N+1 latency.
 - **Enums:** PHP 8.1+ backed enums in `app/Enums/`. Use `$casts` on models.
 - **Scout:** Use `Searchable` trait. Flatten data in `toSearchableArray()`. Set searchable/sortable attributes explicitly. Synchronize and use queuing in prod.
 
