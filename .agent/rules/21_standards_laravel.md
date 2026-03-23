@@ -9,6 +9,8 @@ description: Apply when writing, reviewing, or modifying Laravel backend code (P
 - **Structure:** Default Laravel directory structure. No domain-driven organization.
 - **Principles:** `declare(strict_types=1)` everywhere (Pint). No magic numbers (use config/constants). Comments explain "Why", not "How".
 - **Laravel-First:** Always use built-in features/packages before custom code (Horizon, Scout, Pennant, Pulse, Policies, Notification, Scheduler).
+- **DI Only:** Never call `app()`, `resolve()`, or `new` inside constructors. Use constructor injection exclusively. The container handles resolution.
+- **Refactoring Parity:** When refactoring static factories or inline `app()` calls into DI patterns, verify the output is behaviorally identical. Diff the original composition against the new one before committing.
 
 ## Domain Logic & Routing
 - **Controllers:** Thin logic. Receive request, call action, return response. >15 lines triggers extracting an Action.

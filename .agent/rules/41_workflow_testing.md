@@ -15,6 +15,7 @@ description: Apply when writing, reviewing, or running tests (Pest, Vitest), or 
 - **Syntax:** Use descriptive `it()` blocks and group with `describe()`. Use Datasets (`->with()`) for variations.
 - **Isolation:** Use `RefreshDatabase`. Mock external services (never hit real APIs in tests). Use Model Factories exclusively.
 - **Coverage:** Test Actions (direct invocation), Controllers (HTTP/Validation/Auth), Events, Job `handle()` methods, and Policy gates.
+- **Extraction = Tests:** When extracting logic into a new Service, Action, or DTO, write tests covering the extracted surface. Tests belong to the new class, not the old caller.
 
 ## Frontend (Vitest + @nuxt/test-utils)
 - **Structure:** `tests/unit/` (Node environment) vs `tests/components/` (Nuxt-aware via `mountSuspended` + `happy-dom`).
