@@ -19,6 +19,7 @@ description: Apply when writing, reviewing, or modifying Nuxt/Vue frontend code 
 
 ## Composables & Logic
 - **Composables:** Prefix with `use`. Return refs. Handle side-effect cleanup on unmount. Pass options object if 4+ parameters.
+- **Watchers:** Debounce watchers that trigger API calls (use `useDebounceFn` from `@vueuse/core`, 300ms default). Consolidate multiple watchers on the same sources into one. URL sync is immediate; data fetching is debounced.
 - **Data Fetching:** Use `useFetch` / `useAsyncData` against the server proxy. Never hit Laravel API directly from client.
 - **Error Handling:** Use `useError()`/`createError()`. Wrap sections in `<NuxtErrorBoundary>`. Always handle the `error` ref from `useFetch`. Use inline feedback, **no toasts**.
 

@@ -20,6 +20,12 @@ description: Apply when writing, reviewing, or modifying Laravel backend code (P
 
 ## Data Layer
 - **Eloquent:** Always define `$fillable`. Prefer relationships/scopes over raw queries. Require factories. Use `casts()` method for types.
+- **Eloquent Performance:**
+  - **Streaming:** `cursor()` silently ignores `with()`. Use `lazy()` when relationships are needed; `cursor()` only for standalone column access.
+  - **Eager-Loading:** Never eager-load circular paths (e.g., `variants.bikeModel.bikeType` when `bikeType` is already on the parent). Review `with()` arrays for redundancy.
+  - **Aggregates First:** Use `loadCount()` / `loadExists()` / `withCount()` instead of loading full relations just to call `->count()` or `->contains()`.
+  - **Query Scoping:** Always wrap `orWhere` inside a `where(fn ($q) => ...)` group to prevent scope leaks across unrelated conditions.
+  - **Batch Operations:** For bulk imports (>100 rows), use `upsert()` / `insert()` in chunks instead of per-row `updateOrCreate()`. Pre-load lookup data into memory maps.
 - **Enums:** PHP 8.1+ backed enums in `app/Enums/`. Use `$casts` on models.
 - **Scout:** Use `Searchable` trait. Flatten data in `toSearchableArray()`. Set searchable/sortable attributes explicitly. Synchronize and use queuing in prod.
 

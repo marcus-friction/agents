@@ -12,6 +12,8 @@ description: Apply when writing, reviewing, or modifying code that involves cach
   - Use `Cache::tags()` (Redis) for grouping/invalidation. 
   - Invalidate via Events > Tags > Keys > TTL. Warm caches for high-traffic views.
 - **TTLs:** Forever/24h+ (Static - use versioned keys `brands:v2:list`), 1-4h (Semi-static), 5-30m (Dynamic).
+- **Middleware:** Any `share()` / `handle()` that queries the database must use `Cache::remember()`. Pair every cached model with `FlushCacheObserver` registration. Use namespaced keys matching invalidation scope (e.g., `translations:{locale}`).
+- **Observer Efficiency:** Cache invalidation observers must not query the database to build cache keys. Use the model's foreign keys directly (e.g., `Cache::forget("variant:{$vc->variant_id}")` not `Variant::find($vc->variant_id)`).
 
 ## Redis Architecture
 - **Isolation:** Use separate DBs in `config/database.php` for `default` (0), `cache` (1), `session` (2), `queue` (3) to prevent `FLUSHDB` collateral damage.
