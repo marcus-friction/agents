@@ -42,6 +42,12 @@ description: Apply when writing, reviewing, or modifying Laravel backend code (P
 - **Config:** Never use `env()` outside config files.
 - **Pennant:** Feature flag via `Feature::active()`, not `.env` booleans.
 
+## Testing
+- **Co-Creation Rule:** Every new Action, Controller, Job, or Service must ship with a corresponding Pest test. Actions → `tests/Unit/Actions/`, Controllers → `tests/Feature/`, Jobs → `tests/Unit/Jobs/`.
+- **Isolation:** Use `RefreshDatabase` with `force="true"` in `phpunit.xml`. Fake S3/external disks in `setUp()` before any model creation.
+- **Mocking:** Prefer `->withAnyArgs()` over strict parameter matching. Annotate Mockery mocks with `@var` intersection types for PHPStan. Use anonymous subclasses for `final` class stubs.
+- **Datasets:** Use Pest `->with()` datasets for parameterized tests instead of duplicate test methods.
+
 ## Naming
 - **PascalCase:** Models (`User`), Controllers (`*Controller`), Actions (`Create*`), Form Requests, API Resources, Interfaces/DTOs.
 - **camelCase:** Variables, Methods.

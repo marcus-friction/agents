@@ -34,6 +34,13 @@ description: Apply when writing, reviewing, or modifying Nuxt/Vue frontend code 
 - **Styling:** Design tokens defined once via Tailwind v4 `@theme` in main CSS. Use `@apply` very sparingly (only inside Base components).
 - **TypeScript:** Generate response types from Laravel API Resources. Place in `shared/types/`. Import using `import type`. Use `satisfies` over `as`.
 
+## Testing
+- **Co-Creation Rule:** Every new component in `app/components/` must ship with a corresponding `.spec.ts` in `tests/components/` mirroring the directory structure. Every new composable must ship with a spec in `tests/composables/`. No exceptions.
+- **Mount:** Use `mountSuspended` from `@nuxt/test-utils/runtime` for all component tests. Never use plain `mount()`.
+- **Teleports:** Components using `<Teleport>` (drawers, modals) — assert on `document.body`, not `wrapper`.
+- **Pinia:** Reset with `setActivePinia(createPinia())` in `beforeEach()`.
+- **What to Assert:** Rendered output, user interactions, prop variations, slot content. Not internal implementation.
+
 ## Naming
 - **PascalCase:** Components (`UserCard.vue`, `<UserCard />`), Types/Interfaces.
 - **camelCase:** Composables (`useAuth`), Pinia Stores (`useAuthStore`), Variables.
