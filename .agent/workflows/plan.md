@@ -1,5 +1,5 @@
 ---
-description: Scope, architect, and plan new engineering tasks
+description: Scope, architect, and plan new tasks
 ---
 
 # Plan Workflow
@@ -48,4 +48,3 @@ Present a summary of the plan and the tasks to the user, and ask for their appro
 ## Rules
 
 - **Projects are ALWAYS tackled as a whole.** They can be broken down into phases and stages, but **NO parts** of the project can be deferred. Do not say "we will handle X later" or "Y is out of scope for now" if it was part of the original request or constitutes a complete project.
-- **Interactive Questioning:** Ask questions along the way, interactively and **one by one**, to clarify where a user decision is needed. Every question MUST include a concrete recommendation and a clear explanation of the tradeoffs involved.
