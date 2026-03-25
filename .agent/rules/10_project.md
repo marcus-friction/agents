@@ -20,13 +20,14 @@ trigger: always_on
 
 <!-- Who uses this product? What are their key needs and pain points? -->
 
-## Key Concepts
+## Problems & Pain Points
 
-<!-- Domain-specific terms and definitions the agent must understand to work in this codebase. Use a definition list or table. -->
+<!-- (Optional) What are the specific frustrations, time wastes, or financial costs the user currently experiences? -->
 
-## Status
+## Competitive Landscape & Differentiation
 
-<!-- Current state: ideation, MVP, beta, production, scaling, maintenance? What's the current focus? -->
+<!-- (Optional) Who are the alternatives/competitors, and why is this solution uniquely better? -->
+
 
 ## Constraints
 
