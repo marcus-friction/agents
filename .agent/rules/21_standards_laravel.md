@@ -32,7 +32,7 @@ description: Apply when writing, reviewing, or modifying Laravel backend code (P
 ## Async & Background
 - **Events/Listeners:** Side effects (stats, emails) via Events. Use queueable Listeners (`app/Listeners/`).
 - **Jobs:** Slow/external operations. Must be **idempotent**, implement `ShouldQueue`, and define `$tries`, `$backoff`, and `failed()`.
-- **Notifications:** `app/Notifications/` implementing `ShouldQueue`. Use `via()` for channels (mail, database). Do not use raw Mailables.
+- **Notifications:** `app/Notifications/` implementing `ShouldQueue`. Use `via()` for channels (mail, database). Do not use raw Mailables. See `26_email.md` for MJML template standards.
 - **Scheduling:** `routes/console.php`. Always use `->timezone()` and `->withoutOverlapping()`.
 
 ## Security & Reliability
