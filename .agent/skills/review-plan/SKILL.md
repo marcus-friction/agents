@@ -5,7 +5,7 @@ description: Meta-level guidance for reviewing and challenging implementation pl
 
 # Review Plan Skill
 
-Use this skill during the `/plan` workflow to brutally evaluate your drafted implementation plan before finalizing it. The goal is to catch architectural flaws, scope gaps, and edge cases early.
+Brutally evaluate your drafted implementation plan before finalizing it. The goal is to catch architectural flaws, scope gaps, and edge cases early.
 
 ## Evaluation Perspectives
 
@@ -24,7 +24,7 @@ Put on different hats to evaluate the plan. If the draft fails under any lens, i
 
 ### 3. Engineering & Scope Perspective
 - **No Deferrals:** Does the plan tackle the project **as a whole**? Projects must be phased, not deferred (no "we will do this later").
-- **Knowledge Re-use:** Does the implementation leverage established patterns from the codebase and compounded learnings in Knowledge Items (KIs)?
+- **Knowledge Re-use:** Does the implementation leverage established patterns from the codebase and compounded learnings in Knowledge Items (KIs) and documented under `/docs`?
 - **References:** `21_standards_laravel.md`, `22_standards_nuxt.md`.
 
 ### 4. Performance Perspective

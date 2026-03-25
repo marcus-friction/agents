@@ -25,7 +25,7 @@ When the user asks to plan a new feature, project, or gives a high-level request
 Before writing the plan, you MUST read the following to inform your architecture:
 1. The project rules (`.agent/rules/*.md`).
 2. Any relevant `.agent/skills/*.md`.
-3. The most relevant Knowledge Items (KIs) in the Antigravity Brain (`~/marcus/.gemini/antigravity/knowledge/`). Search for topics related to the user's request to leverage compounded learnings.
+3. The most relevant Knowledge Items (KIs) in the Antigravity Brain and documented under `/docs`.
 4. Existing codebase files that will be impacted.
 
 ### 3. Draft the Plan
@@ -48,3 +48,4 @@ Present a summary of the plan and the tasks to the user, and ask for their appro
 ## Rules
 
 - **Projects are ALWAYS tackled as a whole.** They can be broken down into phases and stages, but **NO parts** of the project can be deferred. Do not say "we will handle X later" or "Y is out of scope for now" if it was part of the original request or constitutes a complete project.
+- **Interactive Questioning:** Ask questions along the way, interactively and **one by one**, to clarify where a user decision is needed. Every question MUST include a concrete recommendation and a clear explanation of the tradeoffs involved.
