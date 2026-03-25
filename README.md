@@ -45,9 +45,10 @@ Skills live in `.agent/skills/` and provide deep, on-demand guidance when a task
 | `architecture-review` | Architecture compliance checklist for code review | Adapted from [Compound Engineering](https://github.com/kieranklaassen) |
 | `performance-review` | Performance analysis checklist for code review | Adapted from [Compound Engineering](https://github.com/kieranklaassen) |
 | `security-review` | Security audit checklist for code review | Adapted from [Compound Engineering](https://github.com/kieranklaassen) |
-| `seo-review` | Comprehensive SEO, Core Web Vitals, and Semantic HTML review. | Adapted from [Agentic-SEO-Skill](https://github.com/Bhanunamikaze/Agentic-SEO-Skill) |
-| `research-solutions` | Search prior solutions before planning new work | Adapted from [Compound Engineering](https://github.com/kieranklaassen) |
-| `heal-skill` | Self-repair skill for fixing malfunctioning skills or workflows | Adapted from [Compound Engineering](https://github.com/kieranklaassen) |
+| `seo-review` | Comprehensive SEO, Core Web Vitals, Semantic HTML, and E-E-A-T review | Adapted from [Agentic-SEO-Skill](https://github.com/Bhanunamikaze/Agentic-SEO-Skill) & [skills.sh](https://skills.sh/coreyhaines31/marketingskills/seo-audit) |
+| `review-gstack` | Mega Review pipeline w/ Target Scope Detection and Auto-Fixing | Adapted from [gstack](https://github.com/garrytan/gstack) |
+| `review-plan` | 5-Phase Mega Plan Review (CEO, Design, Eng) w/ interactive questioning | Adapted from [gstack](https://github.com/garrytan/gstack) |
+| `adversarial-review` | Destructive "Red Team" review to eliminate shared blind spots | Adapted from [gstack](https://github.com/garrytan/gstack) |
 | `changelog` | Generates engaging changelogs from recent merges | Adapted from [Compound Engineering](https://github.com/kieranklaassen) |
 | `systematic-debugging` | Reproduce → Isolate → Hypothesize → Verify → Fix | Adapted from [Vercel Skills.sh](https://skills.sh) |
 | `test-driven-development` | Red → Green → Refactor TDD cycle | Adapted from [Vercel Skills.sh](https://skills.sh) |
@@ -60,6 +61,12 @@ Skills live in `.agent/skills/` and provide deep, on-demand guidance when a task
 | `pinia` | Pinia store patterns — composables, testing, SSR, plugins | From [antfu/skills](https://github.com/antfu/skills) |
 | `vueuse-functions` | VueUse composable catalog — browser, state, sensors, reactivity | From [antfu/skills](https://github.com/antfu/skills) |
 | `tailwind-v4-shadcn` | Tailwind v4 + shadcn/ui — @theme, CSS variables, dark mode | From [jezweb/claude-skills](https://github.com/jezweb/claude-skills) |
+| `office-hours` | Brainstorming and startup validation check ("Boil the Lake") | From [garrytan/gstack](https://github.com/garrytan/gstack) |
+| `skill-creator` | Create new skills, modify existing skills, and measure skill performance | From [anthropics/skills](https://github.com/anthropics/skills) |
+| `design-consultation` | Comprehensive design, typography, color, and aesthetic consultation | From [garrytan/gstack](https://github.com/garrytan/gstack) |
+| `copywriting` | Principles for clear, user-centric marketing and UI copy | From [skills.sh](https://skills.sh/coreyhaines31/marketingskills/copywriting) |
+| `copy-editing` | The Seven Sweeps framework for reviewing and enhancing existing copy | From [skills.sh](https://skills.sh/coreyhaines31/marketingskills/copy-editing) |
+| `compound` | Document solved problems as structured, searchable knowledge | Adapted from [Compound Engineering](https://github.com/kieranklaassen) |
 
 ## Workflows
 
@@ -67,13 +74,14 @@ Workflows live in `.agent/workflows/` and define multi-step procedures:
 
 | Command | Purpose | Source |
 |---|---|---|
-| `/lfg` | Full engineering loop — plan, execute, verify, compound | Adapted from [Compound Engineering](https://github.com/kieranklaassen) |
+| `/plan` | Scope, architect, and plan engineering tasks using the Mega Plan Review | Adapted from [gstack](https://github.com/garrytan/gstack) |
+| `/review-gstack` | Scope, verify, and auto-fix code changes using the rigorous `review-gstack` pipeline | Adapted from [gstack](https://github.com/garrytan/gstack) |
 | `/review` | Multi-angle code review (standards, security, performance, architecture, accessibility, tests) | Adapted from [Compound Engineering](https://github.com/kieranklaassen) |
-| `/compound` | Document a solved problem to compound team knowledge | Adapted from [Compound Engineering](https://github.com/kieranklaassen) |
 | `/brainstorm` | Structured brainstorming divergent/convergent workflow | Adapted from [Compound Engineering](https://github.com/kieranklaassen) |
 | `/project` | Interactive onboarding — collects project context | Original |
 | `/wrap` | Atomic commits and push to origin | Original |
 | `/stats` | Summarize the day's work and put it in context | Original |
+| `/design-system` | Propose and establish the project's visual identity | Adapted from [garrytan/gstack](https://github.com/garrytan/gstack) |
 
 ## Key Principles
 
@@ -93,15 +101,18 @@ The rules use YAML frontmatter with a `trigger` field:
 
 ## Sources
 
-- **Compound Engineering** methodology by [Kieran Klaassen](https://github.com/kieranklaassen) — inspired the workflows (`/lfg`, `/review`, `/compound`) and review skills (`architecture-review`, `performance-review`, `security-review`, `research-solutions`)
+- **gstack** by [Garry Tan](https://github.com/garrytan/gstack) — inspired the 5-phase Mega Plan Review and adversarial checks in the `review-plan` & `review-gstack` skills, and the `/plan` & `/review-gstack` workflows.
+- **Compound Engineering** methodology by [Kieran Klaassen](https://github.com/kieranklaassen) — inspired the workflows (`/review`, `/brainstorm`, `/wrap`) and skills (`compound`, `architecture-review`, `performance-review`, `security-review`)
 - **Skills.sh** by [Vercel Labs](https://skills.sh) — 4 skills adapted from their open-source agent skills registry (`systematic-debugging`, `test-driven-development`, `ui-accessibility-review`, `code-review-excellence`)
 - **antfu/skills** by [Anthony Fu](https://github.com/antfu/skills) — 5 framework reference skills auto-generated from source (`vue-best-practices`, `nuxt`, `vitest`, `pinia`, `vueuse-functions`)
 - **jezweb/claude-skills** by [jezweb](https://github.com/jezweb/claude-skills) — Tailwind v4 + shadcn/ui skill (`tailwind-v4-shadcn`)
 - **Laravel Boost** by [Laravel](https://github.com/laravel/boost) — official Laravel MCP server `.ai/` guidelines, synthesized into the `laravel` skill
+- **anthropics/skills** by [Anthropic](https://github.com/anthropics/skills) — official Claude skills repository, adapted the `skill-creator` for agentic use
 
 ## Releases
 
-- **v1.1.0** (March 2026) — Dense compaction update. Streamlined meta rules, hyper-compressed skills (`tailwind-v4-shadcn`, `vueuse`, `vue-best-practices` ~60-80% smaller), strict verification gates added to `/lfg` and `/review`, and introduced `/brainstorm` workflow alongside `seo-review`, `changelog`, and `heal-skill`.
+- **v1.2.0** (March 2026) — Skill professionalization. Migrated 9 skills from workflows to standalone skills with `references/` architecture. Applied path-to-10 quality audit (pushy descriptions, structured output templates, extracted reference files, generalized paths). Removed `heal-skill` and `research-solutions`. Added JSON-LD schema templates to `seo-review`. Total SKILL.md lines reduced 32% (~1,900 → 1,289).
+- **v1.1.0** (March 2026) — Dense compaction update. Streamlined meta rules, hyper-compressed skills (`tailwind-v4-shadcn`, `vueuse`, `vue-best-practices` ~60-80% smaller), strict verification gates added to `/plan` and `/review`, and introduced `/brainstorm` workflow alongside `seo-review` and `changelog`.
 - **v1.0.0** (February 2026) — Initial release. Baseline Laravel 12 + Nuxt 4 + Tailwind v4 + shadcn/ui agent standards, review checklists, and standard operating procedures.
 
 ## License
