@@ -82,7 +82,7 @@ frontend/
 ## Backend
 
 - **PHP**: 8.4
-- **Framework**: Laravel 12.x
+- **Framework**: Laravel 13.x
 - **Admin Panel**: Filament 4.x
 - **Database**: PostgreSQL 17
 - **Cache / Queues**: Redis
@@ -90,7 +90,7 @@ frontend/
 - **Search**: Meilisearch via Laravel Scout
 - **Auth**: Laravel Sanctum (API tokens + SPA cookie auth)
 - **Feature Flags**: Laravel Pennant
-- **Testing**: Pest 3.x
+- **Testing**: Pest 4.x
 - **Dev Debugging**: Laravel Telescope (local only)
 - **Production Monitoring**: Laravel Pulse
 

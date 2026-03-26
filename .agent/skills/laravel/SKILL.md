@@ -30,9 +30,9 @@ Laravel operational skill for AI-assisted development. Complements the project's
 - **`Model::query()` over `DB::`** — always prefer Eloquent. Use the query builder only for genuinely complex operations.
 - Prevent N+1 problems with eager loading (`with()`, `load()`).
 - Define return type hints on all relationship methods.
-- Casts: use the `casts()` method on models (Laravel 12), not the `$casts` property. Follow whichever convention the project already uses.
+- Casts: use the `casts()` method on models (Laravel 13), not the `$casts` property. Follow whichever convention the project already uses.
 - When modifying a column in a migration, include **all** previously defined attributes — omitted attributes will be dropped.
-- Limit eager loads natively in Laravel 12: `$query->latest()->limit(10)`.
+- Limit eager loads natively in Laravel 13: `$query->latest()->limit(10)`.
 
 ## Controllers & Validation
 
@@ -63,7 +63,7 @@ Laravel operational skill for AI-assisted development. Complements the project's
 
 - **Never use `env()` outside config files.** Always use `config()`.
 
-## Laravel 12 Structure
+## Laravel 13 Structure
 
 - Middleware configured in `bootstrap/app.php` via `Application::configure()->withMiddleware()`.
 - `bootstrap/providers.php` contains service providers.

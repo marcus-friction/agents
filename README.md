@@ -1,18 +1,18 @@
 # Agent Rules
 
-Opinionated rule files for AI coding agents working on a **Laravel 12 + Nuxt 4** full-stack monorepo. These rules ensure agents follow ecosystem conventions, project standards, and established workflows — instead of reinventing the wheel.
+Opinionated rule files for AI coding agents working on a **Laravel 13 + Nuxt 4** full-stack monorepo. These rules ensure agents follow ecosystem conventions, project standards, and established workflows — instead of reinventing the wheel.
 
 ## Stack
 
 | Layer | Technology |
 |---|---|
-| Backend | Laravel 12, PHP 8.4, PostgreSQL 17, Redis |
+| Backend | Laravel 13, PHP 8.4, PostgreSQL 17, Redis |
 | Admin | FilamentPHP 4 |
 | Frontend | Nuxt 4 (SSR), Tailwind CSS 4, Pinia 3, TypeScript |
 | Search | Meilisearch via Laravel Scout |
 | Auth | Laravel Sanctum |
 | Infrastructure | Laravel Sail (dev), Laravel Forge (deploy), PM2 (SSR), Cloudflare (CDN) |
-| Quality | Larastan (L9), Laravel Pint, Pest 3, ESLint, Vitest |
+| Quality | Larastan (L9), Laravel Pint, Pest 4, ESLint, Vitest |
 | Monitoring | Laravel Horizon, Telescope (dev), Pulse (prod) |
 
 ## Rule Files
@@ -54,7 +54,7 @@ Skills live in `.agent/skills/` and provide deep, on-demand guidance when a task
 | `test-driven-development` | Red → Green → Refactor TDD cycle | Adapted from [Vercel Skills.sh](https://skills.sh) |
 | `ui-accessibility-review` | Design system, responsive, WCAG AA checklist | Adapted from [Vercel Skills.sh](https://skills.sh) |
 | `code-review-excellence` | Meta-level review guidance — how to review well | Adapted from [Vercel Skills.sh](https://skills.sh) |
-| `laravel` | Laravel operational patterns — Artisan generators, Eloquent, testing, Laravel 12 structure | Synthesized from [laravel/boost](https://github.com/laravel/boost) |
+| `laravel` | Laravel operational patterns — Artisan generators, Eloquent, testing, Laravel 13 structure | Synthesized from [laravel/boost](https://github.com/laravel/boost) |
 | `vue-best-practices` | Vue 3 Composition API reference — reactivity, components, SSR, TypeScript | From [antfu/skills](https://github.com/antfu/skills) |
 | `nuxt` | Nuxt framework reference — routing, SSR, data fetching, Nitro, modules | From [antfu/skills](https://github.com/antfu/skills) |
 | `vitest` | Vitest API reference — test/describe, mocking, coverage, environments | From [antfu/skills](https://github.com/antfu/skills) |
@@ -111,6 +111,7 @@ The rules use YAML frontmatter with a `trigger` field:
 
 ## Releases
 
+- **v1.3.0** (March 2026) — Framework bump. Upgraded baseline standards to Laravel 13 and Pest 4.
 - **v1.2.0** (March 2026) — Skill professionalization. Migrated 9 skills from workflows to standalone skills with `references/` architecture. Applied path-to-10 quality audit (pushy descriptions, structured output templates, extracted reference files, generalized paths). Removed `heal-skill` and `research-solutions`. Added JSON-LD schema templates to `seo-review`. Total SKILL.md lines reduced 32% (~1,900 → 1,289).
 - **v1.1.0** (March 2026) — Dense compaction update. Streamlined meta rules, hyper-compressed skills (`tailwind-v4-shadcn`, `vueuse`, `vue-best-practices` ~60-80% smaller), strict verification gates added to `/plan` and `/review`, and introduced `/brainstorm` workflow alongside `seo-review` and `changelog`.
 - **v1.0.0** (February 2026) — Initial release. Baseline Laravel 12 + Nuxt 4 + Tailwind v4 + shadcn/ui agent standards, review checklists, and standard operating procedures.
