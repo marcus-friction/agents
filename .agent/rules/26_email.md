@@ -7,21 +7,20 @@ description: Apply when writing, reviewing, or modifying email templates, notifi
 
 ## Template Engine
 - **MJML only.** All email templates use MJML compiled via `spatie/mjml-php`. No raw HTML email templates.
-- **File extension:** `.mjml.blade.php` — Blade handles dynamic content, MJML handles responsive structure.
-- **View names:** Include `.mjml` in Blade references. File `magic-link.mjml.blade.php` → view name `emails.auth.magic-link.mjml`. This applies to `view()`, `@extends`, and `@include`.
+- **File extension:** `.blade.php` — standard Blade extension. The MJML content is self-evident from the `emails/` directory location. Never use `.mjml.blade.php` — Blade treats dots as directory separators, making double-extension files unresolvable.
 - **Location:** `resources/views/emails/`.
 
 ## Architecture (Two-Layer)
 
-### Base Layout (`emails/base.mjml.blade.php`)
-Single shared layout that owns all brand chrome. Every email `@extends('emails.base.mjml')`.
+### Base Layout (`emails/base.blade.php`)
+Single shared layout that owns all brand chrome. Every email `@extends('emails.base')`.
 - **Header:** Project logo as a hosted PNG (not inline SVG — email client support is unreliable). Fixed width (e.g. 150px), retina-ready (`@2x`), with `alt` text set to the project name. Link to project homepage.
 - **Typography:** Map fonts from `23_design_system.md`. Use web-safe fallback stack (MJML `mj-attributes`).
 - **Colors:** Pull brand palette from `23_design_system.md`. Define once in `mj-attributes`, never inline per-notification.
 - **Footer:** Company name, address, unsubscribe link (`{{ $unsubscribeUrl }}`), and legal line. Always present.
 - **No notification builds its own shell.** If a new notification doesn't fit the base layout, extend the base — don't bypass it.
 
-### Content Partials (`emails/_*.mjml.blade.php`)
+### Content Partials (`emails/_*.blade.php`)
 Reusable MJML sections for common patterns. Use `@include` — never copy-paste structure.
 
 | Partial | Purpose |
@@ -33,7 +32,7 @@ Reusable MJML sections for common patterns. Use `@include` — never copy-paste 
 
 Add new partials when a pattern repeats across 2+ notifications.
 
-### Notification Templates (`emails/{domain}/{name}.mjml.blade.php`)
+### Notification Templates (`emails/{domain}/{name}.blade.php`)
 - Grouped by domain (`auth/`, `billing/`, `account/`).
 - Only define the unique `@section('content')` body — all chrome comes from base + partials.
 
