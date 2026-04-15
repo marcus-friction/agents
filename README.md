@@ -55,6 +55,7 @@ Skills live in `.agent/skills/` and provide deep, on-demand guidance when a task
 | `ui-accessibility-review` | Design system, responsive, WCAG AA checklist | Adapted from [Vercel Skills.sh](https://skills.sh) |
 | `code-review-excellence` | Meta-level review guidance — how to review well | Adapted from [Vercel Skills.sh](https://skills.sh) |
 | `laravel` | Laravel operational patterns — Artisan generators, Eloquent, testing, Laravel 13 structure | Synthesized from [laravel/boost](https://github.com/laravel/boost) |
+| `start-scripts` | Standards for reliable local dev startup scripts — Docker / Sail cleanup, port discipline, health checks, graceful shutdown | Original |
 | `vue-best-practices` | Vue 3 Composition API reference — reactivity, components, SSR, TypeScript | From [antfu/skills](https://github.com/antfu/skills) |
 | `nuxt` | Nuxt framework reference — routing, SSR, data fetching, Nitro, modules | From [antfu/skills](https://github.com/antfu/skills) |
 | `vitest` | Vitest API reference — test/describe, mocking, coverage, environments | From [antfu/skills](https://github.com/antfu/skills) |
@@ -110,6 +111,8 @@ The rules use YAML frontmatter with a `trigger` field:
 - **anthropics/skills** by [Anthropic](https://github.com/anthropics/skills) — official Claude skills repository, adapted the `skill-creator` for agentic use
 
 ## Releases
+
+- **v1.3.1** (April 2026) — Added `start-scripts` skill. Standards and patterns for reliable local dev startup scripts: orphaned container cleanup, port discipline, health checks, graceful shutdown, and idempotent dependency installation.
 
 - **v1.3.0** (March 2026) — Framework bump. Upgraded baseline standards to Laravel 13 and Pest 4.
 - **v1.2.0** (March 2026) — Skill professionalization. Migrated 9 skills from workflows to standalone skills with `references/` architecture. Applied path-to-10 quality audit (pushy descriptions, structured output templates, extracted reference files, generalized paths). Removed `heal-skill` and `research-solutions`. Added JSON-LD schema templates to `seo-review`. Total SKILL.md lines reduced 32% (~1,900 → 1,289).
