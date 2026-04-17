@@ -17,7 +17,7 @@ Opinionated rule files for AI coding agents working on a **Laravel 13 + Nuxt 4**
 
 ## Rule Files
 
-Rules live in `.agent/rules/` and are numbered by category:
+Rules live in `.agents/rules/` and are numbered by category:
 
 | # | File | Purpose |
 |---|---|---|
@@ -38,7 +38,7 @@ Rules live in `.agent/rules/` and are numbered by category:
 
 ## Skills
 
-Skills live in `.agent/skills/` and provide deep, on-demand guidance when a task matches:
+Skills live in `.agents/skills/` and provide deep, on-demand guidance when a task matches:
 
 | Skill | Purpose | Source |
 |---|---|---|
@@ -55,7 +55,7 @@ Skills live in `.agent/skills/` and provide deep, on-demand guidance when a task
 | `ui-accessibility-review` | Design system, responsive, WCAG AA checklist | Adapted from [Vercel Skills.sh](https://skills.sh) |
 | `code-review-excellence` | Meta-level review guidance — how to review well | Adapted from [Vercel Skills.sh](https://skills.sh) |
 | `laravel` | Laravel operational patterns — Artisan generators, Eloquent, testing, Laravel 13 structure | Synthesized from [laravel/boost](https://github.com/laravel/boost) |
-| `start-scripts` | Standards for reliable local dev startup scripts — Docker / Sail cleanup, port discipline, health checks, graceful shutdown | Original |
+| `build-start-scripts` | Standards for reliable local dev startup scripts — Docker / Sail cleanup, port discipline, health checks, graceful shutdown | Original |
 | `vue-best-practices` | Vue 3 Composition API reference — reactivity, components, SSR, TypeScript | From [antfu/skills](https://github.com/antfu/skills) |
 | `nuxt` | Nuxt framework reference — routing, SSR, data fetching, Nitro, modules | From [antfu/skills](https://github.com/antfu/skills) |
 | `vitest` | Vitest API reference — test/describe, mocking, coverage, environments | From [antfu/skills](https://github.com/antfu/skills) |
@@ -68,21 +68,15 @@ Skills live in `.agent/skills/` and provide deep, on-demand guidance when a task
 | `copywriting` | Principles for clear, user-centric marketing and UI copy | From [skills.sh](https://skills.sh/coreyhaines31/marketingskills/copywriting) |
 | `copy-editing` | The Seven Sweeps framework for reviewing and enhancing existing copy | From [skills.sh](https://skills.sh/coreyhaines31/marketingskills/copy-editing) |
 | `compound` | Document solved problems as structured, searchable knowledge | Adapted from [Compound Engineering](https://github.com/kieranklaassen) |
+| `start-project` | Interactive onboarding and project planning | Original |
+| `plan` | Scope, architect, and plan engineering tasks using the Mega Plan Review | Adapted from [gstack](https://github.com/garrytan/gstack) |
+| `review` | Multi-angle code review (standards, security, performance, architecture, accessibility, tests) | Adapted from [Compound Engineering](https://github.com/kieranklaassen) |
+| `brainstorm` | Structured brainstorming divergent/convergent workflow | Adapted from [Compound Engineering](https://github.com/kieranklaassen) |
+| `wrap` | Atomic commits and push to origin | Original |
+| `stats` | Summarize the day's work and put it in context | Original |
+| `path-to-10` | Enforces a ruthless 10/10 quality standard on agent outputs | Original |
+| `update-agents` | Pulls the latest agent rules and skills non-destructively | Original |
 
-## Workflows
-
-Workflows live in `.agent/workflows/` and define multi-step procedures:
-
-| Command | Purpose | Source |
-|---|---|---|
-| `/plan` | Scope, architect, and plan engineering tasks using the Mega Plan Review | Adapted from [gstack](https://github.com/garrytan/gstack) |
-| `/review-gstack` | Scope, verify, and auto-fix code changes using the rigorous `review-gstack` pipeline | Adapted from [gstack](https://github.com/garrytan/gstack) |
-| `/review` | Multi-angle code review (standards, security, performance, architecture, accessibility, tests) | Adapted from [Compound Engineering](https://github.com/kieranklaassen) |
-| `/brainstorm` | Structured brainstorming divergent/convergent workflow | Adapted from [Compound Engineering](https://github.com/kieranklaassen) |
-| `/project` | Interactive onboarding — collects project context | Original |
-| `/wrap` | Atomic commits and push to origin | Original |
-| `/stats` | Summarize the day's work and put it in context | Original |
-| `/design-system` | Propose and establish the project's visual identity | Adapted from [garrytan/gstack](https://github.com/garrytan/gstack) |
 
 ## Key Principles
 
@@ -94,7 +88,17 @@ Workflows live in `.agent/workflows/` and define multi-step procedures:
 
 ## Usage
 
-Copy `.agent/` into your project. Fill in `10_project.md` with your project-specific context. Adapt `23_design_system.md` to your actual design tokens.
+You can instantly install the complete Agent Ecosystem into any repository by running this single command in your terminal:
+
+```bash
+bash <(curl -s https://raw.githubusercontent.com/marcus-friction/agents/master/install.sh)
+```
+
+Alternatively, you can manually copy `.agents/`, `AGENTS.md`, and `CLAUDE.md` into your project.
+
+Once installed:
+1. Fill in `.agents/rules/10_project.md` with your project-specific context.
+2. Adapt `.agents/rules/23_design_system.md` to your actual design tokens.
 
 The rules use YAML frontmatter with a `trigger` field:
 - `always_on` — always loaded into the agent's context
@@ -102,8 +106,8 @@ The rules use YAML frontmatter with a `trigger` field:
 
 ## Sources
 
-- **gstack** by [Garry Tan](https://github.com/garrytan/gstack) — inspired the 5-phase Mega Plan Review and adversarial checks in the `review-plan` & `review-gstack` skills, and the `/plan` & `/review-gstack` workflows.
-- **Compound Engineering** methodology by [Kieran Klaassen](https://github.com/kieranklaassen) — inspired the workflows (`/review`, `/brainstorm`, `/wrap`) and skills (`compound`, `architecture-review`, `performance-review`, `security-review`)
+- **gstack** by [Garry Tan](https://github.com/garrytan/gstack) — inspired the 5-phase Mega Plan Review and adversarial checks in the `review-plan`, `review-gstack`, and `plan` skills.
+- **Compound Engineering** methodology by [Kieran Klaassen](https://github.com/kieranklaassen) — inspired the skills (`review`, `brainstorm`, `wrap`, `compound`, `architecture-review`, `performance-review`, `security-review`)
 - **Skills.sh** by [Vercel Labs](https://skills.sh) — 4 skills adapted from their open-source agent skills registry (`systematic-debugging`, `test-driven-development`, `ui-accessibility-review`, `code-review-excellence`)
 - **antfu/skills** by [Anthony Fu](https://github.com/antfu/skills) — 5 framework reference skills auto-generated from source (`vue-best-practices`, `nuxt`, `vitest`, `pinia`, `vueuse-functions`)
 - **jezweb/claude-skills** by [jezweb](https://github.com/jezweb/claude-skills) — Tailwind v4 + shadcn/ui skill (`tailwind-v4-shadcn`)
@@ -112,7 +116,9 @@ The rules use YAML frontmatter with a `trigger` field:
 
 ## Releases
 
-- **v1.3.1** (April 2026) — Added `start-scripts` skill. Standards and patterns for reliable local dev startup scripts: orphaned container cleanup, port discipline, health checks, graceful shutdown, and idempotent dependency installation.
+- **v1.4.0** (April 2026) — Ecosystem Restructure & Rules Hardening. Migrated to a standardized `.agents/` directory structure. Conducted a comprehensive `path-to-10` quality audit across all rule files, resolving architecture offsets, eliminating tool lock-in, and deduplicating cross-references.
+- **v1.3.2** (April 2026) — Added `contribute-back` skill. Allows agents to automatically scan local customizations, propose upstream enhancements, and execute GitHub Pull Requests back to the central repository.
+- **v1.3.1** (April 2026) — Added `build-start-scripts` skill. Standards and patterns for reliable local dev startup scripts: orphaned container cleanup, port discipline, health checks, graceful shutdown, and idempotent dependency installation.
 
 - **v1.3.0** (March 2026) — Framework bump. Upgraded baseline standards to Laravel 13 and Pest 4.
 - **v1.2.0** (March 2026) — Skill professionalization. Migrated 9 skills from workflows to standalone skills with `references/` architecture. Applied path-to-10 quality audit (pushy descriptions, structured output templates, extracted reference files, generalized paths). Removed `heal-skill` and `research-solutions`. Added JSON-LD schema templates to `seo-review`. Total SKILL.md lines reduced 32% (~1,900 → 1,289).
