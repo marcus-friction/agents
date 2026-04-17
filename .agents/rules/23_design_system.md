@@ -1,0 +1,48 @@
+---
+trigger: model_decision
+description: Apply when building UI components, defining styles, choosing colors/typography/spacing, or establishing visual patterns.
+---
+
+# Design System
+
+## Separation of Concerns
+- **`.agents/rules/11_design.md` (Aesthetics & Brand):** Source of truth for all visual identity decisions — typography, color palettes, spacing scales, aesthetic mood, and motion curves.
+- **This file (Implementation Architecture):** Governs *how* those visual decisions are implemented technically in Vue/Nuxt/Tailwind — CSS token abstraction, z-index scales, component state management, and interaction APIs.
+
+## Core Principles
+- **Aesthetic:** Structure over decoration. Consistent geometry (border-radius). Grid spacing (4px base). Desktop-primary design with **mobile-first CSS** (`sm:`, `lg:`). No `max-*:` variants.
+- **Feedback Lifecycle:** **NO TOASTS.** Use inline feedback contexts. 
+  - **Buttons:** State machine (idle -> loading spinner -> success checkmark -> error/idle).
+  - **Forms:** Inline field errors (on blur) via `aria-describedby`. Error summary for 5+ fields.
+- **Component States:** Always implement Loading (skeleton `surface-2 animate-pulse`, no spinners for structural layouts), Empty (icon + description), Error (retry CTA), and Loaded states.
+- **Modals:** Use as a last resort (destructive confirmations). Prefer inline expansion or slide-overs.
+
+## UI Architecture
+- **Tokens (Layer 1):** `tokens.css` with RGB custom properties (`--bg`, `--surface-1`). Map via semantic aliases (`primary`, `danger`). Implement dark mode via `@media (prefers-color-scheme: dark)`.
+- **Bridge (Layer 2):** `main.css` maps tokens to Tailwind via `@theme`.
+- **`@apply`:** Use very sparingly — only inside Base components. Never in feature components or pages.
+- **Z-Index Scale:**
+
+  | Layer | Value | Usage |
+  |:---|:---:|:---|
+  | Base | `z-0` | Default content |
+  | Cards | `z-10` | Elevated surfaces |
+  | Sticky Tabs | `z-20` | In-page sticky elements |
+  | Nav | `z-30` | Navigation |
+  | Header | `z-40` | Top-level header |
+  | Modals | `z-50` | Overlays |
+  | Tooltips | `z-60` | Topmost layer |
+
+  Use `isolate` on scroll contexts.
+
+## Standard Component API
+- **Props:** `variant`, `size`, `disabled`, `loading`, `compact`. Use slots for structural variations. Emit events rather than mutating props.
+- **Shapes:** Buttons and Inputs share fixed height. Cards use `surface-2` with 1px border. Hover states affect borders/shadows, not vertical translation.
+- **Icons:** Use `<BaseIcon>` component. Avoid scattered inline SVGs.
+- **Typography:** Follow brand palette for font families. Use `rem` strictly for user-scaling. 
+  - `text-xs` (0.75rem) to `text-2xl` (1.5rem). `h1`/`h2`=900 weight, `h3`=700 weight. Sentence case headings.
+
+## Colors & Motion
+- **Palette:** Map Tailwind configuration to the hex values from the brand palette (e.g. `primary` token maps to the chosen brand color). Use `600` for hover and `700` for active states. WCAG AA contrast for text/background pairings.
+- **Transitions:** 120-200ms duration.
+- **Easing:** Elements entering (`cubic-bezier(0,0,0.2,1)`), elements exiting (`cubic-bezier(0.4,0,1,1)`), default micro-interactions (`ease-out`).
