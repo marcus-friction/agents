@@ -12,13 +12,19 @@ If the `code-review-excellence` skill exists, read it first for meta-level guida
 
 Before opening a PR, or when the user asks for a review of recent changes.
 
+## Argument Parsing / Modes
+You can invoke this skill conditionally via argument hints:
+- `mode:autofix`: Automatically apply `safe_auto` fixes without asking.
+- `mode:report-only`: Strictly read-only output without modifying files.
+- `base:<sha-or-ref>`: Provide a precise Git base for diffing.
+
 ## Steps
 
 ### 1. Identify Scope
 Review all files changed **in this conversation thread**. Use `git diff` and your conversation context to build the file list. If the branch contains changes from a previous conversation, exclude those — focus only on what was created or modified during this complete thread.
 
-### 2. The Ultra-Thinking Phase
-Before listing any findings, perform two deep-dive analyses:
+### 2. Deep Dive & Action Routing
+Before listing any findings, perform stress testing and Stakeholder Perspective Analysis:
 
 **A. Stakeholder Perspective Analysis**
 Examine the changes from these angles:
@@ -28,15 +34,21 @@ Examine the changes from these angles:
 - **Security:** Are we introducing vulnerabilities?
 - **Business:** Does this align with the project goals?
 
-**B. Scenario Exploration**
-Imagine how the code behaves under stress:
-- **Happy Path:** Does it work when everything is perfect?
-- **Boundary Conditions:** What happens with empty inputs, massive inputs, or malformed data?
-- **State Changes:** What if a database transaction fails halfway through?
-- **Concurrent Access:** What if two users do this at exactly the same time?
+**B. Action Routing & Fix Triggers**
+Map every finding you discover into one of these actions:
+| `autofix_class` | Meaning | Agent Action |
+|---|---|---|
+| `safe_auto` | Local, deterministic fix suitable for immediate autofix. | Fix silently in interactive/autofix mode. |
+| `gated_auto` | Concrete fix, but alters behavior, contracts, or permissions. | Requires user approval before fixing. |
+| `manual` | Actionable work that should be handed off. | Add to `task.md` residual work. |
+| `advisory` | Report-only output (residual risks, rollout notes). | Keep in review report only. |
+
+**C. Confidence Gating**
+- Suppress findings below `0.60` confidence. 
+- Exception: **P0 (Critical)** findings at `0.50+` confidence survive the gate — critical-but-uncertain issues must not be silently dropped.
 
 ### 3. Review Passes
-Execute the following passes against the codebase, keeping the Ultra-Thinking insights in mind:
+Execute the following passes against the codebase, keeping the findings structured logically:
 
 **Standards** — Check all changes against the relevant coding standards:
    - PHP changes → `21_standards_laravel.md`
@@ -91,8 +103,8 @@ Execute the following passes against the codebase, keeping the Ultra-Thinking in
 When the review is complete, you must present the findings in three ways:
 
 1. **Detailed Report Artifact:** Create a **conversation artifact** containing the full review details.
-2. **Task Artifact:** Add the findings as executable items to the Task artifact (`task.md`). If it exists, amend it with a new section for review findings. If it does not exist, create a new task list.
-3. **Chat Summary:** Communicate the report and the updated task list to the user in the chat. You MUST include a **summary table** of the findings in your chat message.
+2. **Task Artifact:** Add `manual` and unapproved `gated_auto` findings as executable items to the Task artifact (`task.md`).
+3. **Chat Summary:** Communicate the report and the updated task list to the user in the chat using a **pipe-delimited Markdown table** for the findings.
 
 **Detailed Report Artifact Format:**
 
@@ -105,14 +117,17 @@ Group findings by severity, with a detailed block for each item:
 
 ---
 
-## 🔴 Must Fix (P1)
-> Security issues, broken tests, data integrity risks.
+## 🚨 Critical (P0)
+> Must fix before merge. Exploitable vulnerability, data loss/corruption, hard breakage.
 
-## 🟡 Should Fix (P2)
-> Standards violations, missing tests, performance concerns.
+## 🔴 High (P1)
+> Should fix. High-impact defect likely hit in normal usage, breaking contract.
 
-## 🟢 Consider (P3)
-> Style suggestions, minor improvements.
+## 🟡 Moderate (P2)
+> Fix if straightforward. Meaningful downside but narrower scope (edge case, perf regression).
+
+## 🟢 Low (P3) / Advisory
+> User's discretion. Formatting, style recommendations, or advisory notes.
 ```
 
 Each finding within a group follows this structure:
@@ -120,6 +135,7 @@ Each finding within a group follows this structure:
 ```markdown
 ### [Short Description]
 **File(s):** `path/to/file.ext`
+**Class:** `safe_auto` | `gated_auto` | `manual` | `advisory`
 
 **Issue:** [Detailed description of what is wrong]
 

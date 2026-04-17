@@ -8,11 +8,16 @@ Run a structured divergent-to-convergent thinking process before diving into pla
 
 ## Steps
 
-### 1. Frame
-Define the problem space, constraints, and desired outcomes.
+### 1. Frame & Pressure Test
+Define the problem space, constraints, and desired outcomes, then rigorously challenge the premise:
 - **Problem:** What are we trying to solve?
 - **Constraints:** What technical, business, or timeline constraints exist?
 - **Success:** What does a successful outcome look like?
+- **The Pressure Test:** 
+  - Is this solving the real user problem, or a proxy for a more important one? 
+  - Are we duplicating something that already covers this?
+  - What happens if we do nothing?
+  - Is there a nearby framing that creates more user value without more carrying cost?
 
 ### 2. Diverge (Exploration)
 Explore multiple, distinctly different approaches to solving the problem. Do not commit to one yet. Consider:
