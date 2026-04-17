@@ -1,100 +1,190 @@
 ---
-name: laravel
-description: Laravel framework operational patterns for AI agents. Use when creating files, writing migrations, building controllers, working with Eloquent, or running Artisan commands. Derived from official Laravel Boost guidelines.
+name: laravel-best-practices
+description: "Apply this skill whenever writing, reviewing, or refactoring Laravel PHP code. This includes creating or modifying controllers, models, migrations, form requests, policies, jobs, scheduled commands, service classes, and Eloquent queries. Triggers for N+1 and query performance issues, caching strategies, authorization and security patterns, validation, error handling, queue and job configuration, route definitions, and architectural decisions. Also use for Laravel code reviews and refactoring existing Laravel code to follow best practices. Covers any task involving Laravel backend PHP code patterns."
+license: MIT
 metadata:
-  version: "2026.2.9"
-  source: Synthesized from laravel/boost .ai/ guidelines, tinho1123/CarvaSys skills, and LeandroSoares/cacaloo agent definitions
+  author: laravel
 ---
 
-Laravel operational skill for AI-assisted development. Complements the project's `21_standards_laravel.md` rule with agent-specific workflow patterns derived from the official Laravel Boost MCP server.
+# Laravel Best Practices
 
-> **Rule vs Skill**: `21_standards_laravel.md` defines *what* to build (architecture, naming, patterns). This skill defines *how* the agent should work (file creation, Artisan usage, verification).
+Best practices for Laravel, prioritized by impact. Each rule teaches what to do and why. For exact API syntax, verify with `search-docs`.
 
-## File Creation
+## Consistency First
 
-- **Always use `sail artisan make:*` commands** to create models, controllers, migrations, Form Requests, policies, jobs, notifications, and events. Never create these files manually.
-- Use `sail artisan list` to discover available generators and their options.
-- Pass `--no-interaction` to all Artisan commands.
-- Pass relevant `--options` to generators (e.g., `make:model -mfsr` for model + migration + seeder + factory + resource).
-- When creating a generic PHP class, use `sail artisan make:class`.
+Before applying any rule, check what the application already does. Laravel offers multiple valid approaches — the best choice is the one the codebase already uses, even if another pattern would be theoretically better. Inconsistency is worse than a suboptimal pattern.
 
-## Conventions
+Check sibling files, related controllers, models, or tests for established patterns. If one exists, follow it — don't introduce a second way. These rules are defaults for when no pattern exists yet, not overrides.
 
-- **Follow existing conventions first.** Before creating or editing a file, check sibling files for structure, approach, and naming patterns.
-- Check for existing components/classes to reuse before writing new ones.
-- Stick to the existing directory structure — do not create new base folders without approval.
-- Do not change dependencies without approval.
+## Quick Reference
 
-## Eloquent
+### 1. Database Performance → `rules/db-performance.md`
 
-- **`Model::query()` over `DB::`** — always prefer Eloquent. Use the query builder only for genuinely complex operations.
-- Prevent N+1 problems with eager loading (`with()`, `load()`).
-- Define return type hints on all relationship methods.
-- Casts: use the `casts()` method on models (Laravel 13), not the `$casts` property. Follow whichever convention the project already uses.
-- When modifying a column in a migration, include **all** previously defined attributes — omitted attributes will be dropped.
-- Limit eager loads natively in Laravel 13: `$query->latest()->limit(10)`.
+- Eager load with `with()` to prevent N+1 queries
+- Enable `Model::preventLazyLoading()` in development
+- Select only needed columns, avoid `SELECT *`
+- `chunk()` / `chunkById()` for large datasets
+- Index columns used in `WHERE`, `ORDER BY`, `JOIN`
+- `withCount()` instead of loading relations to count
+- `cursor()` for memory-efficient read-only iteration
+- Never query in Blade templates
 
-## Controllers & Validation
+### 2. Advanced Query Patterns → `rules/advanced-queries.md`
 
-- Create Form Request classes for validation — never inline `$request->validate()`.
-- Check sibling Form Requests to see if the project uses array or string-based rules.
-- Controllers handle HTTP I/O only — delegate logic to Actions or Services.
+- `addSelect()` subqueries over eager-loading entire has-many for a single value
+- Dynamic relationships via subquery FK + `belongsTo`
+- Conditional aggregates (`CASE WHEN` in `selectRaw`) over multiple count queries
+- `setRelation()` to prevent circular N+1 queries
+- `whereIn` + `pluck()` over `whereHas` for better index usage
+- Two simple queries can beat one complex query
+- Compound indexes matching `orderBy` column order
+- Correlated subqueries in `orderBy` for has-many sorting (avoid joins)
 
-## APIs
+### 3. Security → `rules/security.md`
 
-- Default to Eloquent API Resources with versioned routes (`/api/v1/...`).
-- If existing API routes don't use versioning, follow the existing convention.
+- Define `$fillable` or `$guarded` on every model, authorize every action via policies or gates
+- No raw SQL with user input — use Eloquent or query builder
+- `{{ }}` for output escaping, `@csrf` on all POST/PUT/DELETE forms, `throttle` on auth and API routes
+- Validate MIME type, extension, and size for file uploads
+- Never commit `.env`, use `config()` for secrets, `encrypted` cast for sensitive DB fields
 
-## Auth & Authorization
+### 4. Caching → `rules/caching.md`
 
-- Use Laravel's built-in auth features: gates, policies, Sanctum.
-- Spatie Permission: use `.can()`, never `.hasRole()` for authorization checks.
+- `Cache::remember()` over manual get/put
+- `Cache::flexible()` for stale-while-revalidate on high-traffic data
+- `Cache::memo()` to avoid redundant cache hits within a request
+- Cache tags to invalidate related groups
+- `Cache::add()` for atomic conditional writes
+- `once()` to memoize per-request or per-object lifetime
+- `Cache::lock()` / `lockForUpdate()` for race conditions
+- Failover cache stores in production
 
-## URL Generation
+### 5. Eloquent Patterns → `rules/eloquent.md`
 
-- Prefer named routes with the `route()` function — never hardcode URLs.
+- Correct relationship types with return type hints
+- Local scopes for reusable query constraints
+- Global scopes sparingly — document their existence
+- Attribute casts in the `casts()` method
+- Cast date columns, use Carbon instances in templates
+- `whereBelongsTo($model)` for cleaner queries
+- Never hardcode table names — use `(new Model)->getTable()` or Eloquent queries
 
-## Queues
+### 6. Validation & Forms → `rules/validation.md`
 
-- Use `ShouldQueue` for time-consuming operations.
-- Jobs must be idempotent — safe to retry.
+- Form Request classes, not inline validation
+- Array notation `['required', 'email']` for new code; follow existing convention
+- `$request->validated()` only — never `$request->all()`
+- `Rule::when()` for conditional validation
+- `after()` instead of `withValidator()`
 
-## Config & Environment
+### 7. Configuration → `rules/config.md`
 
-- **Never use `env()` outside config files.** Always use `config()`.
+- `env()` only inside config files
+- `App::environment()` or `app()->isProduction()`
+- Config, lang files, and constants over hardcoded text
 
-## Laravel 13 Structure
+### 8. Testing Patterns → `rules/testing.md`
 
-- Middleware configured in `bootstrap/app.php` via `Application::configure()->withMiddleware()`.
-- `bootstrap/providers.php` contains service providers.
-- Console commands in `app/Console/Commands/` are auto-discovered — no manual registration.
-- Scheduled tasks defined in `routes/console.php`.
+- `LazilyRefreshDatabase` over `RefreshDatabase` for speed
+- `assertModelExists()` over raw `assertDatabaseHas()`
+- Factory states and sequences over manual overrides
+- Use fakes (`Event::fake()`, `Exceptions::fake()`, etc.) — but always after factory setup, not before
+- `recycle()` to share relationship instances across factories
 
-## Testing
+### 9. Queue & Job Patterns → `rules/queue-jobs.md`
 
-- Every change must be tested. Write or update a test, then run it.
-- Run minimum tests needed: `sail test --compact --filter=TestName`.
-- Use model factories — check for existing factory states before manually constructing models.
-- Most tests should be feature tests. Use `--unit` flag only for pure unit tests.
-- Use Pest syntax (`it()`, `test()`) — not PHPUnit class syntax.
-- Use `fake()->word()` or `$this->faker->method()` — follow whichever convention the project uses.
-- Never delete tests without approval.
+- `retry_after` must exceed job `timeout`; use exponential backoff `[1, 5, 10]`
+- `ShouldBeUnique` to prevent duplicates; `ShouldBeUniqueUntilProcessing` for early lock release
+- Always implement `failed()`; with `retryUntil()`, set `$tries = 0`
+- `RateLimited` middleware for external API calls; `Bus::batch()` for related jobs
+- Horizon for complex multi-queue scenarios
 
-## Verification
+### 10. Routing & Controllers → `rules/routing.md`
 
-- Do not create verification scripts or tinker when tests cover the functionality.
-- Run affected tests after every change to confirm they pass.
+- Implicit route model binding
+- Scoped bindings for nested resources
+- `Route::resource()` or `apiResource()`
+- Methods under 10 lines — extract to actions/services
+- Type-hint Form Requests for auto-validation
 
-## Frontend Bundling
+### 11. HTTP Client → `rules/http-client.md`
 
-- If a frontend change isn't reflected in the UI, the user may need to run `npm run build` or `npm run dev`. Ask them.
-- Vite manifest errors (`ViteException`) — resolve by running `npm run build`.
+- Explicit `timeout` and `connectTimeout` on every request
+- `retry()` with exponential backoff for external APIs
+- Check response status or use `throw()`
+- `Http::pool()` for concurrent independent requests
+- `Http::fake()` and `preventStrayRequests()` in tests
 
-## Common Modern PHP Patterns
+### 12. Events, Notifications & Mail → `rules/events-notifications.md`, `rules/mail.md`
 
-Use PHP 8.4 features where appropriate:
-- **Constructor promotion**: `public function __construct(private readonly string $name)`
-- **Backed enums**: `enum Status: string { case Active = 'active'; }`
-- **Match expressions** over switch statements
-- **Readonly properties** for immutable data
-- **Named arguments** for clarity: `User::create(name: $name, email: $email)`
+- Event discovery over manual registration; `event:cache` in production
+- `ShouldDispatchAfterCommit` / `afterCommit()` inside transactions
+- Queue notifications and mailables with `ShouldQueue`
+- On-demand notifications for non-user recipients
+- `HasLocalePreference` on notifiable models
+- `assertQueued()` not `assertSent()` for queued mailables
+- Markdown mailables for transactional emails
+
+### 13. Error Handling → `rules/error-handling.md`
+
+- `report()`/`render()` on exception classes or in `bootstrap/app.php` — follow existing pattern
+- `ShouldntReport` for exceptions that should never log
+- Throttle high-volume exceptions to protect log sinks
+- `dontReportDuplicates()` for multi-catch scenarios
+- Force JSON rendering for API routes
+- Structured context via `context()` on exception classes
+
+### 14. Task Scheduling → `rules/scheduling.md`
+
+- `withoutOverlapping()` on variable-duration tasks
+- `onOneServer()` on multi-server deployments
+- `runInBackground()` for concurrent long tasks
+- `environments()` to restrict to appropriate environments
+- `takeUntilTimeout()` for time-bounded processing
+- Schedule groups for shared configuration
+
+### 15. Architecture → `rules/architecture.md`
+
+- Single-purpose Action classes; dependency injection over `app()` helper
+- Prefer official Laravel packages and follow conventions, don't override defaults
+- Default to `ORDER BY id DESC` or `created_at DESC`; `mb_*` for UTF-8 safety
+- `defer()` for post-response work; `Context` for request-scoped data; `Concurrency::run()` for parallel execution
+
+### 16. Migrations → `rules/migrations.md`
+
+- Generate migrations with `php artisan make:migration`
+- `constrained()` for foreign keys
+- Never modify migrations that have run in production
+- Add indexes in the migration, not as an afterthought
+- Mirror column defaults in model `$attributes`
+- Reversible `down()` by default; forward-fix migrations for intentionally irreversible changes
+- One concern per migration — never mix DDL and DML
+
+### 17. Collections → `rules/collections.md`
+
+- Higher-order messages for simple collection operations
+- `cursor()` vs. `lazy()` — choose based on relationship needs
+- `lazyById()` when updating records while iterating
+- `toQuery()` for bulk operations on collections
+
+### 18. Blade & Views → `rules/blade-views.md`
+
+- `$attributes->merge()` in component templates
+- Blade components over `@include`; `@pushOnce` for per-component scripts
+- View Composers for shared view data
+- `@aware` for deeply nested component props
+
+### 19. Conventions & Style → `rules/style.md`
+
+- Follow Laravel naming conventions for all entities
+- Prefer Laravel helpers (`Str`, `Arr`, `Number`, `Uri`, `Str::of()`, `$request->string()`) over raw PHP functions
+- No JS/CSS in Blade, no HTML in PHP classes
+- Code should be readable; comments only for config files
+
+## How to Apply
+
+Always use a sub-agent to read rule files and explore this skill's content.
+
+1. Identify the file type and select relevant sections (e.g., migration → §16, controller → §1, §3, §5, §6, §10)
+2. Check sibling files for existing patterns — follow those first per Consistency First
+3. Verify API syntax with `search-docs` for the installed Laravel version

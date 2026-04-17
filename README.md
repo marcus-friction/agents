@@ -2,6 +2,50 @@
 
 Opinionated rule files for AI coding agents working on a **Laravel 13 + Nuxt 4** full-stack monorepo. These rules ensure agents follow ecosystem conventions, project standards, and established workflows — instead of reinventing the wheel.
 
+## Installation
+
+You can instantly install the complete Agent Ecosystem into any repository by running this single command in your terminal:
+
+```bash
+bash <(curl -s https://raw.githubusercontent.com/marcus-friction/agents/master/install.sh)
+```
+
+Alternatively, you can manually copy `.agents/`, `AGENTS.md`, and `CLAUDE.md` into your project.
+
+### Starting a New Project
+
+If you are beginning a brand new project, use the **Start Project** skill. 
+Run `/start-project` or ask your agent: "Run the start project skill". 
+This interactive workflow interviews you about the product vision and constraints, seamlessly generating a suite of foundational documents before any code is written:
+- **`10_project.md`**: Captures your core goals, specific users, rigid constraints, and competitive landscape.
+- **`11_design.md`**: (Optional) Triggers a design consultation to establish UI architecture, typography, spacing, and color logic.
+- **`implementation_plan.md` & `task.md`**: Architecturally scopes the End-to-End MVP and provides a comprehensive execution checklist.
+
+### Onboarding an Existing Project
+
+If you are dropping these rules into an established codebase, use the **Onboard Project** skill.
+Run `/onboard-project` or ask your agent: "Run the onboard project skill".
+The agent will systematically analyze your tech stack, map out existing directories, identify missing standards, and custom-tailor the rules and `AGENTS.md` router to fit your specific ecosystem, eliminating agent blindness.
+
+## Core Workflow
+
+The ecosystem is designed around a strict, predictable development loop. For any non-trivial task, enforce this cycle:
+
+1. **`/plan`**: Never code first. Use the `/plan` or `review-plan` skills to force the agent to scope the problem, investigate the codebase, and write a detailed `implementation_plan.md`.
+2. **Implement**: Supervise the agent as it executes the approved plan, tracking progress via `task.md`.
+3. **`/review`**: Before concluding, run a review skill (like `/review` or `review-gstack`) to subject the code to an architecture, security, and scope-drift audit.
+4. **`/wrap`**: Finally, invoke `/wrap`. The agent will structure atomic commits following conventional standards and prepare the branch for pushing.
+
+## Featured Skills
+
+The `.agents/skills/` directory holds deep, on-demand capabilities. Some highlights:
+
+- **Path to 10 (`path-to-10`)**: Enforces a ruthless, uncompromising 10/10 quality standard on agent outputs. Requires proof of constraints, specific citations, and robust environmental execution.
+- **Review GStack (`review-gstack`)**: A "Mega Review" pre-landing pipeline. Uses a 5-phase checking system to catch hidden scope drift, enforce fix-first policies, and mandate ASCII test flow graphs prior to any merge.
+- **Design Consultation (`design-consultation`)**: Acts as a senior product designer. Researches the landscape, proposes cohesive design systems (typography, spacing, color, motion), and generates `11_design.md` as your project's visual source of truth.
+- **Copywriting (`copywriting`)**: Instills professional writing principles. Use this when generating landing pages, UI microcopy, CTAs, product descriptions, or changelogs to ensure clear, user-centric messaging.
+- **Copy Editing (`copy-editing`)**: Employs "The Seven Sweeps" framework to review and enhance existing text—focusing on clarity, voice, benefits, proof, specificity, emotion, and risk reversal.
+
 ## Stack
 
 | Layer | Technology |
@@ -86,24 +130,6 @@ Skills live in `.agents/skills/` and provide deep, on-demand guidance when a tas
 - **Why, not How** — comments explain business intent, not implementation
 - **No magic numbers** — config files or constants only
 
-## Usage
-
-You can instantly install the complete Agent Ecosystem into any repository by running this single command in your terminal:
-
-```bash
-bash <(curl -s https://raw.githubusercontent.com/marcus-friction/agents/master/install.sh)
-```
-
-Alternatively, you can manually copy `.agents/`, `AGENTS.md`, and `CLAUDE.md` into your project.
-
-Once installed:
-1. Fill in `.agents/rules/10_project.md` with your project-specific context.
-2. Adapt `.agents/rules/23_design_system.md` to your actual design tokens.
-
-The rules use YAML frontmatter with a `trigger` field:
-- `always_on` — always loaded into the agent's context
-- `model_decision` — loaded when the agent determines the rule is relevant based on the `description` field
-
 ## Sources
 
 - **gstack** by [Garry Tan](https://github.com/garrytan/gstack) — inspired the 5-phase Mega Plan Review and adversarial checks in the `review-plan`, `review-gstack`, and `plan` skills.
@@ -116,6 +142,7 @@ The rules use YAML frontmatter with a `trigger` field:
 
 ## Releases
 
+- **v1.5.0** (April 2026) — Upstream Ecosystem Sync. Integrated upstream execution tracking (`preamble-tier`), Compound Engineering severity routing, and the Product Pressure Test. Synchronized high-fidelity framework core reference libraries (Vue, Nuxt, Laravel, Pinia, Vite).
 - **v1.4.0** (April 2026) — Ecosystem Restructure & Rules Hardening. Migrated to a standardized `.agents/` directory structure. Conducted a comprehensive `path-to-10` quality audit across all rule files, resolving architecture offsets, eliminating tool lock-in, and deduplicating cross-references.
 - **v1.3.2** (April 2026) — Added `contribute-back` skill. Allows agents to automatically scan local customizations, propose upstream enhancements, and execute GitHub Pull Requests back to the central repository.
 - **v1.3.1** (April 2026) — Added `build-start-scripts` skill. Standards and patterns for reliable local dev startup scripts: orphaned container cleanup, port discipline, health checks, graceful shutdown, and idempotent dependency installation.
