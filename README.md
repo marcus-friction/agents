@@ -142,6 +142,7 @@ Skills live in `.agents/skills/` and provide deep, on-demand guidance when a tas
 
 ## Releases
 
+- **v1.5.1** (April 2026) — Documentation Restructure. Expanded `README.md` to prominently surface installation, zero-to-one onboarding (`start-project`), and the core iterative development loop (`/plan` → execute → `/review` → `/wrap`). Curated a list of featured high-leverage skills (`path-to-10`, `review-gstack`, `copy-editing`).
 - **v1.5.0** (April 2026) — Upstream Ecosystem Sync. Integrated upstream execution tracking (`preamble-tier`), Compound Engineering severity routing, and the Product Pressure Test. Synchronized high-fidelity framework core reference libraries (Vue, Nuxt, Laravel, Pinia, Vite).
 - **v1.4.0** (April 2026) — Ecosystem Restructure & Rules Hardening. Migrated to a standardized `.agents/` directory structure. Conducted a comprehensive `path-to-10` quality audit across all rule files, resolving architecture offsets, eliminating tool lock-in, and deduplicating cross-references.
 - **v1.3.2** (April 2026) — Added `contribute-back` skill. Allows agents to automatically scan local customizations, propose upstream enhancements, and execute GitHub Pull Requests back to the central repository.
