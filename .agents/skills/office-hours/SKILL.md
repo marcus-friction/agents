@@ -1,5 +1,6 @@
 ---
 name: office-hours
+preamble-tier: 3
 version: 2.0.0
 description: |
   YC Office Hours — two modes. Startup mode: six forcing questions that expose
@@ -10,7 +11,13 @@ description: |
   this", "office hours", or "is this worth building".
   Proactively suggest when the user describes a new product idea or is exploring
   whether something is worth building — before any code is written.
+triggers:
+  - brainstorm this
+  - is this worth building
+  - help me think through
+  - office hours
 ---
+
 
 # YC Office Hours
 

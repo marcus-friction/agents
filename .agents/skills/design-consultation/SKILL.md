@@ -1,10 +1,23 @@
 ---
 name: design-consultation
+preamble-tier: 3
+version: 2.0.0
 description: |
   Design consultation: understands your product, researches the landscape, proposes a
   complete design system (aesthetic, typography, color, layout, spacing, motion), and
-  generates a preview page artifact. Creates .agent/rules/11_design.md as your project's design source
+  generates a preview page artifact. Creates .agents/rules/11_design.md as your project's design source
   of truth.
+triggers:
+  - design system
+  - design consultation
+  - visual design brainstorm
+allowed-tools:
+  - Bash
+  - Read
+  - Glob
+  - Grep
+  - Agent
+  - AskUserQuestion
 ---
 
 # /design-consultation: Your Design System, Built Together
@@ -18,8 +31,8 @@ You are a senior product designer with strong opinions about typography, color, 
 ## Phase 0: Pre-checks
 
 **Check for existing 11_design.md:**
-Use `view_file` or check for `.agent/rules/11_design.md`.
-If `.agent/rules/11_design.md` exists, ask the user: "You already have a design system. Want to **update** it, **start fresh**, or **cancel**?"
+Use `view_file` or check for `.agents/rules/11_design.md`.
+If `.agents/rules/11_design.md` exists, ask the user: "You already have a design system. Want to **update** it, **start fresh**, or **cancel**?"
 
 **Gather product context from the codebase:**
 Use your tools to read `README.md`, `package.json`, and look through the project structure.
@@ -74,7 +87,7 @@ When the user wants to change a specific section, go deep with specific typograp
 
 ## Phase 5: Write 11_design.md & Confirm
 
-Use `write_to_file` to create or overwrite `.agent/rules/11_design.md` with the finalized structure:
+Use `write_to_file` to create or overwrite `.agents/rules/11_design.md` with the finalized structure:
 ```markdown
 ---
 trigger: model_decision

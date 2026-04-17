@@ -1,11 +1,29 @@
 ---
 name: review-gstack
+preamble-tier: 4
+version: 1.0.0
 description: |
   Rigorous "Mega Review" pre-landing pipeline. Enforces Scope Drift Detection,
   ASCII Test Flow generation, and Fix-First Auto-Fixing. Requires task.md and
   implementation_plan.md. Use when you're about to merge, land, or push code to
   main, even if you think the changes are small. Proactively suggest this skill
   before any branch merge or PR submission.
+triggers:
+  - review this pr
+  - code review
+  - check my diff
+  - pre-landing review
+  - review my code
+allowed-tools:
+  - Bash
+  - Read
+  - Edit
+  - Write
+  - Grep
+  - Glob
+  - Agent
+  - AskUserQuestion
+  - WebSearch
 ---
 
 # 🕵️ review-gstack: The Mega Review
@@ -25,14 +43,21 @@ Before you begin reviewing, you MUST load the active context:
 
 ## 🛑 STEP 1: SCOPE DRIFT DETECTION
 
-Compare the git diff strictly against `task.md` and `implementation_plan.md`.
+Before reviewing code quality, check: **did they build what was requested — nothing more, nothing less?**
 
-Classify the status of the intent:
+Compare the git diff strictly against the active `task.md` and `implementation_plan.md` artifacts. If there is no active plan, check `git log origin/main..HEAD --oneline` for stated intent.
+
+Classify the status of the intent for each planned item:
 - **[DONE]** - Items in `task.md` that are fully implemented and verified in the diff.
-- **[PARTIAL]** - Items attempted but incomplete.
+- **[PARTIAL]** - Items attempted but incomplete or missing edge cases.
 - **[NOT DONE]** - Items listed in `task.md` missing from the diff.
+- **[CHANGED]** - Items implemented using a different approach than planned, but achieving the same goal.
 
-**Detect Scope Creep:** Flag any files changed or features added in the diff that were *not* explicitly authorized in the implementation plan.
+**Evaluate with skepticism for Scope Creep:**
+- Flag any files changed or features added in the diff that were *not* explicitly authorized in the implementation plan.
+- Flag "While I was in there..." changes that expand the blast radius.
+
+*Output your findings in an informational Scope Check section before proceeding to the code review.*
 
 ---
 
