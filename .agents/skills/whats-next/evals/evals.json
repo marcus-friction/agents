@@ -1,0 +1,23 @@
+{
+  "skill_name": "/whats-next",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Tell me what's next for this project.",
+      "expected_output": "A markdown report containing # \ud83e\udded What's Next: Project Status Report with active branch, last commit, workflow state, recent accomplishments, wip, immediate next steps, and agent suggestions.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Where did we leave off yesterday?",
+      "expected_output": "A markdown report containing # \ud83e\udded What's Next: Project Status Report with active branch, last commit, workflow state, recent accomplishments, wip, immediate next steps, and agent suggestions.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "status update please",
+      "expected_output": "A markdown report containing # \ud83e\udded What's Next: Project Status Report with active branch, last commit, workflow state, recent accomplishments, wip, immediate next steps, and agent suggestions.",
+      "files": []
+    }
+  ]
+}
