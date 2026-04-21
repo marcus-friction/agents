@@ -55,7 +55,21 @@ if [ -f "$TMP_DIR/CLAUDE.md" ]; then
     fi
 fi
 
+echo "=> Installing dependency setup script..."
+if [ -f "$TMP_DIR/install-dependencies.sh" ]; then
+    cp -af "$TMP_DIR/install-dependencies.sh" ./
+    chmod +x ./install-dependencies.sh
+    echo ""
+    echo "=> Bootstrapping system dependencies..."
+    if ! ./install-dependencies.sh; then
+        echo "=> System dependency installation aborted or failed. Exiting ecosystem setup."
+        exit 1
+    fi
+fi
+
+echo ""
 echo "=> Installation Complete!"
 echo "   To initialize the ecosystem, open your AI chat and prompt:"
 echo "     - @start-project   (for a brand new codebase or idea)"
 echo "     - @onboard-project (to integrate into an existing repository)"
+
