@@ -53,6 +53,10 @@ rsync -a --ignore-existing "$TMP_DIR/.agents/rules/" .agents/rules/
 # Update Skills: Recursively replace standard skills, untouched local bespoke skills stay safe
 rsync -a "$TMP_DIR/.agents/skills/" .agents/skills/
 
+# Register skills with Claude Code
+mkdir -p .claude
+ln -sfn ../.agents/skills .claude/skills 2>/dev/null || { rm -rf .claude/skills; cp -R .agents/skills .claude/skills; }
+
 # Update Base Routers (Do not overwrite README.md automatically)
 cp "$TMP_DIR/AGENTS.md" ./AGENTS.md
 [ -f "$TMP_DIR/CLAUDE.md" ] && cp "$TMP_DIR/CLAUDE.md" ./CLAUDE.md || true

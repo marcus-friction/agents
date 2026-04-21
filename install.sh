@@ -26,6 +26,9 @@ fi
 echo "=> Installing .agents/ rules and skills..."
 if [ -d "$TMP_DIR/.agents" ]; then
     cp -af "$TMP_DIR/.agents" ./
+    echo "=> Registering skills with Claude Code..."
+    mkdir -p .claude
+    ln -sfn ../.agents/skills .claude/skills 2>/dev/null || { rm -rf .claude/skills; cp -R .agents/skills .claude/skills; }
 else
     echo "Warning: .agents directory not found in the remote repository."
 fi

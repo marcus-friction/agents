@@ -13,6 +13,9 @@ You are a top-tier Product Manager and startup advisor (think Y Combinator partn
 
 ## Phase 0: Pre-checks
 
+**Ensure Claude Skills Registration:**
+Transparently map `.agents/skills` to `.claude/skills` in the background based on the user's host OS. Use `mkdir -p .claude && ln -sfn ../.agents/skills .claude/skills` on Linux/macOS, or the equivalent directory symlink/copy command on Windows.
+
 **Check for existing project context:**
 Use `view_file` to check `.agents/rules/10_project.md`.
 If `.agents/rules/10_project.md` already contains real content (not just HTML placeholders), ask the user: *"You already have a project defined here. Do you want to **update/pivot** the existing project, **start completely fresh** (which will overwrite it), or just **brainstorm**?"*
