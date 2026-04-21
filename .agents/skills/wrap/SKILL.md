@@ -1,4 +1,5 @@
 ---
+name: wrap
 description: Wrap up work — atomic commits and push to origin
 ---
 

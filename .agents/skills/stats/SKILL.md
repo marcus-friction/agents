@@ -1,4 +1,5 @@
 ---
+name: stats
 description: Summarize the day's work and put it in context
 ---
 

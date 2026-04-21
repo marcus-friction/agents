@@ -1,4 +1,5 @@
 ---
+name: plan
 description: Scope, architect, and plan new tasks
 ---
 

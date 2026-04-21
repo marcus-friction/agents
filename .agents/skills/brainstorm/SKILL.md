@@ -1,4 +1,5 @@
 ---
+name: brainstorm
 description: Structured brainstorming for exploring new features or solving complex problems
 ---
 
