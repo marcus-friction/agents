@@ -12,6 +12,12 @@ bash <(curl -s https://raw.githubusercontent.com/marcus-friction/agents/master/i
 
 Alternatively, you can manually copy `.agents/`, `AGENTS.md`, and `CLAUDE.md` into your project.
 
+### System Dependencies
+
+The ecosystem includes a multi-OS dependency bootstrapper. If executed during the installation, it safely ensures your host machine matches the rigid project baseline (Git, Docker Engine, NVM, Node.js 22 LTS, PHP 8.4, and Composer). 
+
+It dynamically utilizes standard package managers (`apt` / `brew`) and gracefully intercepts Windows users to guide them into **WSL2** for maximum framework compatibility.
+
 ### Starting a New Project
 
 If you are beginning a brand new project, use the **Start Project** skill. 
@@ -142,6 +148,7 @@ Skills live in `.agents/skills/` and provide deep, on-demand guidance when a tas
 
 ## Releases
 
+- **v1.5.2** (April 2026) — Ecosystem Hardening. Introduced native Claude Code agent syncing (`.claude/skills` symlinking) with comprehensive Windows PowerShell fail-safes. Shipped the `install-dependencies.sh` bootstrapper to securely align any host machine with the central tech stack baseline (Docker, Target Node/PHP versions) natively during the install hook.
 - **v1.5.1** (April 2026) — Documentation Restructure. Expanded `README.md` to prominently surface installation, zero-to-one onboarding (`start-project`), and the core iterative development loop (`/plan` → execute → `/review` → `/wrap`). Curated a list of featured high-leverage skills (`path-to-10`, `review-gstack`, `copy-editing`).
 - **v1.5.0** (April 2026) — Upstream Ecosystem Sync. Integrated upstream execution tracking (`preamble-tier`), Compound Engineering severity routing, and the Product Pressure Test. Synchronized high-fidelity framework core reference libraries (Vue, Nuxt, Laravel, Pinia, Vite).
 - **v1.4.0** (April 2026) — Ecosystem Restructure & Rules Hardening. Migrated to a standardized `.agents/` directory structure. Conducted a comprehensive `path-to-10` quality audit across all rule files, resolving architecture offsets, eliminating tool lock-in, and deduplicating cross-references.
