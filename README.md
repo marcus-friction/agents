@@ -149,6 +149,7 @@ Skills live in `.agents/skills/` and provide deep, on-demand guidance when a tas
 
 ## Releases
 
+- **v1.5.4** (April 2026) — Ecosystem Metadata Fix. Patched incomplete YAML frontmatter across `review`, `brainstorm`, `plan`, `stats`, and `wrap` skills to ensure they correctly register as slash commands.
 - **v1.5.3** (April 2026) — Added `end2end` skill for autonomous E2E browser testing with progressive test plans and fix-loop safety boundaries.
 - **v1.5.2** (April 2026) — Ecosystem Hardening. Introduced native Claude Code agent syncing (`.claude/skills` symlinking) with comprehensive Windows PowerShell fail-safes. Shipped the `install-dependencies.sh` bootstrapper to securely align any host machine with the central tech stack baseline (Docker, Target Node/PHP versions) natively during the install hook.
 - **v1.5.1** (April 2026) — Documentation Restructure. Expanded `README.md` to prominently surface installation, zero-to-one onboarding (`start-project`), and the core iterative development loop (`/plan` → execute → `/review` → `/wrap`). Curated a list of featured high-leverage skills (`path-to-10`, `review-gstack`, `copy-editing`).
