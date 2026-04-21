@@ -104,6 +104,7 @@ Skills live in `.agents/skills/` and provide deep, on-demand guidance when a tas
 | `test-driven-development` | Red → Green → Refactor TDD cycle | Adapted from [Vercel Skills.sh](https://skills.sh) |
 | `ui-accessibility-review` | Design system, responsive, WCAG AA checklist | Adapted from [Vercel Skills.sh](https://skills.sh) |
 | `code-review-excellence` | Meta-level review guidance — how to review well | Adapted from [Vercel Skills.sh](https://skills.sh) |
+| `end2end` | Full end-to-end (E2E) autonomous testing skill utilizing the browser | Original |
 | `laravel` | Laravel operational patterns — Artisan generators, Eloquent, testing, Laravel 13 structure | Synthesized from [laravel/boost](https://github.com/laravel/boost) |
 | `build-start-scripts` | Standards for reliable local dev startup scripts — Docker / Sail cleanup, port discipline, health checks, graceful shutdown | Original |
 | `vue-best-practices` | Vue 3 Composition API reference — reactivity, components, SSR, TypeScript | From [antfu/skills](https://github.com/antfu/skills) |
@@ -148,6 +149,7 @@ Skills live in `.agents/skills/` and provide deep, on-demand guidance when a tas
 
 ## Releases
 
+- **v1.5.3** (April 2026) — Added `end2end` skill for autonomous E2E browser testing with progressive test plans and fix-loop safety boundaries.
 - **v1.5.2** (April 2026) — Ecosystem Hardening. Introduced native Claude Code agent syncing (`.claude/skills` symlinking) with comprehensive Windows PowerShell fail-safes. Shipped the `install-dependencies.sh` bootstrapper to securely align any host machine with the central tech stack baseline (Docker, Target Node/PHP versions) natively during the install hook.
 - **v1.5.1** (April 2026) — Documentation Restructure. Expanded `README.md` to prominently surface installation, zero-to-one onboarding (`start-project`), and the core iterative development loop (`/plan` → execute → `/review` → `/wrap`). Curated a list of featured high-leverage skills (`path-to-10`, `review-gstack`, `copy-editing`).
 - **v1.5.0** (April 2026) — Upstream Ecosystem Sync. Integrated upstream execution tracking (`preamble-tier`), Compound Engineering severity routing, and the Product Pressure Test. Synchronized high-fidelity framework core reference libraries (Vue, Nuxt, Laravel, Pinia, Vite).
