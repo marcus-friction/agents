@@ -1,6 +1,6 @@
 # Agent Rules
 
-Opinionated rule files for AI coding agents working on a **Laravel 13 + Nuxt 4** full-stack monorepo. These rules ensure agents follow ecosystem conventions, project standards, and established workflows — instead of reinventing the wheel.
+Opinionated instructions for AI coding agents working on a **Laravel 13 + Nuxt 4** full-stack monorepo. These patterns ensure agents follow ecosystem conventions, project standards, and established workflows — instead of reinventing the wheel.
 
 ## Installation
 
@@ -23,15 +23,15 @@ It dynamically utilizes standard package managers (`apt` / `brew`) and gracefull
 If you are beginning a brand new project, use the **Start Project** skill. 
 Run `/start-project` or ask your agent: "Run the start project skill". 
 This interactive workflow interviews you about the product vision and constraints, seamlessly generating a suite of foundational documents before any code is written:
-- **`10_project.md`**: Captures your core goals, specific users, rigid constraints, and competitive landscape.
-- **`11_design.md`**: (Optional) Triggers a design consultation to establish UI architecture, typography, spacing, and color logic.
+- **`README.md`**: Captures your core goals, specific users, rigid constraints, and competitive landscape.
+- **`DESIGN.md`**: (Optional) Triggers a design consultation to establish UI architecture, typography, spacing, and color logic.
 - **`implementation_plan.md` & `task.md`**: Architecturally scopes the End-to-End MVP and provides a comprehensive execution checklist.
 
 ### Onboarding an Existing Project
 
 If you are dropping these rules into an established codebase, use the **Onboard Project** skill.
 Run `/onboard-project` or ask your agent: "Run the onboard project skill".
-The agent will systematically analyze your tech stack, map out existing directories, identify missing standards, and custom-tailor the rules and `AGENTS.md` router to fit your specific ecosystem, eliminating agent blindness.
+The agent will systematically analyze your tech stack, map out existing directories, identify missing standards, and custom-tailor the setup to fit your specific ecosystem, eliminating agent blindness.
 
 ## Core Workflow
 
@@ -48,7 +48,7 @@ The `.agents/skills/` directory holds deep, on-demand capabilities. Some highlig
 
 - **Path to 10 (`path-to-10`)**: Enforces a ruthless, uncompromising 10/10 quality standard on agent outputs. Requires proof of constraints, specific citations, and robust environmental execution.
 - **Review GStack (`review-gstack`)**: A "Mega Review" pre-landing pipeline. Uses a 5-phase checking system to catch hidden scope drift, enforce fix-first policies, and mandate ASCII test flow graphs prior to any merge.
-- **Design Consultation (`design-consultation`)**: Acts as a senior product designer. Researches the landscape, proposes cohesive design systems (typography, spacing, color, motion), and generates `11_design.md` as your project's visual source of truth.
+- **Design Consultation (`design-consultation`)**: Acts as a senior product designer. Researches the landscape, proposes cohesive design systems (typography, spacing, color, motion), and generates `DESIGN.md` as your project's visual source of truth.
 - **Copywriting (`copywriting`)**: Instills professional writing principles. Use this when generating landing pages, UI microcopy, CTAs, product descriptions, or changelogs to ensure clear, user-centric messaging.
 - **Copy Editing (`copy-editing`)**: Employs "The Seven Sweeps" framework to review and enhance existing text—focusing on clarity, voice, benefits, proof, specificity, emotion, and risk reversal.
 
@@ -65,26 +65,16 @@ The `.agents/skills/` directory holds deep, on-demand capabilities. Some highlig
 | Quality | Larastan (L9), Laravel Pint, Pest 4, ESLint, Vitest |
 | Monitoring | Laravel Horizon, Telescope (dev), Pulse (prod) |
 
-## Rule Files
+## Architecture
 
-Rules live in `.agents/rules/` and are numbered by category:
+Agent behavior is governed by the following core files in the project root:
 
-| # | File | Purpose |
-|---|---|---|
-| `00` | `00_meta.md` | Agent persona, conduct, and anti-patterns |
-| `10` | `10_project.md` | Project context template (name, vision, goals, users) |
-| `20` | `20_stack.md` | Tech stack, directory structure, dependency discipline |
-| `21` | `21_standards_laravel.md` | Laravel conventions, first-party tool usage, refactoring triggers |
-| `22` | `22_standards_nuxt.md` | Nuxt conventions, SSR patterns, component standards |
-| `23` | `23_design_system.md` | Design tokens, color, typography, motion, spacing |
-| `24` | `24_accessibility.md` | WCAG compliance, ARIA, keyboard navigation |
-| `40` | `40_workflow_development.md` | Branching, PRs, review checklist, git hooks |
-| `41` | `41_workflow_testing.md` | Pest, Vitest, architecture tests, coverage expectations |
-| `42` | `42_workflow_debugging.md` | Debugging procedures and tools |
-| `43` | `43_workflow_deployment.md` | Deploy pipeline, rollback strategy, pre-merge checklist |
-| `44` | `44_workflow_database.md` | Migration standards, backup procedures, safety rules |
-| `50` | `50_security.md` | Security hardening (general, Laravel, Nuxt) |
-| `60` | `60_infrastructure.md` | Environment matrix, service configuration |
+- `AGENTS.md`: The pragmatic list of codebase best practices, architectural boundaries, and agentic anti-patterns (no platitudes, no role-play).
+- `CONTRIBUTING.md`: Workflow rules for branches, PRs, squashing, testing, and deployments.
+- `README.md`: The source of truth for the project's vision, tech stack, and infrastructure mapping.
+- `DESIGN.md`: The source of truth for typography, color, spacing, and component structure.
+
+The overarching design ensures the agent checks the `README.md` for *what* is being built, `AGENTS.md` for *how* it should be built architecturally, and `.agents/skills/` for execution logic.
 
 ## Skills
 
