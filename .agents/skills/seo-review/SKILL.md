@@ -78,3 +78,5 @@ P3 Findings: [count]
 
 ## References
 - [Schema Templates](references/schema-templates.md): Ready-to-use JSON-LD boilerplate for Article, Product, Organization, LocalBusiness, FAQPage, BreadcrumbList, and WebSite
+- [Core Web Vitals Thresholds](references/cwv-thresholds.md): Target thresholds, metric definitions (LCP, INP, CLS, TTFB), and optimization triggers
+- [E-E-A-T Quality Framework](references/eeat-framework.md): Experience, Expertise, Authoritativeness, and Trustworthiness evaluation rubrics
