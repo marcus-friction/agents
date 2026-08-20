@@ -108,8 +108,13 @@ Skills live in `.agents/skills/` and provide deep, on-demand guidance when a tas
 | `laravel` | Laravel operational patterns — Artisan generators, Eloquent, testing, Laravel 13 structure | Synthesized from [laravel/boost](https://github.com/laravel/boost) |
 | `build-start-scripts` | Standards for reliable local dev startup scripts — Docker / Sail cleanup, port discipline, health checks, graceful shutdown | Original |
 | `vue-best-practices` | Vue 3 Composition API reference — reactivity, components, SSR, TypeScript | From [antfu/skills](https://github.com/antfu/skills) |
-| `nuxt` | Nuxt framework reference — routing, SSR, data fetching, Nitro, modules | From [antfu/skills](https://github.com/antfu/skills) |
-| `vitest` | Vitest API reference — test/describe, mocking, coverage, environments | From [antfu/skills](https://github.com/antfu/skills) |
+| `vue` | Vue 3 Composition API reference — reactivity system, script setup macros, built-in components | From [antfu/skills](https://github.com/antfu/skills) |
+| `vue-router-best-practices` | Vue Router 4 patterns, navigation guards, route params, lifecycle interactions | From [vuejs-ai/skills](https://github.com/vuejs-ai) |
+| `vue-testing-best-practices` | Vue.js testing best practices — Vitest, Vue Test Utils, component testing, Playwright | From [vuejs-ai/skills](https://github.com/vuejs-ai) |
+| `nuxt` | Nuxt framework reference — routing, SSR, data fetching, Nitro, modules (Nuxt 4 baseline) | From [antfu/skills](https://github.com/antfu/skills) |
+| `nitro` | Nitro server engine reference — server routes, event handlers, storage, auto-imports, plugins | From [antfu/skills](https://github.com/antfu/skills) |
+| `vite` | Vite build tool configuration, plugin API, SSR, and Vite 8 Rolldown migration | From [antfu/skills](https://github.com/antfu/skills) |
+| `vitest` | Vitest API reference — test/describe, mocking, coverage, reporters, test tags, benchmarking | From [antfu/skills](https://github.com/antfu/skills) |
 | `pinia` | Pinia store patterns — composables, testing, SSR, plugins | From [antfu/skills](https://github.com/antfu/skills) |
 | `vueuse-functions` | VueUse composable catalog — browser, state, sensors, reactivity | From [antfu/skills](https://github.com/antfu/skills) |
 | `tailwind-v4-shadcn` | Tailwind v4 + shadcn/ui — @theme, CSS variables, dark mode | From [jezweb/claude-skills](https://github.com/jezweb/claude-skills) |
@@ -117,7 +122,7 @@ Skills live in `.agents/skills/` and provide deep, on-demand guidance when a tas
 | `skill-creator` | Create new skills, modify existing skills, and measure skill performance | From [anthropics/skills](https://github.com/anthropics/skills) |
 | `design-consultation` | Comprehensive design, typography, color, and aesthetic consultation | From [garrytan/gstack](https://github.com/garrytan/gstack) |
 | `copywriting` | Principles for clear, user-centric marketing and UI copy | From [skills.sh](https://skills.sh/coreyhaines31/marketingskills/copywriting) |
-| `copy-editing` | The Seven Sweeps framework for reviewing and enhancing existing copy | From [skills.sh](https://skills.sh/coreyhaines31/marketingskills/copy-editing) |
+| `copy-editing` | The Seven Sweeps framework & Content Refresh for reviewing and enhancing copy | From [skills.sh](https://skills.sh/coreyhaines31/marketingskills/copy-editing) |
 | `compound` | Document solved problems as structured, searchable knowledge | Adapted from [Compound Engineering](https://github.com/kieranklaassen) |
 | `start-project` | Interactive onboarding and project planning | Original |
 | `plan` | Scope, architect, and plan engineering tasks using the Mega Plan Review | Adapted from [gstack](https://github.com/garrytan/gstack) |
@@ -142,13 +147,14 @@ Skills live in `.agents/skills/` and provide deep, on-demand guidance when a tas
 - **gstack** by [Garry Tan](https://github.com/garrytan/gstack) — inspired the 5-phase Mega Plan Review and adversarial checks in the `review-plan`, `review-gstack`, and `plan` skills.
 - **Compound Engineering** methodology by [Kieran Klaassen](https://github.com/kieranklaassen) — inspired the skills (`review`, `brainstorm`, `wrap`, `compound`, `architecture-review`, `performance-review`, `security-review`)
 - **Skills.sh** by [Vercel Labs](https://skills.sh) — 4 skills adapted from their open-source agent skills registry (`systematic-debugging`, `test-driven-development`, `ui-accessibility-review`, `code-review-excellence`)
-- **antfu/skills** by [Anthony Fu](https://github.com/antfu/skills) — 5 framework reference skills auto-generated from source (`vue-best-practices`, `nuxt`, `vitest`, `pinia`, `vueuse-functions`)
+- **antfu/skills** by [Anthony Fu](https://github.com/antfu/skills) — 6 framework reference skills auto-generated from source (`vue-best-practices`, `vue`, `nuxt`, `nitro`, `vite`, `vitest`, `pinia`, `vueuse-functions`)
 - **jezweb/claude-skills** by [jezweb](https://github.com/jezweb/claude-skills) — Tailwind v4 + shadcn/ui skill (`tailwind-v4-shadcn`)
 - **Laravel Boost** by [Laravel](https://github.com/laravel/boost) — official Laravel MCP server `.ai/` guidelines, synthesized into the `laravel` skill
 - **anthropics/skills** by [Anthropic](https://github.com/anthropics/skills) — official Claude skills repository, adapted the `skill-creator` for agentic use
 
 ## Releases
 
+- **v1.6.0** (August 2026) — Upstream Skills Synchronization. Synced `nuxt` to Nuxt 4.x baseline, expanded `vitest` with reporters/benchmarking/test tags, updated 48 `vueuse-functions` composables, added `nitro` server engine skill, updated 8 `laravel` boost rules, upgraded `systematic-debugging` and `test-driven-development` with structured references from `obra/superpowers`, added Content Refresh workflow to `copy-editing`, enriched `seo-review` with Core Web Vitals & E-E-A-T rubrics, and added code slop scan heuristics to `review-gstack`.
 - **v1.5.4** (April 2026) — Ecosystem Metadata Fix. Patched incomplete YAML frontmatter across `review`, `brainstorm`, `plan`, `stats`, and `wrap` skills to ensure they correctly register as slash commands.
 - **v1.5.3** (April 2026) — Added `end2end` skill for autonomous E2E browser testing with progressive test plans and fix-loop safety boundaries.
 - **v1.5.2** (April 2026) — Ecosystem Hardening. Introduced native Claude Code agent syncing (`.claude/skills` symlinking) with comprehensive Windows PowerShell fail-safes. Shipped the `install-dependencies.sh` bootstrapper to securely align any host machine with the central tech stack baseline (Docker, Target Node/PHP versions) natively during the install hook.
