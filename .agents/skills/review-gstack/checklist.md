@@ -37,6 +37,11 @@ Review for clean code, performance, and maintainability.
 5. **Dead/Magic Code & CI/CD**
    - CI workflow changes pushing broken tags or unmapped secrets?
    - Magic numbers, unused variables, stale comments (AUTO-FIX).
+6. **Code Slop & Hallucination Scan**
+   - Hallucinated framework methods or non-existent package exports?
+   - Overly generic wrapper abstractions that wrap a single call site without added value?
+   - Redundant try/catch blocks that swallow errors silently or rethrow generic exceptions?
+   - Leftover debugging artifacts, scratch dumps, or `console.log` / `dd()` statements?
 
 ---
 
