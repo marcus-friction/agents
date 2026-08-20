@@ -1,15 +1,18 @@
 ---
 name: copy-editing
-description: |
-  The Seven Sweeps framework for reviewing and enhancing existing copy. 
-  Focuses on clarity, voice/tone, benefits, proof, specificity, emotion, and risk reversal.
+description: "When the user wants to edit, review, or improve existing marketing copy, or refresh outdated content. Also use when the user mentions 'edit this copy,' 'review my copy,' 'copy feedback,' 'proofread,' 'polish this,' 'make this better,' 'copy sweep,' 'tighten this up,' 'this reads awkwardly,' 'clean up this text,' 'too wordy,' 'sharpen the messaging,' 'refresh this content,' 'update this page,' 'this content is outdated,' or 'content audit.' Use this when the user already has copy and wants it improved or refreshed rather than rewritten from scratch. For writing new copy, see copywriting."
+metadata:
+  version: 2.0.0
 ---
 
 # Copy Editing
 
+You are an expert copy editor specializing in marketing and conversion copy. Your goal is to systematically improve existing copy through focused editing passes while preserving the core message.
+
 ## Core Philosophy
-**Check for project context first:**
-Before editing, read `.agent/rules/10_project.md`. Use the defined Vision, Goals, Users, and Constraints from that context to guide your edits. Only ask the user for information not already covered in that document.
+
+**Check for product marketing context first:**
+If `.agents/product-marketing.md` exists (or `.claude/product-marketing.md`, or the legacy `product-marketing-context.md` filename, in older setups), read it before editing. Use brand voice and customer language from that context to guide your edits.
 
 Good copy editing isn't about rewriting—it's about enhancing. Each pass focuses on one dimension, catching issues that get missed when you try to fix everything at once.
 
@@ -22,9 +25,11 @@ Good copy editing isn't about rewriting—it's about enhancing. Each pass focuse
 ---
 
 ## The Seven Sweeps Framework
+
 Edit copy through seven sequential passes, each focusing on one dimension. After each sweep, loop back to check previous sweeps aren't compromised.
 
 ### Sweep 1: Clarity
+
 **Focus:** Can the reader understand what you're saying?
 
 **What to check:**
@@ -51,6 +56,7 @@ Edit copy through seven sequential passes, each focusing on one dimension. After
 ---
 
 ### Sweep 2: Voice and Tone
+
 **Focus:** Is the copy consistent in how it sounds?
 
 **What to check:**
@@ -76,6 +82,7 @@ Edit copy through seven sequential passes, each focusing on one dimension. After
 ---
 
 ### Sweep 3: So What
+
 **Focus:** Does every claim answer "why should I care?"
 
 **What to check:**
@@ -108,6 +115,7 @@ For every statement, ask "Okay, so what?" If the copy doesn't answer that questi
 ---
 
 ### Sweep 4: Prove It
+
 **Focus:** Is every claim supported with evidence?
 
 **What to check:**
@@ -142,6 +150,7 @@ For every statement, ask "Okay, so what?" If the copy doesn't answer that questi
 ---
 
 ### Sweep 5: Specificity
+
 **Focus:** Is the copy concrete enough to be compelling?
 
 **What to check:**
@@ -177,6 +186,7 @@ For every statement, ask "Okay, so what?" If the copy doesn't answer that questi
 ---
 
 ### Sweep 6: Heightened Emotion
+
 **Focus:** Does the copy make the reader feel something?
 
 **What to check:**
@@ -211,6 +221,7 @@ For every statement, ask "Okay, so what?" If the copy doesn't answer that questi
 ---
 
 ### Sweep 7: Zero Risk
+
 **Focus:** Have we removed every barrier to action?
 
 **What to check:**
@@ -245,10 +256,63 @@ For every statement, ask "Okay, so what?" If the copy doesn't answer that questi
 
 ---
 
+## Expert Panel Scoring
+
+Use this after completing the Seven Sweeps for an additional quality gate. For high-stakes copy (landing pages, launch emails, sales pages), a multi-persona expert review catches issues that a single perspective misses.
+
+### How It Works
+
+1. **Assemble 3-5 expert personas** relevant to the copy type
+2. **Each persona scores the copy 1-10** on their area of expertise
+3. **Collect specific critiques** — not just scores, but what to fix
+4. **Revise based on feedback** — address the lowest-scoring areas first
+5. **Re-score after revisions** — iterate until all personas score 7+, with an average of 8+ across the panel
+
+### Recommended Expert Panels
+
+**Landing page copy:**
+- Conversion copywriter (clarity, CTA strength, benefit hierarchy)
+- UX writer (scannability, cognitive load, user flow)
+- Target customer persona (does this speak to me? do I trust it?)
+- Brand strategist (voice consistency, positioning accuracy)
+
+**Email sequence:**
+- Email marketing specialist (subject lines, open/click optimization)
+- Copywriter (hooks, storytelling, persuasion)
+- Spam filter analyst (deliverability red flags, trigger words)
+- Target customer persona (relevance, value, unsubscribe risk)
+
+**Sales page / long-form:**
+- Direct response copywriter (offer structure, objection handling, urgency)
+- Skeptical buyer persona (proof gaps, trust issues, red flags)
+- Editor (flow, readability, conciseness)
+- SEO specialist (keyword coverage, search intent alignment)
+
+### Scoring Rubric
+
+| Score | Meaning |
+|-------|---------|
+| 9-10 | Publish-ready. No meaningful improvements. |
+| 7-8 | Strong. Minor tweaks only. |
+| 5-6 | Functional but has clear gaps. Needs another pass. |
+| 3-4 | Significant issues. Major revision needed. |
+| 1-2 | Fundamentally broken. Rethink approach. |
+
+### When to Use
+
+- **Always** for launch copy, pricing pages, and high-traffic landing pages
+- **Recommended** for email sequences, sales pages, and ad copy
+- **Optional** for blog posts, social content, and internal docs
+- **Skip** for quick updates, minor edits, and low-stakes content
+
+---
+
 ## Quick-Pass Editing Checks
+
 Use these for faster reviews when a full seven-sweep process isn't needed.
 
 ### Word-Level Checks
+
 **Cut these words:**
 - Very, really, extremely, incredibly (weak intensifiers)
 - Just, actually, basically (filler)
@@ -275,6 +339,7 @@ Use these for faster reviews when a full seven-sweep process isn't needed.
 - Nominalizations (verb → noun: "make a decision" → "decide")
 
 ### Sentence-Level Checks
+
 - One idea per sentence
 - Vary sentence length (mix short and long)
 - Front-load important information
@@ -282,6 +347,7 @@ Use these for faster reviews when a full seven-sweep process isn't needed.
 - No more than 25 words (usually)
 
 ### Paragraph-Level Checks
+
 - One topic per paragraph
 - Short paragraphs (2-4 sentences for web)
 - Strong opening sentences
@@ -290,28 +356,50 @@ Use these for faster reviews when a full seven-sweep process isn't needed.
 
 ---
 
-## Output Template
+## Copy Editing Checklist
 
-After completing all 7 sweeps, present findings in this format:
+For a final QA pass before delivering edits, work through the full checklist in [references/checklist.md](references/checklist.md) — covering all seven sweeps plus pre-start and final-check items.
 
-```
-COPY REVIEW SUMMARY
-───────────────────
-Sweep 1 (Clarity):    X findings
-Sweep 2 (Voice):      X findings
-Sweep 3 (So What):    X findings
-Sweep 4 (Proof):      X findings
-Sweep 5 (Specificity): X findings
-Sweep 6 (Emotion):    X findings
-Sweep 7 (Risk):       X findings
+---
 
-Overall: CLEAN | NEEDS WORK | MAJOR REWRITE
-Top 3 Priority Edits: [numbered list]
-```
+## Common Copy Problems & Fixes
+
+### Problem: Wall of Features
+**Symptom:** List of what the product does without why it matters
+**Fix:** Add "which means..." after each feature to bridge to benefits
+
+### Problem: Corporate Speak
+**Symptom:** "Leverage synergies to optimize outcomes"
+**Fix:** Ask "How would a human say this?" and use those words
+
+### Problem: Weak Opening
+**Symptom:** Starting with company history or vague statements
+**Fix:** Lead with the reader's problem or desired outcome
+
+### Problem: Buried CTA
+**Symptom:** The ask comes after too much buildup, or isn't clear
+**Fix:** Make the CTA obvious, early, and repeated
+
+### Problem: No Proof
+**Symptom:** "Customers love us" with no evidence
+**Fix:** Add specific testimonials, numbers, or case references
+
+### Problem: Generic Claims
+**Symptom:** "We help businesses grow"
+**Fix:** Specify who, how, and by how much
+
+### Problem: Mixed Audiences
+**Symptom:** Copy tries to speak to everyone, resonates with no one
+**Fix:** Pick one audience and write directly to them
+
+### Problem: Feature Overload
+**Symptom:** Listing every capability, overwhelming the reader
+**Fix:** Focus on 3-5 key benefits that matter most to the audience
 
 ---
 
 ## Working with Copy Sweeps
+
 When editing collaboratively:
 
 1. **Run a sweep and present findings** - Show what you found, why it's an issue
@@ -324,19 +412,46 @@ This iterative process ensures each edit doesn't create new problems while respe
 
 ---
 
+## References
+
+- [Plain English Alternatives](references/plain-english-alternatives.md): Replace complex words with simpler alternatives
+- [Content Refresh](references/content-refresh.md): Full checklist, refresh vs. rewrite matrix, and cadence guide
+- [Copy Editing Checklist](references/checklist.md): Full QA checklist across all seven sweeps
+
+---
+
+## Content Refresh Editing
+
+Copy editing isn't just for new content. Existing pages decay over time — outdated stats, stale examples, and drifted brand voice. Use the content refresh framework when traffic is declining, data is stale, or the product has changed.
+
+**For the full refresh checklist, refresh vs. rewrite decision matrix, and cadence guide**: See [references/content-refresh.md](references/content-refresh.md)
+
+---
+
 ## Task-Specific Questions
+
 1. What's the goal of this copy? (Awareness, conversion, retention)
 2. What action should readers take?
 3. Are there specific concerns or known issues?
 4. What proof/evidence do you have available?
+5. Is this new copy or a refresh of existing content?
 
 ---
 
-## References
-- [Plain English Alternatives](references/plain-english-alternatives.md): Replace complex words with simpler alternatives
-- [Checklist](references/checklist.md): Quick-reference tracking checklist for the Seven Sweeps
-- [Common Problems](references/common-problems.md): Recurring copy problems and their fixes
+## Related Skills
+
+- **copywriting**: For writing new copy from scratch (use this skill to edit after your first draft is complete)
+- **cro**: For broader page optimization beyond copy
+- **marketing-psychology**: For understanding why certain edits improve conversion
+- **ab-testing**: For testing copy variations
 
 ---
 
-- **copywriting**: For writing new copy from scratch — use `copy-editing` to review and improve after your first draft is complete.
+## When to Use Each Skill
+
+| Task | Skill to Use |
+|------|--------------|
+| Writing new page copy from scratch | copywriting |
+| Reviewing and improving existing copy | copy-editing (this skill) |
+| Editing copy you just wrote | copy-editing (this skill) |
+| Structural or strategic page changes | cro |
