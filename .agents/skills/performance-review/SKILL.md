@@ -5,7 +5,7 @@ description: Performance analysis checklist for code review
 
 # Performance Review Skill
 
-Systematic performance analysis for code changes. Use during the performance pass of `/review` or when optimizing. See `25_caching_performance.md` rule for implementation standards.
+Systematic performance analysis for code changes. Use during the performance pass of `/review` or when optimizing. See `AGENTS.md` rule for implementation standards.
 
 ## Checklist
 
@@ -26,7 +26,7 @@ Systematic performance analysis for code changes. Use during the performance pas
 - [ ] **Tagged caching**: Related cache entries grouped with tags for collective invalidation
 - [ ] **Cache invalidation**: Cache cleared on data mutation — no stale data risk
 - [ ] **Event-driven invalidation**: Model observers or event listeners handle invalidation, not manual `forget()` scattered through code
-- [ ] **TTL alignment**: TTL matches data volatility (see tiered strategy in `25_caching_performance.md`)
+- [ ] **TTL alignment**: TTL matches data volatility (see tiered strategy in `AGENTS.md`)
 - [ ] **Null handling**: `Cache::remember()` closures don't return bare `null` (treated as cache miss)
 - [ ] **Key naming**: Cache keys follow `entity:id:attribute` convention — descriptive and hierarchical
 

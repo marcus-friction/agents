@@ -38,7 +38,7 @@ Port conflicts are the #1 cause of "the script worked yesterday" failures. Every
   - Infrastructure documentation
   - README files
 
-The infrastructure rule (`60_infrastructure.md`) is the single source of truth for this project's port mapping. Defer to it.
+The infrastructure rule (`README.md`) is the single source of truth for this project's port mapping. Defer to it.
 
 ## Graceful Shutdown
 

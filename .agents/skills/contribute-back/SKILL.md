@@ -31,7 +31,7 @@ if ! git clone --depth 1 https://github.com/marcus-friction/agents.git "$TMP_DIR
 fi
 
 # Exclusion list: project-specific templates that must NEVER leak upstream
-EXCLUDE="--exclude=10_project.md --exclude=11_design.md --exclude=23_design_system.md --exclude=60_infrastructure.md"
+EXCLUDE=""
 
 echo ""
 echo "=== MODIFIED/NEW FILES IN LOCAL .agents/ ==="

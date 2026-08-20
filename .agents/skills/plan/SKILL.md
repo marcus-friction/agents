@@ -24,8 +24,8 @@ When the user asks to plan a new feature, project, or gives a high-level request
 
 ### 2. Context Gathering
 Before writing the plan, you MUST read the following to inform your architecture:
-1. The project rules (`.agent/rules/*.md`).
-2. Any relevant `.agent/skills/*.md`.
+1. The project rules (`AGENTS.md and README.md`).
+2. Any relevant `.agents/skills/*.md`.
 3. The most relevant Knowledge Items (KIs) and explicitly search `docs/solutions/` for compounded learnings to avoid repeating past mistakes.
 4. Existing codebase files that will be impacted.
 
@@ -34,7 +34,7 @@ Draft an initial Implementation Plan based on the gathered context. Follow our a
 
 ### 4. The Review Loop
 Do NOT present the first draft to the user immediately.
-1. Load the `review-plan` skill (`.agent/skills/review-plan/SKILL.md`).
+1. Load the `review-plan` skill (`.agents/skills/review-plan/SKILL.md`).
 2. Self-review your drafted plan using the criteria in the `review-plan` skill.
 3. Revise the plan to address any shortcomings found during the self-review.
 4. Repeat this self-review and revision loop exactly **3 times** to ensure maximum robustness.

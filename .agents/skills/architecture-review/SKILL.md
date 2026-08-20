@@ -51,10 +51,10 @@ Controllers → Actions → Models
 
 - [ ] Dependencies flow downward — never upward or circular
 - [ ] No new dependency added without explicit approval
-- [ ] Package usage aligns with stack choices in `20_stack.md`
+- [ ] Package usage aligns with stack choices in `README.md`
 
 ### File Organization
 
-- [ ] New files follow existing directory structure (see `20_stack.md` layouts)
+- [ ] New files follow existing directory structure (see `README.md` layouts)
 - [ ] Test files mirror source structure in `tests/Feature/` and `tests/Unit/`
 - [ ] No orphan files — everything belongs to a clear module or domain area

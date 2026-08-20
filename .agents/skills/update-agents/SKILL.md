@@ -21,7 +21,7 @@ set -e
 # 1. Base Environment & Cleanliness Gate
 cd "$(git rev-parse --show-toplevel)" || { echo "Must be in a git repository."; exit 1; }
 
-if ! git diff --quiet HEAD -- .agents/ AGENTS.md CLAUDE.md 2>/dev/null; then
+if ! git diff --quiet HEAD -- .agents/ AGENTS.md CONTRIBUTING.md CLAUDE.md 2>/dev/null; then
   echo "ERROR: Uncommitted changes detected in your agent files."
   echo "You must commit or stash active work before running an update to prevent data loss."
   exit 1
@@ -38,17 +38,24 @@ trap 'rm -rf "$TMP_DIR"' EXIT
 rm -rf "$TMP_DIR"
 git clone --depth 1 https://github.com/marcus-friction/agents.git "$TMP_DIR"
 
-# 4. File Synchronization & Protection
+# 4. Legacy Migration
+if [ -d ".agents/rules" ]; then
+  echo "Migrating legacy .agents/rules to new structure..."
+  
+  # Migrate project constraints to README.md
+  echo -e "\n## Legacy Project Context\n" >> README.md
+  [ -f ".agents/rules/10_project.md" ] && cat .agents/rules/10_project.md >> README.md
+  [ -f ".agents/rules/20_stack.md" ] && cat .agents/rules/20_stack.md >> README.md
+  [ -f ".agents/rules/60_infrastructure.md" ] && cat .agents/rules/60_infrastructure.md >> README.md
+  
+  # Migrate design context to DESIGN.md
+  echo -e "\n## Legacy Design Context\n" >> DESIGN.md
+  [ -f ".agents/rules/11_design.md" ] && cat .agents/rules/11_design.md >> DESIGN.md
+  
+  rm -rf .agents/rules
+fi
 
-# Update Rules Pass 1: Sync core rules, explicitly excluding customizable templates
-rsync -a \
-  --exclude="10_project.md" \
-  --exclude="23_design_system.md" \
-  --exclude="60_infrastructure.md" \
-  "$TMP_DIR/.agents/rules/" .agents/rules/
-
-# Update Rules Pass 2: Safely add customizable templates ONLY if they do not exist locally
-rsync -a --ignore-existing "$TMP_DIR/.agents/rules/" .agents/rules/
+# 5. File Synchronization & Protection
 
 # Update Skills: Recursively replace standard skills, untouched local bespoke skills stay safe
 rsync -a "$TMP_DIR/.agents/skills/" .agents/skills/
@@ -59,19 +66,15 @@ ln -sfn ../.agents/skills .claude/skills 2>/dev/null || { rm -rf .claude/skills;
 
 # Update Base Routers (Do not overwrite README.md automatically)
 cp "$TMP_DIR/AGENTS.md" ./AGENTS.md
+[ -f "$TMP_DIR/CONTRIBUTING.md" ] && cp "$TMP_DIR/CONTRIBUTING.md" ./CONTRIBUTING.md || true
 [ -f "$TMP_DIR/CLAUDE.md" ] && cp "$TMP_DIR/CLAUDE.md" ./CLAUDE.md || true
 
-# 5. Orphan Analysis & Verification
+# 6. Orphan Analysis & Verification
 echo ""
 echo "--- ORPHAN ANALYSIS (SKILLS) ---"
 echo "The following skills exist locally but are NOT present in the upstream repository:"
 comm -23 <(ls -1 .agents/skills/ | sort) <(ls -1 "$TMP_DIR/.agents/skills/" | sort)
 echo "--------------------------------"
-echo ""
-echo "--- ORPHAN ANALYSIS (RULES) ---"
-echo "The following rules exist locally but are NOT present in the upstream repository:"
-comm -23 <(ls -1 .agents/rules/ | sort) <(ls -1 "$TMP_DIR/.agents/rules/" | sort)
-echo "-------------------------------"
 echo ""
 
 echo "Update complete. Reviewing final git status:"
@@ -80,7 +83,7 @@ git status
 
 ### Final Report & User Interaction
 End your turn by presenting the user with:
-1. A summary of the rules or skills that were modified or added (based on the `git status` output).
+1. A summary of the skills that were modified or added (based on the `git status` output).
 2. Confirmation that local custom templates were safely bypassed.
-3. **CRITICAL**: Explicitly read the `ORPHAN ANALYSIS` outputs from the terminal. If any orphaned skills or rules are listed, prompt the user: 
+3. **CRITICAL**: Explicitly read the `ORPHAN ANALYSIS` outputs from the terminal. If any orphaned skills are listed, prompt the user: 
    > *"I noticed the following items exist locally but not upstream: `[Item X, Item Y]`. Are these your custom workflows, or are they deprecated upstream files you would like me to clean up?"*

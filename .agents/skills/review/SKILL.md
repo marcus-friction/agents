@@ -52,20 +52,20 @@ Map every finding you discover into one of these actions:
 Execute the following passes against the codebase, keeping the findings structured logically:
 
 **Standards** — Check all changes against the relevant coding standards:
-   - PHP changes → `21_standards_laravel.md`
-   - Vue/Nuxt changes → `22_standards_nuxt.md`
-   - Styling changes → `23_design_system.md`
+   - PHP changes → `AGENTS.md`
+   - Vue/Nuxt changes → `AGENTS.md`
+   - Styling changes → `DESIGN.md`
    - **Knowledge Re-use:** Did the implementation re-invent the wheel or correctly leverage compounded learnings from existing Knowledge Items (KIs)?
    - Flag any deviations.
 
-**Security** — Review changes through the lens of `50_security.md`:
+**Security** — Review changes through the lens of `AGENTS.md`:
    - User input handling — is everything validated?
    - Authorization — are policies enforced?
    - Secrets — any hardcoded values or exposed keys?
    - SQL injection, XSS, CSRF — applicable?
    If the `security-review` skill exists, read it for deeper guidance.
 
-**Performance** — Review changes through the lens of `25_caching_performance.md`. Look for:
+**Performance** — Review changes through the lens of `AGENTS.md`. Look for:
    - N+1 queries (missing eager loading)
    - Unnecessary database calls in loops
    - Missing indexes for new query patterns
@@ -87,7 +87,7 @@ Execute the following passes against the codebase, keeping the findings structur
    - Structured data / Schema.org where applicable
    If the `seo-review` skill exists, read it for deeper guidance.
 
-**Accessibility** — Review changes through the lens of `24_accessibility.md`. For frontend code:
+**Accessibility** — Review changes through the lens of `AGENTS.md`. For frontend code:
    - Design system tokens used (no hardcoded colors, spacing)
    - Responsive at all breakpoints (320px → 1440px)
    - Semantic HTML, keyboard accessible, WCAG AA contrast

@@ -5,7 +5,7 @@ description: UI quality, responsiveness, and accessibility review checklist for 
 
 # UI & Accessibility Review Skill
 
-Review checklist for UI code quality, responsive design, and WCAG AA compliance. Use during the UI/accessibility pass of `/review` or when auditing frontend code. References `24_accessibility.md` and `23_design_system.md` as source rules.
+Review checklist for UI code quality, responsive design, and WCAG AA compliance. Use during the UI/accessibility pass of `/review` or when auditing frontend code. References `AGENTS.md` and `DESIGN.md` as source rules.
 
 ## Checklist
 

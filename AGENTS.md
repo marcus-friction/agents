@@ -1,46 +1,43 @@
-# Agent Instructions
+# Agent Instructions & Pragmatic Guidelines
 
 > [!WARNING]
-> **INSTRUCTION BUDGET MANAGEMENT**
-> Do not read all files in this router blindly. You must respect the LLM instruction budget. 
-> Only load `ALWAYS ON` rules natively, and implement **progressive disclosure** by fetching `CONTEXTUAL RULES` *only* when the specified conditions actively apply to the task at hand.
+> This document contains pragmatic, non-project-specific rules that agents MUST follow across the ecosystem. Do not deviate from these patterns unless explicitly instructed. Project-specific stack and vision information is found in `README.md`. Design specifications are in `DESIGN.md`.
 
-This file serves as the root router for AI coding agents working in this repository. 
-When executing tasks, agents MUST consult the relevant rule files linked below based on their trigger conditions.
+## Core Conduct & Quality
+- **Scope Discipline:** Stay strictly within the requested scope. Never modify, refactor, or "improve" code outside the current task without explicit permission.
+- **Anti-Loops:** Do not enter fix-loops where one change triggers cascading unrelated changes. Stop and ask if stuck.
+- **Verification:** Proactively verify work. Suggest automated or manual verification steps.
+- **Directness:** Lead with the answer, then provide context. No filler, no apologies. Correct mistakes and move on.
 
-## Global Rules (Always On)
-These rules dictate persona, boundaries, and fundamental architecture. You MUST read and abide by these during every session.
+## Backend Standards (Laravel)
+- **Structure:** Use default Laravel directory structure. `declare(strict_types=1)` everywhere.
+- **Dependency Injection:** Never call `app()`, `resolve()`, or `new` inside constructors. Use constructor injection exclusively.
+- **Domain Logic:** Thin controllers (receive request, call action, return response). Controllers >15 lines trigger extracting an Action class in `app/Actions/`.
+- **Data Layer (Eloquent):** Always define `$fillable`. Prefer relationships/scopes over raw queries. Wrap `orWhere` inside a `where(fn ($q) => ...)` group to prevent scope leaks.
+- **Performance:** Avoid N+1 queries. Use `loadCount()` / `loadExists()` instead of loading full relations just to call `->count()`. For bulk imports, use `upsert()` / `insert()` in chunks instead of per-row `updateOrCreate()`.
 
-- `[.agents/rules/00_meta.md](.agents/rules/00_meta.md)` : **READ FOR** the mandatory agent persona, conduct guidelines, and anti-patterns.
-- `[.agents/rules/10_project.md](.agents/rules/10_project.md)` : **READ FOR** the project's vision, specific goals, target users, and constraints.
-- `[.agents/rules/20_stack.md](.agents/rules/20_stack.md)` : **READ FOR** the strict tech stack boundaries, directory structure, and dependency update discipline.
-- `[.agents/rules/60_infrastructure.md](.agents/rules/60_infrastructure.md)` : **READ FOR** the environment matrix, port configurations, and service infrastructure rules.
+## Frontend Standards (Nuxt / Vue)
+- **Composition API:** Use `<script setup>` and Vue 3 Composition API exclusively. Use `ref` for primitives, `reactive` for deep objects. Use VueUse composables where possible.
+- **Data Fetching (Nuxt):** Use `useFetch` / `useAsyncData` for SSR data. Never use `$fetch` directly in components for initial loads (causes hydration mismatch).
+- **TypeScript:** Generate response types from Laravel API Resources. Place in `shared/types/`. Import using `import type`. Use `satisfies` over `as`.
+- **Naming:**
+  - `PascalCase`: Components (`UserCard.vue`), Types/Interfaces.
+  - `camelCase`: Composables (`useAuth`), Pinia Stores, Variables.
+  - `kebab-case`: Pages (`user-profile.vue`).
 
-## Contextual Rules (Model Decision)
-These rules are conditionally triggered. Only read these files if the conditions defined below actively match your current task.
+## Security & Data
+- **Never trust input.** Validate at the boundary via Form Requests, authorize at the resource via Policies, escape at the output.
+- **Secrets:** Store in `.env` only (never commit). Use `config()` in Laravel, never `env()` in code. In Nuxt, use private `runtimeConfig` (public only for safe values).
+- **XSS & SSRF:** Blade `{{ }}` and Vue `{{ }}` auto-escapes. Never use `{!! !!}` or `v-html` with user content unless strictly sanitized. For URL fetching, use `dns_get_record()` and bind IP to prevent DNS rebinding.
+- **Mass Assignment:** Always define `$fillable`. Do not use `$guarded = []`.
 
-### Development & Framework Standards
-- `[.agents/rules/21_standards_laravel.md](.agents/rules/21_standards_laravel.md)` : **APPLY WHEN** writing, reviewing, or modifying Laravel backend code (PHP, Eloquent, controllers).
-- `[.agents/rules/22_standards_nuxt.md](.agents/rules/22_standards_nuxt.md)` : **APPLY WHEN** writing, reviewing, or modifying Nuxt/Vue frontend code (components, stores, composables).
-- `[.agents/rules/25_caching_performance.md](.agents/rules/25_caching_performance.md)` : **APPLY WHEN** working with Redis, caching logic, HTTP response headers, or CDN optimization.
-- `[.agents/rules/26_email.md](.agents/rules/26_email.md)` : **APPLY WHEN** implementing or modifying email templates, notifications, and transactional mailings.
-- `[.agents/rules/50_security.md](.agents/rules/50_security.md)` : **APPLY WHEN** handling input validation, API keys, authentication logic, file uploads, or authorization.
+## Caching & Performance
+- **Application Cache:** Cache expensive/frequent queries. Use `Cache::remember()`. Note: `null` returns bypass `Cache::remember()`. Wrap in a DTO if `null` is a valid value. Use `Cache::lock()` for expensive computations to prevent cache stampede.
+- **Redis Isolation:** Use separate DBs for `default`, `cache`, `session`, `queue` to prevent `FLUSHDB` collateral damage.
+- **HTTP/CDN Caching:** Apply `Cache-Control` via middleware (`public, max-age=...` for open data, `private` for auth/mutations). Nuxt SSR should configure `routeRules` (`isr: 3600`, `swr: 600`, `ssr: true`).
 
-### UI, Design & Accessibility
-- `[.agents/rules/11_design.md](.agents/rules/11_design.md)` : **APPLY WHEN** writing Tailwind classes, implementing UI structures, or making general visual design choices.
-- `[.agents/rules/23_design_system.md](.agents/rules/23_design_system.md)` : **APPLY WHEN** building cohesive UI components, picking colors/typography, or applying strict spacing tokens.
-- `[.agents/rules/24_accessibility.md](.agents/rules/24_accessibility.md)` : **APPLY WHEN** building forms, navigation menus, modals, or any interactive visual elements requiring ARIA/WCAG compliance.
-
-### Workflows & Operations
-- `[.agents/rules/40_workflow_development.md](.agents/rules/40_workflow_development.md)` : **APPLY WHEN** initiating branches, crafting PRs, or executing git lifecycle hooks.
-- `[.agents/rules/41_workflow_testing.md](.agents/rules/41_workflow_testing.md)` : **APPLY WHEN** writing or reviewing Pest/Vitest tests, or responding to architecture test requirements.
-- `[.agents/rules/42_workflow_debugging.md](.agents/rules/42_workflow_debugging.md)` : **APPLY WHEN** actively troubleshooting errors, running isolation tests, or trying to reproduce a bug.
-- `[.agents/rules/43_workflow_deployment.md](.agents/rules/43_workflow_deployment.md)` : **APPLY WHEN** deploying code, managing environment progression, or dealing with server pipelines.
-- `[.agents/rules/44_workflow_database.md](.agents/rules/44_workflow_database.md)` : **APPLY WHEN** constructing migrations, building seeders, or initiating any destructive database resets.
-
-
-## Agent Ecosystem & Capabilities
-Beyond these core rules, this repository contains an arsenal of specialized Skills. **Do NOT blindly read these directories.** 
-Instead, be aware that they exist. If your task requires complex execution (e.g., project planning, design systems, architectural testing, rigorous code review, or framework-specific setups), you MUST:
-1. Scan the `README.md` for a full index of available skills.
-2. Manually read specific execution skills in `.agents/skills/`.
+## Accessibility (WCAG AA)
+- **Semantic HTML:** Use correct native elements (`<button>`, `<a>`, `<nav>`). Never `<div>`/`<span>` for interactions. Ensure one sequential `<h1>` per page.
+- **Focus & Keyboard:** All interactive elements must be keyboard-operable. Provide visible focus indicators. Modals must trap focus and close via `Escape`.
+- **Contrast & Visuals:** Minimum 4.5:1 (normal text). Do not use color alone to convey meaning. Meaningful images require descriptive `alt`. Decorative require `alt=""`.
+- **Forms:** Every input requires a visible `<label>` tied via `for`/`id`. Indicate required fields structurally.

@@ -2,7 +2,7 @@
 
 This checklist defines the strict rules for **Step 3: Conditional Design Review**. It is only invoked if frontend files (Vue/Nuxt, Blade, Tailwind, CSS) are modified.
 
-You are enforcing the `23_design_system.md` standards and basic usability. 
+You are enforcing the `DESIGN.md` standards and basic usability. 
 
 ## ⚖️ 1. Classifier: Marketing vs App UI
 Before evaluating, determine what type of UI you are looking at:

@@ -15,7 +15,7 @@ You are an adversarial perfectionist evaluating another agent's work (or your ow
 Before passing judgment, you must understand the environment and select the rules of engagement.
 
 1. **Understand Intent**: Review the active `task.md` and `implementation_plan.md`.
-2. **Persistent Knowledge**: Consult the project's historical knowledge, rules, or persistent context using your generic agent tools (e.g., semantic search, grep, or Knowledge Items). You MUST explicitly check `docs/solutions/` for learnings compounded via the `.agents/rules/45_workflow_compound.md` protocol. You cannot grade an item without knowing its historical struggles or standards.
+2. **Persistent Knowledge**: Consult the project's historical knowledge, rules, or persistent context using your generic agent tools (e.g., semantic search, grep, or Knowledge Items). You MUST explicitly check `docs/solutions/` for learnings compounded via the `compound` skill protocol. You cannot grade an item without knowing its historical struggles or standards.
 3. **Active Code Gathering**: If evaluating a specific component, you MUST use your file-reading, search, and grep tools to proactively trace its dependencies, implementations, and usages across the wider codebase.
 4. **Define Dimensions**: Determine 4-5 specific dimensions tailored to the item being evaluated.
    - *Backend examples*: Query efficiency, Abstraction, Type safety.
@@ -30,7 +30,7 @@ Evaluate the item across the dynamic dimensions you defined above.
 
 ### Rule Citation Enforcement (MANDATORY)
 Every flaw highlighted below MUST be explicitly backed by a citation to a specific project rule.
-(Example: *Violates `.agents/rules/21_standards_laravel.md` because the API resource is not abstracted.*)
+(Example: *Violates `AGENTS.md` because the API resource is not abstracted.*)
 
 > [!IMPORTANT]
 > **Output your evaluation using the exact table structure below. Do not alter the columns.**

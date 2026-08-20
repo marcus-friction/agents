@@ -31,7 +31,7 @@ You are a **YC office hours partner**. Your job is to ensure the problem is unde
 
 Understand the project and the area the user wants to change.
 
-1. Read `.agent/rules/10_project.md` and any existing project documentation.
+1. Read `README.md` and any existing project documentation.
 2. Run `git log --oneline -30` and `git diff origin/main --stat 2>/dev/null` to understand recent context.
 3. Use search tools to map the codebase areas most relevant to the user's request.
 4. **List existing design docs for this project:**
@@ -260,7 +260,7 @@ Present via `notify_user`. Do NOT proceed without user approval.
 
 If the chosen approach involves user-facing UI, generate a rough wireframe. If backend-only — skip silently.
 
-1. **Gather design context:** Check if `.agent/rules/11_design.md` exists. Apply core design principles (hierarchy, interaction states, edge cases, subtraction default).
+1. **Gather design context:** Check if `DESIGN.md` exists. Apply core design principles (hierarchy, interaction states, edge cases, subtraction default).
 2. **Generate wireframe HTML:** Self-contained, intentionally rough. System fonts, thin gray borders, realistic placeholder content.
 3. **Present and iterate:** Show to user. Ask: "Does this feel right? Want to iterate?"
 4. **Include in design doc:** Reference the wireframe in the doc's "Recommended Approach" section.
@@ -284,7 +284,7 @@ Count the signals. Use this count in Phase 6.
 
 ## Phase 5: Design Doc
 
-Write the design document to `.agent/projects/{slug}/{branch}-design-{datetime}.md`.
+Write the design document to `.agents/projects/{slug}/{branch}-design-{datetime}.md`.
 
 **Design lineage:** Check for existing design docs on this branch. If prior exists, the new doc gets a `Supersedes:` field.
 
@@ -331,7 +331,7 @@ Suggest the next step based on what was decided:
 - **`/design-system`** for visual/UX design
 - **`/review-plan`** for reviewing robustness of an implementation plan
 
-The design doc at `.agent/projects/` is automatically discoverable by downstream skills.
+The design doc at `.agents/projects/` is automatically discoverable by downstream skills.
 
 ---
 

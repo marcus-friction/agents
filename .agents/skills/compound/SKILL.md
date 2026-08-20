@@ -54,8 +54,8 @@ Knowledge exists at multiple levels. Place learnings at the right tier:
 |------|----------|-------------|-------------|
 | **Conversation memory** | Agent brain / conversation logs | Automatic — summaries carry forward | Always happens — no action needed |
 | **Solution docs** | `docs/solutions/[category]/` | Git-tracked, searchable | Default target for compound — specific problem/solution pairs |
-| **Rules** | `.agent/rules/` | Always-on or model-decision | Recurring patterns seen in 3+ solutions — propose promotion |
-| **Skills** | `.agent/skills/` | On-demand, loaded by name | Reusable expertise checklists (review, research) |
+| **Rules** | `AGENTS.md` | Always-on or model-decision | Recurring patterns seen in 3+ solutions — propose promotion |
+| **Skills** | `.agents/skills/` | On-demand, loaded by name | Reusable expertise checklists (review, research) |
 
 > Conversation summaries and walkthrough artifacts are automatically available at the start of each session. Solution docs require explicit search. Rules are always loaded. Use the right tier for the right type of knowledge.
 

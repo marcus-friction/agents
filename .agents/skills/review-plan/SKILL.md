@@ -34,7 +34,7 @@ Explicitly declare the review mode based on the plan's intent:
 - Are we solving the right problem? Challenge the core premise of the implementation plan. Is there a simpler way to achieve the exact same business goal?
 
 ### Step 2: Dream State Mapping
-- How does this implementation specifically advance the project's core vision (`10_project.md`) and get us closer to the ideal product state?
+- How does this implementation specifically advance the project's core vision (`README.md`) and get us closer to the ideal product state?
 
 ---
 
@@ -43,7 +43,7 @@ Explicitly declare the review mode based on the plan's intent:
 
 Enforce the following 7-Pass Structure:
 1. **The Pruning Pass (Subtraction Default):** Does every UI element earn its pixels? Reduce cognitive load. "If it doesn't earn its pixels, cut it."
-2. **The Slop Pass (AI Slop Avoidance):** Audit against the "AI Slop" blacklist. Remove generic 3-column feature grids, floating blobs, bubbly borders, and default font stacks. Demand specific, intentional UI decisions leveraging `23_design_system.md`.
+2. **The Slop Pass (AI Slop Avoidance):** Audit against the "AI Slop" blacklist. Remove generic 3-column feature grids, floating blobs, bubbly borders, and default font stacks. Demand specific, intentional UI decisions leveraging `DESIGN.md`.
 3. **The State Matrix Pass:** Are loading, empty, error, success, and partial states explicitly defined? Empty states must have warmth, a primary action, and context.
 4. **The Microcopy Pass:** Favor utility over aspiration. Remove generic hero copy.
 5. **The Design System Alignment Pass:** Audit against existing components. Does the plan invent new UI paradigms unnecessarily?
@@ -59,9 +59,9 @@ Enforce the following 7-Pass Structure:
 
 ### Checklist Anchors
 Cross-reference these rule files during the review to catch domain-specific gaps:
-- `10_project.md` — Does the plan align with project vision and goals?
-- `23_design_system.md` — Does the plan reuse existing design tokens (if UI scope)?
-- `24_accessibility.md` — Are accessibility requirements addressed (if UI scope)?
+- `README.md` — Does the plan align with project vision and goals?
+- `DESIGN.md` — Does the plan reuse existing design tokens (if UI scope)?
+- `AGENTS.md` — Are accessibility requirements addressed (if UI scope)?
 
 ### Step 2: Data Flow & State Verification
 - **ASCII Diagrams:** For any complex data transformations, database migrations, or state changes, mandate an ASCII diagram to visualize the data flow.

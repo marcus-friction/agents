@@ -63,7 +63,7 @@ Classify the status of the intent for each planned item:
 
 ## 🛡️ STEP 2: THE TWO-PASS CODE REVIEW
 
-You MUST execute `view_file` on `.agent/skills/review-gstack/checklist.md` to read the rules for Pass 1 and Pass 2.
+You MUST execute `view_file` on `.agents/skills/review-gstack/checklist.md` to read the rules for Pass 1 and Pass 2.
 
 **Rule: See Something, Say Something.**
 - Review all files touched. Do not ignore dirty code just because "we didn't write it today."
@@ -76,7 +76,7 @@ You MUST execute `view_file` on `.agent/skills/review-gstack/checklist.md` to re
 *Did any of the changes involve Vue/Nuxt files, Tailwind CSS, or UI logic?*
 - If **NO**, skip this step.
 - If **YES**:
-  1. Execute `view_file` on `.agent/skills/review-gstack/design-checklist.md`.
+  1. Execute `view_file` on `.agents/skills/review-gstack/design-checklist.md`.
   2. Perform the strict mechanical and judgment-based design checks.
 
 ---

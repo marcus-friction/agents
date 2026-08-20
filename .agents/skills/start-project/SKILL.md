@@ -17,8 +17,8 @@ You are a top-tier Product Manager and startup advisor (think Y Combinator partn
 Transparently map `.agents/skills` to `.claude/skills` in the background based on the user's host OS. Use `mkdir -p .claude && ln -sfn ../.agents/skills .claude/skills` on Linux/macOS, or the equivalent directory symlink/copy command on Windows.
 
 **Check for existing project context:**
-Use `view_file` to check `.agents/rules/10_project.md`.
-If `.agents/rules/10_project.md` already contains real content (not just HTML placeholders), ask the user: *"You already have a project defined here. Do you want to **update/pivot** the existing project, **start completely fresh** (which will overwrite it), or just **brainstorm**?"*
+Use `view_file` to check `README.md`.
+If `README.md` already contains real project content (not just a template), ask the user: *"You already have a project defined here. Do you want to **update/pivot** the existing project, **start completely fresh** (which will overwrite it), or just **brainstorm**?"*
 
 **Branching Logic:**
 - If the user chooses to **update/pivot**, ask them what has changed and only update the requested sections in Phase 3.
@@ -39,7 +39,7 @@ If the codebase is currently empty and the user just says "start project", expli
 
 ## Phase 2: Rigorous Interrogation
 
-Once the user provides the core idea, ask follow-up questions to fill out the standard project template (`.agents/rules/10_project.md`). 
+Once the user provides the core idea, ask follow-up questions to fill out the standard project template (see `README.template.md`). 
 
 **CRITICAL: Ask these questions STRICTLY one by one.** Do not batch them into a single massive prompt. Wait for the user's answer and actively review it against the forcing functions below before asking the next one. If answers use buzzwords ("better UX"), lack measurable outcomes, or gloss over constraints, you must challenge the user and demand specificity.
 
@@ -56,13 +56,13 @@ Walk through these areas sequentially:
 
 ---
 
-## Phase 3: Product Synthesis & Amend 10_project.md
+## Phase 3: Product Synthesis & Amend README.md
 
 Once all sections pass your depth checks, compile the collected information.
 **Present this synthesis to the user for a final "CEO-style" review first.** Ask: *"Does this accurately capture the product vision, or did I miss any crucial constraints? Please review this drafted context before I lock it in."*
 
 After user approval:
-- Write the collected insights into `.agents/rules/10_project.md`.
+- Write the collected insights into `README.md`, structuring it according to `README.template.md`.
 - Strip out any marketing fluff and keep it objective.
 - Preserve any existing YAML frontmatter.
 
@@ -75,7 +75,7 @@ Before drafting a technical implementation plan, we must establish the visual id
 Explicitly ask the user: *"Would you like to run a **design consultation** (using the `design-consultation` skill) to establish the project's visual identity before we start building?"*
 
 If the user agrees:
-- Wait until the design consultation is complete and the new design file (`.agents/rules/11_design.md`) has been written.
+- Wait until the design consultation is complete and the new design file (`DESIGN.md`) has been written.
 - Incorporate these newly established visual and structural constraints when moving to Phase 5.
 
 If the user declines, proceed directly to Phase 5.
@@ -89,7 +89,7 @@ With the project context locked in (and the design constraints established, if a
 Before drafting the plan, you are encouraged to ask any further clarifying questions needed to shape the architecture. **Ask these questions strictly one by one** so the user isn't overwhelmed.
 
 Follow the core principles of the `/plan` flow to build the plan:
-1. **Review Standards**: You MUST review and adhere to the project's architectural standards outlined explicitly in the rule files (e.g., `.agents/rules/20_stack.md`, `.agents/rules/21_standards_laravel.md`, `.agents/rules/22_standards_nuxt.md`).
+1. **Review Standards**: You MUST review and adhere to the project's architectural standards outlined explicitly in `AGENTS.md` and `README.md`.
 2. **Review Knowledge Space**: Explicitly cross-reference the problem space against provided **Knowledge Item (KI) summaries** (found in the persistent context) and explicitly search `docs/solutions/` for compounded learnings. If we have built similar features before, leverage those past patterns to speed up and secure the architecture.
 3. **Draft the Plan**: Draft the initial implementation plan. **CRITICAL:** The implementation plan MUST cover a complete, end-to-end first version of the project. No part of the project scope can be deferred ("we will handle X later" is unacceptable).
 4. **Review Loop**: Perform a 3-loop self-review using the `review-plan` skill to ensure robustness and uncover blind spots.
