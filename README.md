@@ -117,6 +117,7 @@ Skills live in `.agents/skills/` and provide deep, on-demand guidance when a tas
 | `start-project` | Interactive onboarding and project planning | Original |
 | `plan` | Scope, architect, and plan engineering tasks using the Mega Plan Review | Adapted from [gstack](https://github.com/garrytan/gstack) |
 | `review` | Multi-angle code review (standards, security, performance, architecture, accessibility, tests) | Adapted from [Compound Engineering](https://github.com/kieranklaassen) |
+| `ma-review` | Multi-agent parallel code review orchestrator (dispatches security, architecture, performance personas) | Adapted from [Compound Engineering](https://github.com/kieranklaassen) |
 | `brainstorm` | Structured brainstorming divergent/convergent workflow | Adapted from [Compound Engineering](https://github.com/kieranklaassen) |
 | `wrap` | Atomic commits and push to origin | Original |
 | `stats` | Summarize the day's work and put it in context | Original |
