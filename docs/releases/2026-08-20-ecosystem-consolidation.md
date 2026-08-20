@@ -19,6 +19,8 @@ Re-architected the agent ecosystem to rely on a centralized 3-file routing archi
   - Enforced "Testable Acceptance Criteria" before implementation begins.
   - Mandated 100% Test Coverage (TDD) for both Backend (Pest) and Frontend (Vitest).
   - Promoted Playwright to the Base Stack in `README.template.md` to enforce Real-Browser E2E verification on all UI changes.
+- **Documentation Compression**
+  - Aggressively compressed `AGENTS.md` and `CONTRIBUTING.md` by ~50% to improve token efficiency without losing any constraints or directives.
 
 ## Notes
 - `update-agents` has been patched to handle the lack of `.agents/rules` correctly going forward, but the transition script should be closely monitored on the next upstream sync.
