@@ -16,7 +16,7 @@ The project follows the ecosystem's opinionated full-stack architecture:
 - **Backend:** Laravel 13, PHP 8.3
 - **Database:** PostgreSQL 16, Redis (Caching, Sessions, Queues)
 - **AI / LLMs:** Laravel AI (`laravel/ai`)
-- **Quality & Testing:** Pest (Backend), Vitest (Frontend), Larastan L9, Laravel Pint, ESLint
+- **Quality & Testing:** Pest (Backend), Vitest (Frontend), Playwright (E2E), Larastan L9, Laravel Pint, ESLint
 
 ### On-Demand Ecosystem Tools
 *If the project requires these specific features, strictly use the following packages:*
@@ -29,7 +29,6 @@ The project follows the ecosystem's opinionated full-stack architecture:
 - **Search Engine:** `laravel/scout`
 - **Background Workers:** `laravel/horizon`
 - **File & Media Management:** `spatie/laravel-medialibrary`
-- **End-to-End (E2E) Testing:** `playwright`
 
 ## 3. Infrastructure & Services
 | Service | Environment | Internal Port | External Port | Notes |

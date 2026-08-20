@@ -9,12 +9,21 @@
 - **Verification:** Proactively verify work. Suggest automated or manual verification steps.
 - **Directness:** Lead with the answer, then provide context. No filler, no apologies. Correct mistakes and move on.
 
+## AI Native Workflow & Compounding
+- **"Do the Complete Thing":** Because AI makes the marginal cost of execution near zero, never skip the "last 10%". Every feature must include regression tests, a security review, and documentation updates before being considered complete.
+- **Optimize for Judgment, Not Typing:** Code generation is cheap; architectural judgment is expensive. Pause to verify architectural fit and edge cases with the developer before generating large blocks of code.
+- **The "Feature Bloat" Stop-Condition:** If you find yourself repeatedly fixing the same class of bug or using inconsistent patterns, immediately HALT execution and document the constraint in `AGENTS.md` before proceeding.
+
+## Engineering Process
+- **Testable Acceptance Criteria:** Every feature must be mapped to explicit, testable acceptance criteria (and edge cases) *before* implementation begins. This ensures clarity and prevents building the wrong thing.
+
 ## Backend Standards (Laravel)
 - **Structure:** Use default Laravel directory structure. `declare(strict_types=1)` everywhere.
 - **Dependency Injection:** Never call `app()`, `resolve()`, or `new` inside constructors. Use constructor injection exclusively.
 - **Domain Logic:** Thin controllers (receive request, call action, return response). Controllers >15 lines trigger extracting an Action class in `app/Actions/`.
 - **Data Layer (Eloquent):** Always define `$fillable`. Prefer relationships/scopes over raw queries. Wrap `orWhere` inside a `where(fn ($q) => ...)` group to prevent scope leaks.
 - **Performance:** Avoid N+1 queries. Use `loadCount()` / `loadExists()` instead of loading full relations just to call `->count()`. For bulk imports, use `upsert()` / `insert()` in chunks instead of per-row `updateOrCreate()`.
+- **100% Test Coverage (TDD):** All controllers, actions, and domain logic must be covered by Pest tests. Strict Test-Driven Development is required: no production code without a failing test first.
 
 ## Frontend Standards (Nuxt / Vue)
 - **Composition API:** Use `<script setup>` and Vue 3 Composition API exclusively. Use `ref` for primitives, `reactive` for deep objects. Use VueUse composables where possible.
@@ -24,6 +33,8 @@
   - `PascalCase`: Components (`UserCard.vue`), Types/Interfaces.
   - `camelCase`: Composables (`useAuth`), Pinia Stores, Variables.
   - `kebab-case`: Pages (`user-profile.vue`).
+- **Real-Browser Verification (E2E):** Do not rely solely on unit tests for the frontend. Any DOM or interaction changes must be verified using a real browser testing tool (e.g., Playwright) to prevent "it works in theory" hydration and interaction bugs.
+- **100% Test Coverage (TDD):** All composables, Pinia stores, and complex UI logic must have 100% unit test coverage using Vitest. Strict Test-Driven Development is required: no production code without a failing test first.
 
 ## Security & Data
 - **Never trust input.** Validate at the boundary via Form Requests, authorize at the resource via Policies, escape at the output.
