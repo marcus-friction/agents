@@ -1,0 +1,15 @@
+{
+  "name": "marcus-friction-plugins",
+  "owner": {
+    "name": "marcus-friction",
+    "url": "https://github.com/marcus-friction"
+  },
+  "plugins": [
+    {
+      "name": "agents",
+      "source": "./.agents",
+      "description": "Agent ecosystem (edge channel; use the full-SHA Git installer for stable releases)",
+      "version": "1.7.0"
+    }
+  ]
+}

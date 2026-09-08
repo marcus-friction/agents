@@ -5,7 +5,10 @@ description: Meta-level code review guidance — how to review well, not just wh
 
 # Code Review Excellence Skill
 
-How to conduct a high-quality code review. This skill provides meta-level guidance for the `/review` workflow — the domain-specific checklists (security, performance, architecture, accessibility) tell you *what* to check; this skill tells you *how* to review well.
+How to conduct a high-quality code review. This skill provides meta-level
+guidance for the `review` workflow — the domain-specific checklists (security,
+performance, architecture, accessibility) tell you *what* to check; this skill
+tells you *how* to review well.
 
 ## Principles
 
@@ -58,7 +61,7 @@ If a linter or formatter can catch it, don't spend review time on it.
 
 ## Review Order
 
-For the `/review` workflow, follow this sequence:
+For the `review` workflow, follow this sequence:
 
 1. **Understand** — read the context, trace the flow
 2. **Correctness** — does the code do what it claims?

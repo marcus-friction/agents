@@ -8,7 +8,10 @@ metadata:
 
 # Laravel Best Practices
 
-Best practices for Laravel, prioritized by impact. Each rule teaches what to do and why. For exact API syntax, verify with `search-docs`.
+Best practices for Laravel, prioritized by impact. Each rule teaches what to do
+and why. Verify exact API syntax against sources for the installed version;
+when those are insufficient, use available research capabilities to consult the
+official Laravel documentation.
 
 ## Consistency First
 
@@ -42,7 +45,8 @@ Check sibling files, related controllers, models, or tests for established patte
 
 ### 3. Security → `rules/security.md`
 
-- Define `$fillable` or `$guarded` on every model, authorize every action via policies or gates
+- Define `$fillable` or `$guarded` on every model. Authorize every protected
+  Laravel-owned action through an appropriate Policy or Gate.
 - No raw SQL with user input — use Eloquent or query builder
 - `{{ }}` for output escaping, `@csrf` on all POST/PUT/DELETE forms, `throttle` on auth and API routes
 - Validate MIME type, extension, and size for file uploads
@@ -71,9 +75,12 @@ Check sibling files, related controllers, models, or tests for established patte
 
 ### 6. Validation & Forms → `rules/validation.md`
 
-- Form Request classes, not inline validation
+- Use Form Requests for meaningful or complex payloads, reused rules, request
+  authorization, or an established project convention. A small, one-off input
+  may stay inline when the boundary remains clear and testable.
 - Array notation `['required', 'email']` for new code; follow existing convention
-- `$request->validated()` only — never `$request->all()`
+- Consume `validated()`/`safe()` from a Form Request or the array returned by
+  inline `validate()`; never use `$request->all()` for mass operations.
 - `Rule::when()` for conditional validation
 - `after()` instead of `withValidator()`
 
@@ -104,8 +111,9 @@ Check sibling files, related controllers, models, or tests for established patte
 - Implicit route model binding
 - Scoped bindings for nested resources
 - `Route::resource()` or `apiResource()`
-- Methods under 10 lines — extract to actions/services
-- Type-hint Form Requests for auto-validation
+- Extract business behavior to actions/services when cohesion, reuse, or
+  testability earns that boundary; do not use a method-line threshold.
+- Type-hint Form Requests when that proportional request boundary applies.
 
 ### 11. HTTP Client → `rules/http-client.md`
 
@@ -183,8 +191,13 @@ Check sibling files, related controllers, models, or tests for established patte
 
 ## How to Apply
 
-Always use a sub-agent to read rule files and explore this skill's content.
-
-1. Identify the file type and select relevant sections (e.g., migration → §16, controller → §1, §3, §5, §6, §10)
-2. Check sibling files for existing patterns — follow those first per Consistency First
-3. Verify API syntax with `search-docs` for the installed Laravel version
+1. Identify the file type and select relevant sections (e.g., migration → §16,
+   controller → §1, §3, §5, §6, §10).
+2. If parallel agent capacity is available, delegate bounded rule-file discovery
+   while you inspect the affected code. Otherwise, read the relevant rule files
+   inline before proceeding.
+3. Check sibling files for existing patterns — follow those first per
+   Consistency First.
+4. Verify API syntax from installed-version sources first. If local evidence is
+   insufficient, consult official Laravel documentation through an available
+   read or research capability.

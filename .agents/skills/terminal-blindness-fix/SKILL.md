@@ -1,17 +1,32 @@
 ---
 name: terminal-blindness-fix
-description: Fixes "Terminal Blindness" in local VS Code environments where shell integration prevents the agent from reading terminal output. Run this skill when setting up a new project or if terminal outputs from commands appear blank.
+description: Diagnose and fix "Terminal Blindness" in local VS Code only when the user explicitly requests it or command output has been observed blank, unreadable, or missing because capture failed. Do not run during routine project setup.
 ---
 
 # Terminal Blindness Fix
 
-If the agent runs in a local VS Code environment, shell integration can cause terminal output capture to fail ("terminal blindness"). This skill sets up exactly what's needed to disable it for the local project.
+VS Code shell integration can sometimes prevent terminal output capture. Use
+this workflow only after an observed blank, unreadable, or missing capture, or
+when the user explicitly requests the fix. Normal terminal output or routine
+project setup is not a trigger.
 
-1. Check if `.vscode/settings.json` exists in the project root. Create it if it doesn't.
-2. Ensure the following configuration is present to disable shell integration:
+1. Confirm the host is local VS Code and distinguish capture failure from a
+   command that legitimately emitted no output. An explicit bounded fix request
+   may proceed directly within that scope after inspection.
+2. Inspect `.vscode/settings.json`, its existing parents, and `.gitignore` without
+   following symlinks or replacing unrelated settings.
+3. If the failure was only observed and the accepted task did not authorize a
+   settings change, present the exact patch and stop before the settings write.
+   Do not continue until that exact document patch is approved; then revalidate
+   the target and parent.
+4. Minimally merge this setting into the physical project file:
    ```json
    {
        "terminal.integrated.shellIntegration.enabled": false
    }
    ```
-3. Update `.gitignore` to allow this setting to be committed if necessary (e.g., adding an exception `!.vscode/settings.json` if `.vscode/` is ignored by default).
+5. Change `.gitignore` only when the scoped request includes making the setting
+   trackable and an exception such as `!.vscode/settings.json` is actually
+   necessary.
+6. Re-run one previously unreadable command and report whether capture works. Do
+   not broaden the fix when the failure has a different cause.

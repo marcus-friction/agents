@@ -19,6 +19,21 @@ NO FIXES WITHOUT ROOT CAUSE INVESTIGATION FIRST
 
 If you haven't completed Phase 1, you cannot propose fixes.
 
+## Intent and authority
+
+Use the supplied request to distinguish **diagnosis-only** from
+**diagnose-and-fix**. A request to explain, investigate, or review is
+diagnosis-only; a request to fix includes bounded implementation authority.
+When intent is unclear, investigate without mutation and report the missing
+decision.
+
+Prefer existing or redacted evidence: current errors, logs, traces, status,
+configuration shape, and a minimal reproduction. Never expose credentials or
+secret values. Adding diagnostic instrumentation is a production mutation and
+requires mutation authority; permission to diagnose or run a test does not
+grant it. Classify any fixture, external-service, or shared-state effect
+separately.
+
 ## When to Use
 
 Use for ANY technical issue:
@@ -43,7 +58,8 @@ Use for ANY technical issue:
 
 ## The Four Phases
 
-You MUST complete each phase before proceeding to the next.
+Complete each applicable phase in order. Diagnosis-only work stops before the
+implementation phase.
 
 ### Phase 1: Root Cause Investigation
 
@@ -71,7 +87,8 @@ You MUST complete each phase before proceeding to the next.
 
    **WHEN system has multiple components (CI → build → signing, API → service → database):**
 
-   **BEFORE proposing fixes, add diagnostic instrumentation:**
+   **Inspect existing evidence first. Add diagnostic instrumentation only when
+   the request supplies mutation authority, and redact sensitive values:**
    ```
    For EACH component boundary:
      - Log what data enters component
@@ -86,21 +103,17 @@ You MUST complete each phase before proceeding to the next.
 
    **Example (multi-layer system):**
    ```bash
-   # Layer 1: Workflow
-   echo "=== Secrets available in workflow: ==="
-   echo "IDENTITY: ${IDENTITY:+SET}${IDENTITY:-UNSET}"
+   # Layer 1: Workflow (presence only; never print the value)
+   if [[ -n "${IDENTITY:-}" ]]; then echo "IDENTITY: SET"; else echo "IDENTITY: UNSET"; fi
 
    # Layer 2: Build script
-   echo "=== Env vars in build script: ==="
-   env | grep IDENTITY || echo "IDENTITY not in environment"
+   # Record whether the expected variable name arrived, never its contents.
 
-   # Layer 3: Signing script
-   echo "=== Keychain state: ==="
-   security list-keychains
-   security find-identity -v
+   # Layer 3: Signing environment
+   # Use a read-only status check and reduce output to counts/booleans.
 
-   # Layer 4: Actual signing
-   codesign --sign "$IDENTITY" --verbose=4 "$APP"
+   # Layer 4: Existing artifact
+   # Verify metadata without signing or modifying the artifact.
    ```
 
    **This reveals:** Which layer fails (secrets → workflow ✓, workflow → build ✗)
@@ -150,12 +163,15 @@ You MUST complete each phase before proceeding to the next.
    - Be specific, not vague
 
 2. **Test Minimally**
-   - Make the SMALLEST possible change to test hypothesis
+   - Prefer a non-mutating test or existing evidence to test the hypothesis
+   - Any instrumentation or fixture mutation still needs its own authority
+   - When authorized, make the SMALLEST possible change to test the hypothesis
    - One variable at a time
    - Don't fix multiple things at once
 
 3. **Verify Before Continuing**
-   - Did it work? Yes → Phase 4
+   - Did it work? In diagnose-and-fix work, proceed to Phase 4
+   - In diagnosis-only work, report the confirmed cause and stop
    - Didn't work? Form NEW hypothesis
    - DON'T add more fixes on top
 
@@ -165,7 +181,10 @@ You MUST complete each phase before proceeding to the next.
    - Ask for help
    - Research more
 
-### Phase 4: Implementation
+### Phase 4: Implementation (diagnose-and-fix only)
+
+If the request is diagnosis-only, report the root cause, supporting evidence,
+confidence, and smallest recommended fix, then stop. Do not enter Phase 4.
 
 **Fix the root cause, not the symptom:**
 
@@ -186,7 +205,7 @@ You MUST complete each phase before proceeding to the next.
    - Test passes now?
    - No other tests broken?
    - Issue actually resolved?
-   - Run complete automated test suite and verify edge cases before claiming success
+   - Run the focused regression and the proportionate applicable suite before claiming success
 
 4. **If Fix Doesn't Work**
    - STOP
@@ -269,8 +288,9 @@ If systematic investigation reveals issue is truly environmental, timing-depende
 
 1. You've completed the process
 2. Document what you investigated
-3. Implement appropriate handling (retry, timeout, error message)
-4. Add monitoring/logging for future investigation
+3. In diagnosis-only work, report the evidence and stop
+4. In diagnose-and-fix work, implement authorized handling and add
+   monitoring/logging only when it is inside the supplied mutation scope
 
 **But:** 95% of "no root cause" cases are incomplete investigation.
 
@@ -281,4 +301,3 @@ These techniques are part of systematic debugging and available in `references/`
 - [root-cause-tracing.md](references/root-cause-tracing.md) - Trace bugs backward through call stack to find original trigger
 - [defense-in-depth.md](references/defense-in-depth.md) - Add validation at multiple layers after finding root cause
 - [condition-based-waiting.md](references/condition-based-waiting.md) - Replace arbitrary timeouts with condition polling
-

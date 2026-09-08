@@ -1,8 +1,6 @@
 ---
 name: changelog
-description: Create engaging changelogs summarizing recent merges to the main branch
-argument-hint: "[optional: daily|weekly, or time period in days]"
-disable-model-invocation: true
+description: Create engaging changelogs summarizing recent merges to the main branch. Use only when explicitly asked; accept an optional daily, weekly, or number-of-days time period.
 ---
 
 # Changelog Generator

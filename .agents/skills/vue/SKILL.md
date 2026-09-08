@@ -17,7 +17,9 @@ metadata:
 - Prefer `<script setup lang="ts">` over `<script>`
 - For performance, prefer `shallowRef` over `ref` if deep reactivity is not needed
 - Always use Composition API over Options API
-- Discourage using Reactive Props Destructure
+- Vue 3.5 reactive props destructure is supported. When a destructured prop is
+  passed directly to `watch()` or an external composable, preserve its reactive
+  source with a getter or `toRef()`.
 
 ## Core
 
@@ -38,9 +40,9 @@ metadata:
 
 ```vue
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue'
+import { computed, watch, onMounted } from 'vue'
 
-const props = defineProps<{
+const { title, count = 0 } = defineProps<{
   title: string
   count?: number
 }>()
@@ -51,9 +53,10 @@ const emit = defineEmits<{
 
 const model = defineModel<string>()
 
-const doubled = computed(() => (props.count ?? 0) * 2)
+const doubled = computed(() => count * 2)
 
-watch(() => props.title, (newVal) => {
+// Destructured props are reactive in Vue 3.5; watch them through a getter.
+watch(() => title, (newVal) => {
   console.log('Title changed:', newVal)
 })
 

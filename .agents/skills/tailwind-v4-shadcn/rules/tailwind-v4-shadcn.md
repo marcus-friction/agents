@@ -4,18 +4,27 @@ paths: "**/*.css", "**/*.tsx", "**/*.jsx", tailwind.config.*, components.json, p
 
 # Tailwind v4 + shadcn/ui Corrections
 
-Claude's training may reference Tailwind v3 patterns. This project uses **Tailwind v4** with different syntax.
+General model knowledge may include Tailwind v3 patterns. This project uses
+**Tailwind v4** with different syntax.
 
 ## Critical Differences from v3
 
 ### Configuration
-- **No `tailwind.config.ts`** - v4 uses CSS-first config with `@theme` blocks
-- **No PostCSS setup** - Use `@tailwindcss/vite` plugin instead
-- **`components.json`** must have `"config": ""` (empty string)
+- Prefer CSS-first `@theme` blocks for new v4 configuration. Preserve an
+  existing compatible `tailwind.config.*`; migrate or remove it only after an
+  exact usage check and approved preview.
+- JavaScript configuration remains compatible through the explicit `@config`
+  directive. Check whether an existing config is loaded before changing it.
+- PostCSS integration is supported in v4. This Vite-specific workflow selects
+  `@tailwindcss/vite`; do not add a second processing path without a project
+  reason.
+- For the CSS-first shadcn/ui v4 setup, use `"config": ""` in
+  `components.json`. That field does not prove a separately loaded `@config`
+  file is unused.
 
 ### CSS Syntax
 ```css
-/* ❌ v3 (Claude may suggest this) */
+/* ❌ v3 (an agent may suggest this) */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -25,11 +34,15 @@ Claude's training may reference Tailwind v3 patterns. This project uses **Tailwi
 ```
 
 ### Theme Configuration
-```css
-/* ❌ v3 - tailwind.config.ts */
-theme: { colors: { primary: '#3b82f6' } }
+```javascript
+// tailwind.config.js — compatible when loaded explicitly from CSS
+export default { theme: { colors: { primary: '#3b82f6' } } }
+```
 
-/* ✅ v4 - in CSS file */
+```css
+@config "../../tailwind.config.js";
+
+/* Preferred for new CSS-first v4 theme tokens */
 @theme inline {
   --color-primary: var(--primary);
   --color-background: var(--background);
@@ -37,41 +50,56 @@ theme: { colors: { primary: '#3b82f6' } }
 ```
 
 ### Animations Package
-```bash
-# ❌ v3 package (deprecated for v4)
-pnpm add tailwindcss-animate
-
-# ✅ v4 package
-pnpm add -D tw-animate-css
-```
+Do not add the v3-era `tailwindcss-animate` package. If generated CSS requires
+`tw-animate-css`, resolve a project-compatible exact version and include its
+purpose, command, and lockfile change in the approved dependency preview.
+Install an animation package only when the selected output requires it; native
+CSS animation remains a valid dependency-free option.
 
 ```css
-/* ✅ v4 import */
+/* Add the second import only when selected output requires it. */
 @import "tailwindcss";
 @import "tw-animate-css";
 ```
 
 ### Plugins
-```css
-/* ❌ v3 - require() in config */
-plugins: [require('@tailwindcss/typography')]
+Plugins in a JavaScript config loaded through `@config` remain supported for
+compatibility. Inspect and preserve an existing compatible plugin path. For a
+new CSS-first setup, `@plugin` loads a JavaScript plugin directly; it is an
+alternative, not a reason to rewrite working configuration. Configuration,
+presets, plugins, and CSS-driven features are merged where possible, with CSS
+taking precedence on conflicts.
 
-/* ✅ v4 - @plugin directive in CSS */
+```javascript
+// Supported compatibility path when this config is loaded with @config.
+export default {
+  plugins: [require('@tailwindcss/typography')],
+}
+```
+
+```css
+/* CSS-first alternative for a new setup. */
 @plugin "@tailwindcss/typography";
 ```
 
 ### @apply Directive
+Tailwind v4 supports `@apply` for composing existing utilities into custom CSS.
+Prefer utilities in markup or ordinary custom CSS when they are clearer; use
+`@apply` when composition is the simpler project-consistent choice. In CSS
+modules or separately processed component styles, expose the theme with
+`@reference` before applying utilities.
+
 ```css
-/* ❌ Deprecated in v4 */
+/* Supported when these utilities are in scope */
 .btn { @apply px-4 py-2 bg-primary; }
 
-/* ✅ Use direct classes or CSS */
+/* Ordinary custom CSS is also supported */
 .btn { padding: 0.5rem 1rem; background-color: var(--primary); }
 ```
 
 ## Variable Architecture
 
-CSS variables must follow this structure:
+For this shadcn/ui semantic-token pattern, use this structure:
 
 ```css
 /* 1. Define at root (NOT inside @layer base) */
@@ -108,11 +136,10 @@ CSS variables must follow this structure:
 
 ## Quick Fixes
 
-| If Claude suggests... | Use instead... |
+| If older guidance suggests... | Use instead... |
 |----------------------|----------------|
 | `@tailwind base` | `@import "tailwindcss"` |
-| `tailwind.config.ts` | `@theme inline` in CSS |
-| `tailwindcss-animate` | `tw-animate-css` |
-| `require('@plugin')` | `@plugin "@plugin"` |
-| `@apply` | Direct CSS or utility classes |
+| existing JavaScript config | Preserve and load with `@config`, or migrate its verified values in the approved preview |
+| generated animation dependency | Inspect selected output; use native CSS, or an exact compatible `tw-animate-css` only when required |
+| repeated utility declarations | `@apply`, direct CSS, or utility classes—whichever is clearest in context |
 | `hsl(var(--color))` | `var(--color)` (already has hsl) |

@@ -1,58 +1,79 @@
 ---
 name: end2end
-description: Full end-to-end (E2E) testing skill utilizing the browser. Make sure to use this skill whenever the user asks to "test the app", "run end to end tests", "verify the UI", "check if the app works", or wants you to use the browser to interact with and test the application flow. This skill orchestrates creating a test plan, getting user approval, navigating the application using the browser, independently fixing obstacles, and generating a progressive test report.
+description: Plan and run browser-based end-to-end tests when the user asks to test an app, verify a UI, check a user flow, or interact with an application in a browser. Distinguishes test-only work from explicitly authorized test-and-fix work and reports evidence progressively.
 ---
 
-# End-to-End Testing (E2E) Workflow
+# End-to-End Testing
 
-You are executing an end-to-end browser test for the application. Your goal is to systematically verify functionality from a user's perspective, document failures, and independently fix issues as you encounter them.
+Verify the application from a user's perspective while keeping browser and
+state effects inside the user's intent.
 
-Follow these steps precisely:
+## 1. Derive intent and scope
 
-## 1. Scoping (Ask the User)
-Before doing anything, ask the user what they want to test. Specifically, ask:
-*   Do they want to test the full application or just a specific subset of functionality (e.g., recently worked on features)?
-*   Are there any specific URLs, user personas, or paths that should be the focus?
+Use the scope already supplied. Ask only for a missing URL, persona, flow, or
+expected result when it blocks safe execution; do not repeat questions the user
+has answered.
 
-## 2. Test Planning
-Once the user provides the scope, create a detailed testing plan.
-*   **Artifact Strategy**: Use your artifact tools to create a `test_plan.md` artifact outlining exactly which pages, interactions, and expected outcomes you will test.
-*   **Task List**: Make sure you have a `task.md` created with a structured checklist (using `[ ]`, `[/]`, `[x]`) corresponding to the steps in your test plan. 
+Classify the request before opening the browser:
 
-## 3. Approval
-Wait for the user's explicit approval on the test plan and task list. Do NOT proceed to execution until the user explicitly approves the plan.
+- **Test-only** is the default for requests to test, inspect, or report.
+  Testing alone does not authorize production-code mutation.
+- **Test-and-fix** applies only when the user also asks for fixes or an existing
+  implementation request clearly includes them. It authorizes only bounded
+  local edits in that supplied scope.
 
-## 4. Execution & Independent Debugging
-After user approval, systematically execute your test plan using the `browser_subagent`.
+Classify fixture, browser, credential, cleanup, and shared-state effects
+independently. Identify whether the target and test data are disposable local
+state, a shared environment, or production. Do not use real credentials,
+create shared records, alter production, or perform destructive cleanup unless
+that exact effect has been approved. Never place credentials in plans, logs,
+screenshots, traces, or reports.
 
-*   **Test Progressively**: Test one flow or page area at a time *so that you can isolate failures immediately before compounding errors*.
-*   **Track Progress**: Update your `task.md` checklist markings continuously as you move through each step (e.g., `[/]` when starting, `[x]` when verified) *so the user has real-time observability into what is actively being tested*.
-*   **Independent Fixes (Bounded)**: If you encounter a bug, obstacle, or unexpected behavior during your browser session, STOP and attempt to fix it locally if you have the codebase access and context.
-    *   Investigate logs, code, and errors.
-    *   Apply the fix locally so the next browser test step passes.
-    *   **Do NOT commit to git**: Leave the changes uncommitted for the user to review. 
-    *   **Fix-Loop Warning**: If a fix requires complex architectural changes, touches multiple unrelated files, or you enter a repetitive fix-loop, STOP attempting to fix it. Revert your changes and simply log it as an Unresolved Issue in the report. Do not compound errors.
-    *   Re-run the step using the browser to verify the fix only if you successfully applied a bounded local fix.
-*   **Keep Reporting**: Maintain a `progressive_testing_report.md` artifact as you go *so the final state of the test doesn't lose the granular details discovered along the way*.
+Disposable local tests may use synthetic credentials created for that fixture
+without a separate approval. Never substitute a live credential.
 
-## 5. Report Formatting
-ALWAYS use this exact template for the `progressive_testing_report.md` artifact:
+## 2. Plan proportionately
 
-```markdown
-# Progressive Testing Report: [Target Scope]
+State the flows, expected outcomes, environment, and allowed effects concisely
+in chat. A supplied, safe scope needs no redundant approval gate. Request one
+precise decision only for an unresolved material effect such as real credential
+use, shared-state mutation, or production interaction.
 
-## Executive Summary
-[High-level overview of test stability and overall outcome]
+Chat is the default for the plan, progress, and result. Create a durable plan,
+task list, trace, or report only when requested or when the user accepts it as a
+useful handoff. Keep temporary test evidence in a verified test-owned location.
 
-## Testing Milestones
-### [Milestone Name]
-- **Status**: [Pass/Fail/Fixed]
-- **Outcome**: [What worked or failed]
-- **Applied Fixes**: [Detailed summary of what was fixed, if anything. Leave blank if none]
+## 3. Execute progressively
 
-## Unresolved Issues
-- [List any issues that you could not fix independently]
-```
+Test one flow or page area at a time so failures remain attributable. Prefer
+the host's browser capability and follow the `playwright` skill when Playwright
+is used.
 
-## 6. Final Report
-When all tasks in your plan are checked off, finalize the `progressive_testing_report.md` utilizing the template above. Let the user know the testing is complete.
+For each flow:
+
+1. Record the expected outcome.
+2. Perform only the classified interactions.
+3. Verify the visible and stateful result.
+4. Record pass, fail, or blocked with supporting evidence.
+
+Seed and remove only proven disposable test-owned data. Preserve pre-existing
+and shared data. If cleanup cannot be verified, retain the data and report its
+exact location and recovery path.
+
+## 4. Handle failures according to intent
+
+- In **test-only** work, investigate read-only evidence as useful, report the
+  failure and likely boundary, and do not edit production code.
+- In **test-and-fix** work, use `systematic-debugging`, add a failing regression
+  test when practical, make the smallest authorized local fix, and rerun the
+  affected browser step.
+- Stop when a fix expands beyond supplied scope or the same blocker survives
+  three attempts. Do not revert user or pre-existing work; describe any local
+  changes and unresolved recovery needs.
+
+## 5. Report
+
+Return a concise chat report with the tested scope and environment, per-flow
+outcomes, evidence, changes made (if authorized), unresolved issues, and any
+retained test data. A durable report uses the same fields only when requested
+or accepted as a handoff.

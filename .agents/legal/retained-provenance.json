@@ -1,0 +1,239 @@
+{
+  "format": "agents-ecosystem-retained-provenance-v1",
+  "entries": [
+    {
+      "source": "Superpowers",
+      "sourceUrl": "https://github.com/obra/superpowers",
+      "revision": "b36e0829c6d0140e93cfef2ca599b1b07d4a7797",
+      "upstreamPath": "skills/systematic-debugging/condition-based-waiting.md",
+      "upstreamGitBlob": "70994f777c586f7d4c43033aac34c7cf0da6688b",
+      "localPath": ".agents/skills/systematic-debugging/references/condition-based-waiting.md",
+      "sha256": "e89fec8400d6cd50f43407cec9fab50976ba4d55d0ec2eb51c0bd68036b54c26"
+    },
+    {
+      "source": "Superpowers",
+      "sourceUrl": "https://github.com/obra/superpowers",
+      "revision": "b36e0829c6d0140e93cfef2ca599b1b07d4a7797",
+      "upstreamPath": "skills/systematic-debugging/defense-in-depth.md",
+      "upstreamGitBlob": "e2483354dc2b62478a2624e34ca18bc0efe887b2",
+      "localPath": ".agents/skills/systematic-debugging/references/defense-in-depth.md",
+      "sha256": "1e175fb86fc357e58c6aebf5441e481e1b7868b4380c0456b63a17eefbd18ba7"
+    },
+    {
+      "source": "Superpowers",
+      "sourceUrl": "https://github.com/obra/superpowers",
+      "revision": "b36e0829c6d0140e93cfef2ca599b1b07d4a7797",
+      "upstreamPath": "skills/systematic-debugging/root-cause-tracing.md",
+      "upstreamGitBlob": "12ef5222e24e19ab92172b82b69ef1b0c30d9bfa",
+      "localPath": ".agents/skills/systematic-debugging/references/root-cause-tracing.md",
+      "sha256": "6b0622269e098ca1399e123e553fd385f0b6412d88ef0e9c4f5a8ea9cf1cec7b"
+    },
+    {
+      "source": "Superpowers",
+      "sourceUrl": "https://github.com/obra/superpowers",
+      "revision": "b36e0829c6d0140e93cfef2ca599b1b07d4a7797",
+      "upstreamPath": "skills/test-driven-development/writing-good-tests.md",
+      "upstreamGitBlob": "d3c4482fd30b4f9084bb61545fe73939a7502c28",
+      "localPath": ".agents/skills/test-driven-development/references/writing-good-tests.md",
+      "sha256": "51471c853306ff92ca8bb41dcaea05f31c0e46b03651f8f3c99754b7172f4ae1"
+    },
+    {
+      "source": "Jezweb Claude Skills",
+      "sourceUrl": "https://github.com/jezweb/claude-skills",
+      "revision": "bf917575ed6b65eb98307ced903f469020d8cd0a",
+      "upstreamPath": "plugins/frontend/skills/tailwind-theme-builder/references/migration-guide.md",
+      "upstreamGitBlob": "8ce1a0a3236fe68eb55e2bcb9f828838339b1f93",
+      "localPath": ".agents/skills/tailwind-v4-shadcn/references/migration-guide.md",
+      "sha256": "4580c5c918d71e3ac518d236a035bd627a5e99b254bb93f05eed67fc5ae53b42"
+    },
+    {
+      "source": "Jezweb Claude Skills",
+      "sourceUrl": "https://github.com/jezweb/claude-skills",
+      "revision": "bf917575ed6b65eb98307ced903f469020d8cd0a",
+      "upstreamPath": "plugins/frontend/skills/tailwind-theme-builder/assets/components.json",
+      "upstreamGitBlob": "e71fe103f1266995be80b1b9350c8a21fcd68e5c",
+      "localPath": ".agents/skills/tailwind-v4-shadcn/templates/components.json",
+      "sha256": "38d09e0be58f15412e01057114a5d9d4b3582200378441a3c74fd490c37b9a4b"
+    },
+    {
+      "source": "Jezweb Claude Skills",
+      "sourceUrl": "https://github.com/jezweb/claude-skills",
+      "revision": "bf917575ed6b65eb98307ced903f469020d8cd0a",
+      "upstreamPath": "plugins/frontend/skills/tailwind-theme-builder/assets/index.css",
+      "upstreamGitBlob": "8f20cc9cf2fd391aebac60f0839d0cf679db68ff",
+      "localPath": ".agents/skills/tailwind-v4-shadcn/templates/index.css",
+      "sha256": "3bb8a7a2daf4a9507f8c27deeb626b0d51166d018f7aa0d1d656dd8f652a527a"
+    },
+    {
+      "source": "Jezweb Claude Skills",
+      "sourceUrl": "https://github.com/jezweb/claude-skills",
+      "revision": "bf917575ed6b65eb98307ced903f469020d8cd0a",
+      "upstreamPath": "plugins/frontend/skills/tailwind-theme-builder/assets/theme-provider.tsx",
+      "upstreamGitBlob": "98126d7d4132f0c6a07186c24832d3cff0f8a372",
+      "localPath": ".agents/skills/tailwind-v4-shadcn/templates/theme-provider.tsx",
+      "sha256": "df87540b95499b272216c7b41a5d133bf0a449eb25049128f8a032ccd0e65580"
+    },
+    {
+      "source": "Jezweb Claude Skills",
+      "sourceUrl": "https://github.com/jezweb/claude-skills",
+      "revision": "bf917575ed6b65eb98307ced903f469020d8cd0a",
+      "upstreamPath": "plugins/frontend/skills/tailwind-theme-builder/assets/tsconfig.app.json",
+      "upstreamGitBlob": "9c0b41b21fe8a95991173fb2cc1affb7b45d6f8c",
+      "localPath": ".agents/skills/tailwind-v4-shadcn/templates/tsconfig.app.json",
+      "sha256": "8d20a8ea391818bebc7436709dd00e3e5422db9f811868127f1584efe8ff3047"
+    },
+    {
+      "source": "Jezweb Claude Skills",
+      "sourceUrl": "https://github.com/jezweb/claude-skills",
+      "revision": "bf917575ed6b65eb98307ced903f469020d8cd0a",
+      "upstreamPath": "plugins/frontend/skills/tailwind-theme-builder/assets/utils.ts",
+      "upstreamGitBlob": "d084ccade0d8b5bd77fd5174993bcef7b57644c9",
+      "localPath": ".agents/skills/tailwind-v4-shadcn/templates/utils.ts",
+      "sha256": "51bbf14cd1f84f49aab2e0dbee420137015d56b6677bb439e83a908cd292cce1"
+    },
+    {
+      "source": "Jezweb Claude Skills",
+      "sourceUrl": "https://github.com/jezweb/claude-skills",
+      "revision": "bf917575ed6b65eb98307ced903f469020d8cd0a",
+      "upstreamPath": "plugins/frontend/skills/tailwind-theme-builder/assets/vite.config.ts",
+      "upstreamGitBlob": "3409417efa8932e9c95ef3f749a2c86ac1418e55",
+      "localPath": ".agents/skills/tailwind-v4-shadcn/templates/vite.config.ts",
+      "sha256": "37171894fd3d8b7709d1ea15c4db5f4ba0faa1b58d7c7418d11ce4e30eb5562d"
+    },
+    {
+      "source": "Anthropic Skills",
+      "sourceUrl": "https://github.com/anthropics/skills",
+      "revision": "b9e19e6f44773509fbdd7001d77ff41a49a486c1",
+      "upstreamPath": "skills/skill-creator/agents/analyzer.md",
+      "upstreamGitBlob": "14e41d6068635f4dd3fb878fd1626312395dda63",
+      "localPath": ".agents/skills/skill-creator/agents/analyzer.md",
+      "sha256": "bf68f4cac5a56c673a928c2e6d619586c5b93ea364026ab37547772cb45a663a"
+    },
+    {
+      "source": "Anthropic Skills",
+      "sourceUrl": "https://github.com/anthropics/skills",
+      "revision": "b9e19e6f44773509fbdd7001d77ff41a49a486c1",
+      "upstreamPath": "skills/skill-creator/agents/comparator.md",
+      "upstreamGitBlob": "80e00eb45db3ee53a132fc2ba97fd59a7339e563",
+      "localPath": ".agents/skills/skill-creator/agents/comparator.md",
+      "sha256": "fe1fc9787c495d864c5d6eada47396478572325fde1b33a96d78bf4b849b7a3e"
+    },
+    {
+      "source": "Anthropic Skills",
+      "sourceUrl": "https://github.com/anthropics/skills",
+      "revision": "b9e19e6f44773509fbdd7001d77ff41a49a486c1",
+      "upstreamPath": "skills/skill-creator/agents/grader.md",
+      "upstreamGitBlob": "558ab05c0a9a8bb062ef4c51823d4d76c3acf7c4",
+      "localPath": ".agents/skills/skill-creator/agents/grader.md",
+      "sha256": "57134da0c1a4eea33fbd74a1c9c44aa814f07d6bc64de303edb586f941e5d21a"
+    },
+    {
+      "source": "Anthropic Skills",
+      "sourceUrl": "https://github.com/anthropics/skills",
+      "revision": "b9e19e6f44773509fbdd7001d77ff41a49a486c1",
+      "upstreamPath": "skills/skill-creator/assets/eval_review.html",
+      "upstreamGitBlob": "938ff32aed9bffabf723bd5492d720f4736c8e4d",
+      "localPath": ".agents/skills/skill-creator/assets/eval_review.html",
+      "sha256": "ce477dcc74dc1c0d1d3352646a79167b5a63634e936b1019160025065974e452"
+    },
+    {
+      "source": "Anthropic Skills",
+      "sourceUrl": "https://github.com/anthropics/skills",
+      "revision": "b9e19e6f44773509fbdd7001d77ff41a49a486c1",
+      "upstreamPath": "skills/skill-creator/eval-viewer/generate_review.py",
+      "upstreamGitBlob": "7fa5978631fed1ed545591dbb2b0eb21ce3f3d08",
+      "localPath": ".agents/skills/skill-creator/eval-viewer/generate_review.py",
+      "sha256": "fc9d1b9243fe5ab6012ebd579bd76d0035de1b79fd3b969de114defab26478fb"
+    },
+    {
+      "source": "Anthropic Skills",
+      "sourceUrl": "https://github.com/anthropics/skills",
+      "revision": "b9e19e6f44773509fbdd7001d77ff41a49a486c1",
+      "upstreamPath": "skills/docx/scripts/office/helpers/__init__.py",
+      "upstreamGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+      "localPath": ".agents/skills/skill-creator/scripts/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "Anthropic Skills",
+      "sourceUrl": "https://github.com/anthropics/skills",
+      "revision": "b9e19e6f44773509fbdd7001d77ff41a49a486c1",
+      "upstreamPath": "skills/skill-creator/scripts/aggregate_benchmark.py",
+      "upstreamGitBlob": "3e66e8c105be9bab9f0e9c61f0d1482619401580",
+      "localPath": ".agents/skills/skill-creator/scripts/aggregate_benchmark.py",
+      "sha256": "123ef128ea5ccc01a4b1ac212ef5567f21e9c13d3d240609780beeb3200c49aa"
+    },
+    {
+      "source": "Anthropic Skills",
+      "sourceUrl": "https://github.com/anthropics/skills",
+      "revision": "b9e19e6f44773509fbdd7001d77ff41a49a486c1",
+      "upstreamPath": "skills/skill-creator/scripts/improve_description.py",
+      "upstreamGitBlob": "06bcec76122446986e3610c20a39c466de36f495",
+      "localPath": ".agents/skills/skill-creator/scripts/improve_description.py",
+      "sha256": "87d864570220b699fac52da309d2d6efdb060647bfebc74f768128e646accf80"
+    },
+    {
+      "source": "Anthropic Skills",
+      "sourceUrl": "https://github.com/anthropics/skills",
+      "revision": "b9e19e6f44773509fbdd7001d77ff41a49a486c1",
+      "upstreamPath": "skills/skill-creator/scripts/package_skill.py",
+      "upstreamGitBlob": "f48eac444656ddc41204aac1760a217951ce609e",
+      "localPath": ".agents/skills/skill-creator/scripts/package_skill.py",
+      "sha256": "1a33059b0db1ef73375d46d513e5ea81369d2e8838c970597b0d52ddef8d1c0f"
+    },
+    {
+      "source": "Anthropic Skills",
+      "sourceUrl": "https://github.com/anthropics/skills",
+      "revision": "b9e19e6f44773509fbdd7001d77ff41a49a486c1",
+      "upstreamPath": "skills/skill-creator/scripts/quick_validate.py",
+      "upstreamGitBlob": "ed8e1dddce77b16af13c6f36b3fe86c4ac7c590c",
+      "localPath": ".agents/skills/skill-creator/scripts/quick_validate.py",
+      "sha256": "67cf5703402013936c8fb75ad6a1afecd8841d45cc5e606b634eb05825fde365"
+    },
+    {
+      "source": "Anthropic Skills",
+      "sourceUrl": "https://github.com/anthropics/skills",
+      "revision": "b9e19e6f44773509fbdd7001d77ff41a49a486c1",
+      "upstreamPath": "skills/skill-creator/scripts/run_eval.py",
+      "upstreamGitBlob": "e58c70bea39d5b252a1e819f242bbdcdf20e8b87",
+      "localPath": ".agents/skills/skill-creator/scripts/run_eval.py",
+      "sha256": "43e3b8f80dbf69c343967ba77e268fae991d9fa3ed68b32a0ff02532cd48657f"
+    },
+    {
+      "source": "Anthropic Skills",
+      "sourceUrl": "https://github.com/anthropics/skills",
+      "revision": "b9e19e6f44773509fbdd7001d77ff41a49a486c1",
+      "upstreamPath": "skills/skill-creator/scripts/run_loop.py",
+      "upstreamGitBlob": "30a263d674ef19de11c756d6f7537f91a421909e",
+      "localPath": ".agents/skills/skill-creator/scripts/run_loop.py",
+      "sha256": "7bd6f674203168520517eec94c55f493c0d154339b061b4d7c0f0dad187d0f21"
+    },
+    {
+      "source": "Anthropic Skills",
+      "sourceUrl": "https://github.com/anthropics/skills",
+      "revision": "b9e19e6f44773509fbdd7001d77ff41a49a486c1",
+      "upstreamPath": "skills/skill-creator/scripts/utils.py",
+      "upstreamGitBlob": "51b6a07dd57174197a937034b7eecebd5768ff8a",
+      "localPath": ".agents/skills/skill-creator/scripts/utils.py",
+      "sha256": "3af8ae62c40c73ab712207436a0d9a981e845f25c5a7040229eb189cc8e45bb1"
+    },
+    {
+      "source": "Agentic SEO Skill",
+      "sourceUrl": "https://github.com/Bhanunamikaze/Agentic-SEO-Skill",
+      "revision": "337069435d16c68071523f488841b882e35d9767",
+      "upstreamPath": "resources/references/cwv-thresholds.md",
+      "upstreamGitBlob": "2c522b88faaa15e5d1eb6e36a92a4451c192f9a7",
+      "localPath": ".agents/skills/seo-review/references/cwv-thresholds.md",
+      "sha256": "a89089773c3a5e78517187b71ad9b82f732cc3affa7c96f61b0d4a1c98934303"
+    },
+    {
+      "source": "Marketing Skills",
+      "sourceUrl": "https://github.com/coreyhaines31/marketingskills",
+      "revision": "0d586e4952494d58ed5c60926aa5982311e41044",
+      "upstreamPath": "skills/copy-editing/references/content-refresh.md",
+      "upstreamGitBlob": "70e97ff248980495ef8cc87d22119b93e6199eeb",
+      "localPath": ".agents/skills/copy-editing/references/content-refresh.md",
+      "sha256": "8a3a2d301bb2b8b2a780f5bef43093ab42295041b2fea2a9caeca2421ef3c79b"
+    }
+  ]
+}

@@ -1,109 +1,101 @@
 ---
 name: review-plan
-description: |
-  Meta-level guidance for reviewing and challenging implementation plans using the
-  Mega Plan Review pipeline. Use whenever you've drafted an implementation plan or
-  design doc and need to evaluate it for completeness, scope gaps, and architectural
-  flaws before proceeding to implementation. Proactively suggest this skill after
-  any /plan workflow or when the user says "review my plan" or "is this plan solid".
+description: Challenge an implementation plan for scope, architecture, design, security, and verification gaps. Use after drafting a non-trivial plan or when asked whether a plan is ready.
 ---
 
-# Review Plan Skill
+# Review Plan
 
-Brutally evaluate your drafted implementation plan before finalizing it. The goal is to catch architectural flaws, scope gaps, and edge cases early using a structured pipeline.
+Evaluate the plan against repository evidence and the complete accepted
+increment. The goal is convergence, not ritual.
 
-## Preamble & Interaction Rules
+## Preflight
 
-During the review, you must follow the strict `AskUserQuestion` protocol:
-- **Interactive Questioning:** Ask questions interactively, one by one. Do NOT batch all questions at the end of the review. Wait for the user's response before proceeding.
-- **Format:** For every question, describe the problem, present 2-3 concrete options, and provide an opinionated recommendation based on engineering preferences.
-- **Tradeoffs:** Explain the tradeoffs (Effort vs. Risk) for each option.
+Declare scope mode: expansion, selective expansion, hold scope, or reduction.
+Read the accepted request, plan, applicable `AGENTS.md`, `README.md`, and
+`CONTRIBUTING.md`. Load `ARCHITECTURE.md` when runtime boundaries matter and
+`DESIGN.md` only for UI scope. Identify R0–R3 change rigor and affected
+boundary-assurance facts.
 
----
+Ask only questions whose answers materially change the plan. Present concrete
+options and a recommendation. Group related decisions when clearer.
 
-## Phase 1: CEO Review (Strategy & Scope)
+## Review passes
 
-### Step 0: Mode Selection
-Explicitly declare the review mode based on the plan's intent:
-1. **SCOPE EXPANSION:** Adding net-new capabilities. High risk.
-2. **SELECTIVE EXPANSION:** Modifying existing flows to add edge-case value.
-3. **HOLD SCOPE:** Refactoring or performance work. No new user-facing features.
-4. **SCOPE REDUCTION:** Deleting features or ripping out legacy systems.
+Mark every pass **applicable** or **not applicable**, with a reason.
 
-### Step 1: Premise Challenge
-- Are we solving the right problem? Challenge the core premise of the implementation plan. Is there a simpler way to achieve the exact same business goal?
+### Strategy and scope
 
-### Step 2: Dream State Mapping
-- How does this implementation specifically advance the project's core vision (`README.md`) and get us closer to the ideal product state?
+- Does the plan solve the stated problem with the smallest complete increment?
+- Are success measures observable?
+- Are exclusions explicit and compatible with a usable result?
+- Did adjacent nice-to-have work enter without evidence?
+- Does it reuse existing code and applicable compounded knowledge?
 
----
+### Architecture and data
 
-## Phase 2: Design Review (UI/UX)
-*Trigger this phase ONLY if the plan includes UI/frontend scope.*
+- Do adopted components and dependency directions match repository evidence?
+- Are identity, browser sessions, service claims, and resource authorization
+  owned explicitly when relevant?
+- Are public contracts, persistence ownership, migrations, concurrency,
+  idempotence, recovery, and compatibility handled?
+- Are dependencies exact and purpose-bound? Are unplanned services, major
+  upgrades, licensing, or permission expansions surfaced for decision?
+- Would a compact ASCII flow materially clarify a multi-step state or data
+  transition? Require one only when it improves understanding.
 
-Enforce the following 7-Pass Structure:
-1. **The Pruning Pass (Subtraction Default):** Does every UI element earn its pixels? Reduce cognitive load. "If it doesn't earn its pixels, cut it."
-2. **The Slop Pass (AI Slop Avoidance):** Audit against the "AI Slop" blacklist. Remove generic 3-column feature grids, floating blobs, bubbly borders, and default font stacks. Demand specific, intentional UI decisions leveraging `DESIGN.md`.
-3. **The State Matrix Pass:** Are loading, empty, error, success, and partial states explicitly defined? Empty states must have warmth, a primary action, and context.
-4. **The Microcopy Pass:** Favor utility over aspiration. Remove generic hero copy.
-5. **The Design System Alignment Pass:** Audit against existing components. Does the plan invent new UI paradigms unnecessarily?
-6. **The Responsive & Accessibility Pass:** Enforce keyboard navigation, ARIA landmarks, contrast, and intentional mobile layouts instead of just "stacking on mobile."
-7. **The Developer Handoff Pass:** Surface and resolve all unresolved design decisions via `AskUserQuestion` before engineering begins.
+### Design and accessibility
 
----
+Apply only for interface scope. Check alignment with the active `DESIGN.md`,
+existing components, responsive states, loading/empty/error/success behavior,
+keyboard flow, semantics, focus, contrast, reduced motion, and developer
+handoff. Reject generic design prescriptions that lack project evidence.
 
-## Phase 3: Eng Review (Architecture & Completeness)
+### Security and operations
 
-### Step 1: The Completeness Principle
-- **"Boil the lake."** Does the plan tackle the project **as a whole**? Handle all documented edge cases. No deferred tasks (no "we will do this later" or "TODOs"). If an issue is within the blast radius and takes <1 day of effort, do it now.
+Use the security review's applicability preflight. Derive controls from exposure,
+data impact, privilege, reversibility, control ownership, and evidence. Ensure
+adopted runtimes have enough diagnostic and health evidence for their materiality.
+Do not require unrelated auth, database, observability, or edge controls.
 
-### Checklist Anchors
-Cross-reference these rule files during the review to catch domain-specific gaps:
-- `README.md` — Does the plan align with project vision and goals?
-- `DESIGN.md` — Does the plan reuse existing design tokens (if UI scope)?
-- `AGENTS.md` — Are accessibility requirements addressed (if UI scope)?
+### Testing and delivery
 
-### Step 2: Data Flow & State Verification
-- **ASCII Diagrams:** For any complex data transformations, database migrations, or state changes, mandate an ASCII diagram to visualize the data flow.
-- **Explicit > Clever:** Does the plan favor explicit, readable code over clever, magical abstractions?
+Map changed observable behavior and meaningful failure paths to real tests.
+Preserve the 100% line and branch target for testable production behavior while
+documenting legitimate generated, declarative, unreachable, or behavior-free
+exclusions. Verify commands, fixtures, compatibility, and rollback or rebuild
+paths. Do not claim unavailable tools as passed.
 
-### Step 3: Performance, Security & QA
-- **Scalability & Security:** Check for N+1 query risks, missing Policies (authorization), and strict input validation.
-- **Test Coverage Map:** Map every new codepath to specific test types (unit, E2E). Concrete verification steps only (e.g., "Add `it('handles X')` to `OrderTest`").
-- **Zero Silent Failures:** Ensure the system fails loudly and safely. Create a **Failure Modes Registry** table documenting how the implementation handles nil, empty, and timeout edge cases.
+## Required plan content
 
----
+A ready plan states:
 
-## Phase 4: Required Outputs
+- the accepted increment and explicit exclusions;
+- evidence, assumptions, adopted components, and unresolved decisions;
+- file ownership and implementation sequence;
+- test coverage map and verification commands;
+- failure modes and safe recovery;
+- existing patterns and knowledge to reuse;
+- completion criteria.
 
-The finalized plan must explicitly include these two sections:
-1. **NOT in scope:** Explicitly define what was considered but deferred or excluded, with a one-line rationale for each.
-2. **What already exists:** List the existing patterns, KIs, compounded solutions (`docs/solutions/`), and components that this plan will reuse to prevent duplication.
+## Convergence and verdict
 
----
+Perform one thorough pass. Repeat only to resolve a newly found material issue;
+do not require a fixed pass count. If the same blocker survives three attempted
+resolutions, stop for owner input.
 
-## Phase 5: Outside Voice (Adversarial Challenge)
+Before finalizing, use an outside-voice challenge for R3 or significant
+architecture, security, data, or production scope. Routine plans do not require
+an adversarial persona or mega review.
 
-Before finalizing, perform an adversarial check:
-- Adopt an adversarial persona to find the blind spots in the plan.
-- What happens if the database locks? What if the UI state desyncs? What if the third-party API is down?
-- Force the plan to address these before developer execution begins.
+Report:
 
----
-
-## Review Verdict Output
-
-After completing all phases, output a structured verdict:
-
-```
+```text
 REVIEW VERDICT
-─────────────
-Phase 1 (Strategy):      PASS | FAIL — [one-line summary]
-Phase 2 (Design):        PASS | FAIL | SKIPPED — [one-line summary]
-Phase 3 (Engineering):   PASS | FAIL — [one-line summary]
-Phase 4 (Outputs):       PASS | FAIL — [one-line summary]
-Phase 5 (Adversarial):   PASS | FAIL — [one-line summary]
-
-Overall: GO | NO-GO
-Blocking Issues: [numbered list, or "None"]
+Strategy:      PASS | FAIL
+Architecture:  PASS | FAIL | N/A
+Design:        PASS | FAIL | N/A
+Security/Ops:  PASS | FAIL | N/A
+Testing:       PASS | FAIL
+Overall:       GO | NO-GO
+Blocking issues: [list or None]
 ```

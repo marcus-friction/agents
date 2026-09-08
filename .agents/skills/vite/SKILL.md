@@ -9,7 +9,9 @@ metadata:
 
 # Vite
 
-> Based on Vite 8 beta (Rolldown-powered). Vite 8 uses Rolldown bundler and Oxc transformer.
+> Based on stable Vite 8, released March 12, 2026. Vite 8 uses the
+> Rolldown bundler and Oxc transformer. See the
+> [official Vite 8 announcement](https://vite.dev/blog/announcing-vite8).
 
 Vite is a next-generation frontend build tool with fast dev server (native ESM + HMR) and optimized production builds.
 

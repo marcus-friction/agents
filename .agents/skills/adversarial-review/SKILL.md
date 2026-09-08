@@ -1,43 +1,50 @@
 ---
 name: adversarial-review
-description: |
-  Perform a destructive "Red Team" review of the current changes to eliminate
-  shared blind spots. Best used with a secondary model. Use after any code review
-  or plan review, and before deploying to production. Proactively suggest when
-  merging significant changes.
+description: Independently challenge R3 or significant architecture, security, data, migration, permission, deployment, or production changes. Use after a deep review or when explicitly requested; routine changes do not require it.
 ---
 
-# 🛑 adversarial-review: The Red Team Pass
+# Adversarial Review
 
-This skill enforces the **Red Team Pass**. You must actively attempt to break the assumptions, architecture, and code constructed by the primary developer or agent.
+Try to falsify the approved design, implementation, and review conclusions.
+Prefer a different model family or independent context when available, but do
+not block evidence gathering merely because it is not.
 
-## When to Use
-Triggered automatically or manually immediately after `review-gstack` or `plan` has been completed. For the highest rigor, the user should switch the active LLM model (e.g., from Claude to Gemini) before running this, ensuring a true "Outside Voice" without shared contextual blind spots.
+This workflow is report-only: make zero repository or external writes.
 
-## Rules of Engagement
+## Preflight
 
-1. **Verify Model Switch & Pause:** **Before doing anything**, explicitly use the `notify_user` asking the user: "To ensure a true adversarial review without shared context, please switch your active LLM model (e.g., from Claude to Gemini) and reply with 'continue'." You must receive a positive confirmation before proceeding with the review.
-2. **Assume Failure:** You do not trust the diff. You do not trust the implementation plan. Look for catastrophic edge cases.
-3. **The "What If" Matrix:** Apply each scenario from `references/what-if-matrix.md`. At minimum, consider:
-   - **Concurrency:** What if two users execute this simultaneously? Race conditions cause silent data corruption.
-   - **Trust Boundaries:** What if a malicious user bypasses frontend validation? Server-side must be the source of truth.
-   - **Infrastructure Failures:** What if the database locks during this transaction? What if the third-party API times out or returns a 500?
-   - **Deployment Race:** What if the data migration drops a table while code is mid-deployment? Zero-downtime requires backward compatibility.
-4. **Report Format:** Do not present a standard review. Present your findings exclusively as independent "Vulnerability / Risk Scenarios" using the output template below.
-5. **No Auto-Fixing:** You are the auditor, not the engineer. Bring the glaring issues to the user's attention using the interactive `AskUserQuestion` format. All issues should be batched together at the end.
+- Read the accepted request, scope, comparison base, plan, and prior review.
+- Identify the R3 or significant boundary that warrants an outside voice.
+- Preserve unrelated dirty work and exclude it unless a dependency trace makes
+  it relevant.
+- Read relevant project rules and `references/what-if-matrix.md`.
 
-## Output Template
+## Challenge
 
-For each finding, use:
+Construct realistic failure scenarios only for applicable boundaries:
 
-```
-SCENARIO: [Short descriptive name]
-─────────────────────────────────
-Category:   [Concurrency | Trust Boundary | Infrastructure | Deployment | Logic | Data Integrity]
-Impact:     [Critical | High | Medium | Low]
-Likelihood: [Certain | Likely | Possible | Unlikely]
-Description: [What happens and why it's dangerous]
-Mitigation: [Recommended fix or guard]
-```
+- concurrency, duplicate delivery, ordering, and partial writes;
+- bypassed trust boundaries, confused deputies, privilege changes, and secret
+  exposure;
+- malformed, missing, stale, or adversarial input;
+- database locks, resource exhaustion, timeouts, dependency outages, and
+  degraded service;
+- published-contract or migration compatibility during mixed-version rollout;
+- destructive operations, recovery gaps, and irreversible external effects;
+- UI state desynchronization, inaccessible recovery, and misleading feedback;
+- scope omissions and assumptions unsupported by executable evidence.
 
-Batch all scenarios into a single `notify_user` call at the end.
+Attempt to reproduce or prove each scenario with read-only inspection and safe
+tests. Distinguish confirmed defects from hypotheses and unavailable evidence.
+Do not manufacture a finding to justify the workflow.
+
+## Report
+
+For each scenario state category, affected boundary, evidence, exploit or failure
+path, impact, likelihood, reversibility, existing controls, smallest mitigation,
+and verification. Derive severity from the facts rather than a missing checklist
+item.
+
+Finish with blocking scenarios, non-blocking residual risks, pass applicability,
+and an explicit GO or NO-GO recommendation. No autofix or task mutation occurs
+in this skill; implementation requires a separate user request.

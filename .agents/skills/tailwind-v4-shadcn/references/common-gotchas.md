@@ -1,10 +1,18 @@
 # Common Gotchas & Solutions
 
-## Critical Failures (Will Break Your Build)
+## CSS and Theme Checks
 
-### 1. `:root` Inside `@layer base`
+### 1. Choosing a Cascade Location for `:root`
 
-❌ **WRONG:**
+This skill's baseline keeps theme variables at the document root:
+```css
+:root {
+  --background: hsl(0 0% 100%);
+}
+```
+
+Ordinary custom CSS is supported in Tailwind v4, including selectors outside
+Tailwind directives. A layered `:root` rule is also valid CSS:
 ```css
 @layer base {
   :root {
@@ -13,20 +21,17 @@
 }
 ```
 
-✅ **CORRECT:**
-```css
-:root {
-  --background: hsl(0 0% 100%);
-}
+Choose deliberately based on the project's cascade. Do not move an existing
+rule merely because it is layered; check ordering and resulting styles first.
 
+The baseline applies element defaults separately:
+```css
 @layer base {
   body {
     background-color: var(--background);
   }
 }
 ```
-
-**Why:** Tailwind v4 strips CSS outside `@theme`/`@layer`, but `:root` must be at root level.
 
 ---
 
@@ -88,9 +93,13 @@
 
 ---
 
-### 4. Colors in `tailwind.config.ts`
+### 4. Blindly retaining or deleting `tailwind.config.ts`
 
-❌ **WRONG:**
+❌ **WRONG:** assuming a file can be deleted merely because the project uses
+Tailwind v4, or leaving active v3-only color configuration without checking how
+the build consumes it.
+
+An example of v3-style configuration that needs investigation:
 ```typescript
 // tailwind.config.ts
 export default {
@@ -104,9 +113,16 @@ export default {
 }
 ```
 
-✅ **CORRECT:**
+✅ **CORRECT:** inspect imports, scripts, plugins, presets, and generated config
+first. Tailwind v4 can load a compatible JavaScript config explicitly with
+`@config`; preserve that path or move confirmed theme values into the previewed
+CSS-first mapping when appropriate:
+```css
+@config "../../tailwind.config.js";
+```
+
 ```typescript
-// Delete tailwind.config.ts entirely OR leave it empty
+// Keep a compatible file until its approved migration/removal is verified.
 export default {}
 
 // components.json
@@ -117,7 +133,9 @@ export default {}
 }
 ```
 
-**Why:** Tailwind v4 completely ignores `theme.extend.colors`.
+**Why:** CSS-first theme values are clearer for this pattern, but deletion can
+discard plugins, presets, or project-owned behavior. Preserve compatible config
+and remove only the exact reviewed file in the approved migration.
 
 ---
 
@@ -173,24 +191,30 @@ Result: `bg-background` class doesn't exist
 
 ---
 
-### 7. Using PostCSS Instead of Vite Plugin
+### 7. Mixing PostCSS and Vite Integration Without Intent
 
-❌ **WRONG:**
-```typescript
-// vite.config.ts
-export default defineConfig({
-  css: {
-    postcss: './postcss.config.js'  // Old v3 way
-  }
-})
-```
+PostCSS integration through `@tailwindcss/postcss` is supported in Tailwind v4.
+This skill targets an adopted Vite stack, where the direct Vite plugin is the
+default integration:
 
-✅ **CORRECT:**
 ```typescript
 import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig({
-  plugins: [react(), tailwindcss()]  // v4 way
+  plugins: [react(), tailwindcss()]
+})
+```
+
+An existing working PostCSS path is not a v3 defect. Preserve it unless the
+approved scope includes a migration. What to avoid is configuring both paths
+without a project-specific reason, for example adding this on top of the Vite
+plugin:
+```typescript
+// vite.config.ts
+export default defineConfig({
+  css: {
+    postcss: './postcss.config.js'
+  }
 })
 ```
 
@@ -296,16 +320,12 @@ import { cn } from '@/lib/utils'
 
 ### 13. Wrong Tailwind Package
 
-❌ **WRONG:**
-```bash
-npm install tailwindcss@^3.4.0  # v3
-```
+❌ **WRONG:** carrying a Tailwind 3 range forward, or installing an unpinned
+Tailwind version without checking the host project.
 
-✅ **CORRECT:**
-```bash
-npm install tailwindcss@^4.1.0  # v4
-npm install @tailwindcss/vite
-```
+✅ **CORRECT:** inspect the manifest and lockfile, resolve mutually compatible
+exact versions of `tailwindcss` and `@tailwindcss/vite`, and include both
+purposes and the lockfile diff in the dependency preview.
 
 ---
 
@@ -321,55 +341,42 @@ npm install @tailwindcss/vite
 }
 ```
 
-✅ **CORRECT:**
-```json
-{
-  "dependencies": {
-    "tailwindcss": "^4.1.0",
-    "@tailwindcss/vite": "^4.1.0",
-    "clsx": "^2.1.1",
-    "tailwind-merge": "^3.3.1"
-  },
-  "devDependencies": {
-    "@types/node": "^24.0.0"
-  }
-}
-```
+✅ **CORRECT:** derive the needed package set from the selected components and
+existing application. Record exact, project-compatible versions—without range
+operators—for each new package in the approved plan. Do not copy a stock
+manifest over existing dependencies.
 
 ---
 
 ### 17. tw-animate-css Import Error (REAL-WORLD ISSUE)
 
-❌ **WRONG:**
-```bash
-npm install tailwindcss-animate  # Deprecated package
-```
+❌ **WRONG:** adding `tailwindcss-animate` by habit without inspecting the
+generated CSS and project dependencies.
 
 ```css
-@import "tw-animate-css";  # Package doesn't exist in v4
+@import "tw-animate-css"; /* Fails when the package was not planned/installed. */
 ```
 
-✅ **CORRECT:**
-```bash
-# Don't install tailwindcss-animate at all
-# Use native CSS animations or @tailwindcss/motion
-```
+✅ **CORRECT:** use native CSS animation when sufficient. If selected shadcn
+output imports `tw-animate-css`, resolve an exact compatible version and show
+its purpose, install command, and lockfile change before applying it.
 
 **Why:**
-- `tailwindcss-animate` is deprecated in Tailwind v4
-- Causes import errors during build
-- shadcn/ui docs may still reference it (outdated)
-- The skill handles animations differently in v4
+- `tailwindcss-animate` is a different, v3-era integration
+- An import without its matching dependency causes a build error
+- Generator output and installed packages must be reconciled as one batch
 
 **Impact:** Build failure, requires manual CSS file cleanup
 
 ---
 
-### 18. Duplicate @layer base After shadcn init (REAL-WORLD ISSUE)
+### 18. Conflicting Base Rules After shadcn init
 
-❌ **WRONG:**
+Multiple `@layer base` blocks are valid and participate in cascade order. The
+problem is conflicting declarations, not the number of blocks. After generator
+output, compare the resulting selectors and values:
+
 ```css
-/* After running shadcn init, you might have: */
 @layer base {
   body {
     background-color: var(--background);
@@ -383,9 +390,10 @@ npm install tailwindcss-animate  # Deprecated package
 }
 ```
 
-✅ **CORRECT:**
+Merge blocks only when doing so preserves ordering and makes the conflict
+clearer:
+
 ```css
-/* Merge into single @layer base block */
 @layer base {
   * {
     border-color: var(--border);
@@ -398,18 +406,12 @@ npm install tailwindcss-animate  # Deprecated package
 }
 ```
 
-**Why:**
-- `shadcn init` adds its own `@layer base` block
-- Results in duplicate layer declarations
-- Can cause unexpected CSS priority issues
-- Easy to miss during setup
-
 **Prevention:**
-- Check `src/index.css` immediately after running `shadcn init`
-- Merge any duplicate `@layer base` blocks
-- Keep only one base layer section
+- Compare `src/index.css` before and after generator output.
+- Reconcile duplicate selectors or contradictory declarations.
+- Preserve valid separate layer blocks when their order is intentional.
 
-**Impact:** CSS priority issues, harder to debug styling problems
+**Impact:** unresolved conflicting declarations can create unexpected styles.
 
 ---
 
@@ -450,7 +452,7 @@ Colors look good but fail WCAG
 | `bg-primary` doesn't work | Missing `@theme inline` mapping |
 | Colors all black/white | Double `hsl()` wrapping |
 | Dark mode not switching | Missing ThemeProvider |
-| Build fails | `tailwind.config.ts` exists with theme config |
+| Build fails | Legacy config, plugins, and CSS entry disagree with the v4 setup |
 | Text invisible | Wrong contrast colors |
 | `@/` imports fail | Missing path aliases in tsconfig |
 
@@ -459,11 +461,11 @@ Colors look good but fail WCAG
 ## Prevention Checklist
 
 Before deploying:
-- [ ] No `tailwind.config.ts` file (or it's empty)
-- [ ] `components.json` has `"config": ""`
-- [ ] All colors have `hsl()` wrapper in `:root`
-- [ ] `@theme inline` maps all variables
-- [ ] `@layer base` doesn't wrap `:root`
+- [ ] Existing `tailwind.config.*` was preserved, or its exact migration/removal was reviewed and approved
+- [ ] CSS-first shadcn/ui v4 projects use `"config": ""` in `components.json`
+- [ ] Semantic color variables contain valid complete color values and are not double-wrapped
+- [ ] `@theme inline` maps the semantic variables that need generated utilities
+- [ ] The intended cascade location and ordering of `:root` rules was verified
 - [ ] Theme provider wraps app
 - [ ] Tested in both light and dark modes
 - [ ] All text has sufficient contrast

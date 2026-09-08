@@ -1,74 +1,66 @@
 ---
 name: ui-accessibility-review
-description: UI quality, responsiveness, and accessibility review checklist for Nuxt/Tailwind
+description: Review adopted user interfaces for design-system fit, responsive behavior, and WCAG AA accessibility.
 ---
 
-# UI & Accessibility Review Skill
+# UI and Accessibility Review
 
-Review checklist for UI code quality, responsive design, and WCAG AA compliance. Use during the UI/accessibility pass of `/review` or when auditing frontend code. References `AGENTS.md` and `DESIGN.md` as source rules.
+Use during a scoped UI review. Read the active `DESIGN.md` and representative
+implementation first. If no interface is affected, mark the pass not applicable
+with a reason.
 
-## Checklist
+## Design system
 
-### Design System Compliance
+- Use approved color, typography, spacing, shape, and motion tokens through the
+  project's Tailwind and CSS-variable conventions.
+- Reuse established primitives when they preserve semantics and consistency;
+  use established `Base*` components where they own the contract, while native
+  semantic controls remain valid when the design system has no matching owner.
+- Avoid unexplained one-off values. Judge exceptions by the active design
+  language, not arbitrary class or pixel-count rules.
+- Keep icons, feedback, empty/loading/error/success states, and density coherent.
 
-- [ ] Colors use design tokens — no hardcoded hex/rgb values
-- [ ] Typography uses defined scale — no arbitrary `text-[17px]`
-- [ ] Spacing follows the spacing scale — no arbitrary `p-[13px]`
-- [ ] Base components used (`BaseButton`, `BaseInput`, etc.) — no raw HTML for standard controls
-- [ ] Icons are consistent in size and style throughout the view
+## Responsive behavior
 
-### Layout & Responsiveness
+- Exercise the project's supported narrow, medium, and wide viewports,
+  including the smallest documented width. When no project matrix exists, use
+  representative 320px, 768px, 1024px, and 1440px checks.
+- Prevent unintended horizontal scrolling, clipped content, and unusable
+  controls.
+- Preserve meaningful reading and focus order as layouts reflow.
+- Make pointer targets usable for the product's devices and audience.
+- Use responsive image sizing and `<NuxtImg>` when the adopted Nuxt image
+  pipeline adds optimization without breaking the asset contract.
 
-- [ ] Layout works at 320px, 768px, 1024px, 1440px viewports
-- [ ] No horizontal scrolling at any breakpoint
-- [ ] Touch targets are at least 44×44px on mobile
-- [ ] Stacking order makes sense on mobile (most important content first)
-- [ ] Images use `<NuxtImg>` with appropriate `sizes` attribute
-- [ ] No fixed widths that break on smaller viewports
+## Structure and interaction
 
-### Visual Quality
+- Use semantic landmarks, headings, lists, tables, buttons, links, and form
+  controls for their intended behavior.
+- Keep one meaningful `<h1>` per page and preserve a logical heading hierarchy.
+- Keep every action and navigation path keyboard-operable with visible focus.
+- Manage focus entry, containment, Escape behavior, and restoration for dialogs.
+- Announce material dynamic updates when they are not otherwise perceivable.
+- Associate visible labels, instructions, validation, and errors with controls;
+  every input needs a visible label under the project accessibility contract.
+- Use ARIA only where native semantics do not express the required state.
 
-- [ ] Consistent spacing rhythm — elements don't feel randomly placed
-- [ ] Text is readable — sufficient line height, appropriate measure (45–75 chars per line)
-- [ ] Empty states are handled — not just blank white space
-- [ ] Loading states are present for async content
-- [ ] Error states are visually clear and provide actionable guidance
-- [ ] Transitions/animations use `prefers-reduced-motion` media query
+## Content and perception
 
-### Accessibility — Structure
+- Give meaningful images useful alternatives and decorative images empty alt
+  text.
+- Meet WCAG AA contrast: at least 4.5:1 for normal text and 3:1 for large text
+  and meaningful UI boundaries.
+- Do not communicate status by color, motion, position, or icon alone.
+- Respect reduced motion, zoom, text scaling, localization, and long content.
+- Keep errors actionable and recovery paths perceivable.
 
-- [ ] Semantic HTML used — `<nav>`, `<main>`, `<article>`, `<button>`, `<a>`
-- [ ] One `<h1>` per page, heading levels are sequential (no skipping)
-- [ ] Interactive elements are `<button>` (actions) or `<a>` (navigation) — not `<div @click>`
-- [ ] Lists use `<ul>`/`<ol>`, tabular data uses `<table>`
+## Findings
 
-### Accessibility — Interaction
+Classify issues by user impact and affected flow:
 
-- [ ] All interactive elements keyboard-reachable and operable
-- [ ] Visible focus indicators on all focusable elements
-- [ ] Tab order follows visual reading order
-- [ ] Modals trap focus and close with Escape key
-- [ ] Dynamic content updates use `aria-live` regions
+- **Must fix:** blocks access, understanding, input, navigation, or recovery.
+- **Should fix:** materially weakens consistency or usability.
+- **Consider:** bounded polish with no functional accessibility impact.
 
-### Accessibility — Content
-
-- [ ] Meaningful images have descriptive `alt` text
-- [ ] Decorative images use `alt=""`
-- [ ] Form inputs have visible `<label>` elements with `for`/`id` association
-- [ ] Error messages linked to inputs via `aria-describedby`
-- [ ] Required fields use `required` attribute and visual indicator
-- [ ] Color contrast meets 4.5:1 (text) / 3:1 (large text, UI components)
-- [ ] Information not conveyed by color alone
-
-### Accessibility — ARIA
-
-- [ ] `aria-label` or `aria-labelledby` on icon-only buttons
-- [ ] `aria-expanded` on toggles and disclosure widgets
-- [ ] `aria-hidden="true"` on decorative icons paired with text
-- [ ] No redundant roles (`role="button"` on `<button>`)
-
-## Severity Guide
-
-- 🔴 **Must fix**: Missing keyboard access, broken semantics (`<div>` as button), contrast failures, no alt text on meaningful images
-- 🟡 **Should fix**: Missing ARIA attributes, arbitrary spacing/colors bypassing tokens, no empty/loading states
-- 🟢 **Consider**: Minor spacing inconsistencies, suboptimal line length, missing `prefers-reduced-motion`
+Cite the affected state and evidence. Do not auto-fix subjective design choices;
+propose the smallest coherent correction and how to verify it.

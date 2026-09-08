@@ -1,0 +1,822 @@
+{
+  "schema_version": 2,
+  "profile": "live-agent-v2",
+  "deterministic_profile": "offline-deterministic",
+  "deterministic_only": [
+    {
+      "path": "tests",
+      "path_kind": "root",
+      "reason": "Test infrastructure is exercised by the offline deterministic suite."
+    },
+    {
+      "path": "scripts",
+      "path_kind": "root",
+      "reason": "Installer and distribution scripts have isolated deterministic behavior tests."
+    },
+    {
+      "path": "docs",
+      "path_kind": "root",
+      "reason": "Documentation links and executable quickstarts are checked deterministically; human wording is not treated as behavior."
+    },
+    {
+      "path": "project-templates",
+      "path_kind": "root",
+      "reason": "Template layout, inactive staging, rollback, and ownership boundaries are checked deterministically."
+    },
+    {
+      "path": ".agents/tools",
+      "path_kind": "root",
+      "reason": "Dependency bootstrap behavior is covered by isolated shell tests."
+    },
+    {
+      "path": ".agents/legal",
+      "path_kind": "root",
+      "reason": "Distributed licensing and attribution are covered by deterministic provenance contracts."
+    },
+    {
+      "path": ".agents/.claude-plugin",
+      "path_kind": "root",
+      "reason": "Provider metadata is covered by distribution structure checks."
+    },
+    {
+      "path": ".claude-plugin",
+      "path_kind": "root",
+      "reason": "Marketplace metadata is covered by distribution structure checks."
+    },
+    {
+      "path": ".github",
+      "path_kind": "root",
+      "reason": "Repository automation is covered by isolated deterministic workflow contracts."
+    },
+    {
+      "path": ".cursor",
+      "path_kind": "root",
+      "reason": "Cursor discovery adapters are covered by deterministic provider and distribution contracts."
+    },
+    {
+      "path": ".gitattributes",
+      "path_kind": "exact",
+      "reason": "Distribution file attributes are covered by deterministic repository contracts."
+    },
+    {
+      "path": ".gitignore",
+      "path_kind": "exact",
+      "reason": "Generated artifact exclusions are covered by deterministic profile and distribution contracts."
+    },
+    {
+      "path": "LICENSE",
+      "path_kind": "exact",
+      "reason": "Repository licensing is covered by deterministic provenance contracts."
+    },
+    {
+      "path": "THIRD_PARTY_NOTICES.md",
+      "path_kind": "exact",
+      "reason": "Third-party attribution is covered by deterministic provenance contracts."
+    },
+    {
+      "path": "VERSION",
+      "path_kind": "exact",
+      "reason": "Repository and plugin version consistency is covered by deterministic contracts."
+    },
+    {
+      "path": "README.md",
+      "path_kind": "exact",
+      "reason": "The root interface has deterministic budget, preservation, and portability checks."
+    },
+    {
+      "path": "README.template.md",
+      "path_kind": "exact",
+      "reason": "Legacy template removal is covered by deterministic project-template layout checks."
+    },
+    {
+      "path": "CLAUDE.md",
+      "path_kind": "exact",
+      "reason": "The compatibility router is a structural provider adapter."
+    },
+    {
+      "path": "install.sh",
+      "path_kind": "exact",
+      "reason": "Installation behavior is covered by isolated shell tests."
+    },
+    {
+      "path": "install-global.sh",
+      "path_kind": "exact",
+      "reason": "Global installation behavior is covered by isolated shell tests."
+    },
+    {
+      "path": "install-dependencies.sh",
+      "path_kind": "exact",
+      "reason": "Dependency installation behavior is covered by isolated shell tests."
+    },
+    {
+      "path": ".agents/skills/skill-creator",
+      "path_kind": "root",
+      "reason": "The imported package is covered by portability and schema checks in this increment."
+    },
+    {
+      "path": ".agents/skills/architecture-review",
+      "path_kind": "root",
+      "reason": "Architecture review packaging is covered by portability checks; this profile makes no behavioral claim."
+    },
+    {
+      "path": ".agents/skills/build-start-scripts",
+      "path_kind": "root",
+      "reason": "Startup-script guidance is structurally covered by portability checks; behavioral coverage is not claimed."
+    },
+    {
+      "path": ".agents/skills/contribute-back",
+      "path_kind": "root",
+      "reason": "Contribution guidance is structurally covered by portability checks; behavioral coverage is not claimed."
+    },
+    {
+      "path": ".agents/skills/end2end",
+      "path_kind": "root",
+      "reason": "Browser-test guidance is structurally covered by portability checks; behavioral coverage is not claimed."
+    },
+    {
+      "path": ".agents/skills/playwright",
+      "path_kind": "root",
+      "reason": "Browser interaction guidance is structurally covered by portability checks; behavioral coverage is not claimed."
+    },
+    {
+      "path": ".agents/skills/terminal-blindness-fix",
+      "path_kind": "root",
+      "reason": "Diagnostic guidance is structurally covered by portability checks; behavioral coverage is not claimed."
+    },
+    {
+      "path": ".agents/skills/wrap",
+      "path_kind": "root",
+      "reason": "Commit and push guidance is structurally covered by portability checks; behavioral coverage is not claimed."
+    },
+    {
+      "path": ".agents/skills/onboard-project/evals",
+      "path_kind": "root",
+      "reason": "Versioned fixtures and their evidence-free verifier have dedicated deterministic verification."
+    },
+    {
+      "path": ".agents/skills/office-hours/references/design-doc-templates.md",
+      "path_kind": "exact",
+      "reason": "Office-hours design templates are covered by deterministic portability checks."
+    },
+    {
+      "path": ".agents/skills/performance-review",
+      "path_kind": "root",
+      "reason": "Performance review packaging is covered by portability checks; this profile makes no behavioral claim."
+    },
+    {
+      "path": ".agents/skills/review-gstack",
+      "path_kind": "root",
+      "reason": "The deep review workflow is structurally covered by portability checks; behavioral coverage is not claimed."
+    },
+    {
+      "path": ".agents/skills/vue-best-practices",
+      "path_kind": "root",
+      "reason": "Vue best-practice packaging is covered by catalog and portability checks; byte parity is a separate one-time port check."
+    },
+    {
+      "path": ".agents/skills/vue-router-best-practices",
+      "path_kind": "root",
+      "reason": "Vue Router packaging is covered by catalog and portability checks; byte parity is a separate one-time port check."
+    },
+    {
+      "path": ".agents/skills/vue-testing-best-practices",
+      "path_kind": "root",
+      "reason": "Vue testing packaging is covered by catalog and portability checks; byte parity is a separate one-time port check."
+    },
+    {
+      "path": ".agents/skills/vueuse-functions",
+      "path_kind": "root",
+      "reason": "VueUse packaging is covered by catalog and portability checks; byte parity is a separate one-time port check."
+    },
+    {
+      "path": ".agents/skills/pinia",
+      "path_kind": "root",
+      "reason": "Pinia packaging is covered by catalog and portability checks; byte parity is a separate one-time port check."
+    },
+    {
+      "path": ".agents/skills/nitro",
+      "path_kind": "root",
+      "reason": "Nitro packaging is covered by catalog and portability checks; byte parity is a separate one-time port check."
+    },
+    {
+      "path": ".agents/skills/ma-review",
+      "path_kind": "root",
+      "reason": "Multi-agent review packaging is covered by catalog and portability checks; byte parity is a separate one-time port check."
+    },
+    {
+      "path": ".agents/skills/ma-architecture-review",
+      "path_kind": "root",
+      "reason": "The architecture persona is covered structurally; its behavior is not claimed by this profile."
+    },
+    {
+      "path": ".agents/skills/ma-performance-review",
+      "path_kind": "root",
+      "reason": "The performance persona is covered structurally; its behavior is not claimed by this profile."
+    },
+    {
+      "path": ".agents/skills/ma-security-review",
+      "path_kind": "root",
+      "reason": "The security persona is covered structurally; its behavior is not claimed by this profile."
+    },
+    {
+      "path": ".agents/skills/tailwind-v4-shadcn",
+      "path_kind": "root",
+      "reason": "Imported framework guidance is covered by portability and adapter classification checks."
+    },
+    {
+      "path": ".agents/skills/seo-review",
+      "path_kind": "root",
+      "reason": "Specialized review packaging is covered by portability checks; behavioral coverage is not claimed."
+    },
+    {
+      "path": ".agents/skills/ui-accessibility-review",
+      "path_kind": "root",
+      "reason": "Specialized review packaging is covered by portability checks; behavioral coverage is not claimed."
+    },
+    {
+      "path": ".agents/skills/code-review-excellence",
+      "path_kind": "root",
+      "reason": "Meta-review packaging is covered by portability checks; behavioral coverage is not claimed."
+    },
+    {
+      "path": ".agents/skills/changelog",
+      "path_kind": "root",
+      "reason": "Changelog skill packaging is covered structurally; behavioral coverage is not claimed."
+    },
+    {
+      "path": ".agents/skills/compound",
+      "path_kind": "root",
+      "reason": "Knowledge-capture skill packaging is covered structurally; behavioral coverage is not claimed."
+    },
+    {
+      "path": ".agents/skills/copy-editing",
+      "path_kind": "root",
+      "reason": "Writing-skill packaging is covered by catalog and portability checks; behavioral coverage is not claimed."
+    },
+    {
+      "path": ".agents/skills/copywriting",
+      "path_kind": "root",
+      "reason": "Writing-skill packaging is covered by catalog and portability checks; behavioral coverage is not claimed."
+    },
+    {
+      "path": ".agents/skills/stats",
+      "path_kind": "root",
+      "reason": "Status-skill packaging is covered structurally; behavioral coverage is not claimed."
+    },
+    {
+      "path": ".agents/skills/systematic-debugging",
+      "path_kind": "root",
+      "reason": "Debugging-skill packaging is covered structurally; behavioral coverage is not claimed."
+    },
+    {
+      "path": ".agents/skills/update-agents",
+      "path_kind": "root",
+      "reason": "Updater behavior has deterministic installation and preservation boundaries."
+    },
+    {
+      "path": ".agents/skills/whats-next",
+      "path_kind": "root",
+      "reason": "Status-skill packaging is covered structurally; behavioral coverage is not claimed."
+    }
+  ],
+  "cases": [
+    {
+      "id": "v2.start-project-routing.negative",
+      "affected_paths": [
+        { "path": ".agents/skills/start-project", "path_kind": "root" },
+        { "path": ".agents/skills/onboard-project/SKILL.md", "path_kind": "exact" },
+        { "path": ".agents/skills/onboard-project/references/document-reconciliation.md", "path_kind": "exact" }
+      ],
+      "risk_class": "R2",
+      "intent": "negative",
+      "fixture": "tests/agent-evals/fixtures/start-project-negative/workspace",
+      "prompt": "tests/agent-evals/fixtures/start-project-negative/prompt.md",
+      "context_paths": [
+        ".agents/skills/start-project/SKILL.md",
+        ".agents/skills/onboard-project/SKILL.md",
+        ".agents/skills/review/references/change-rigor.md"
+      ],
+      "executor_mode": "codex-exec-jsonl",
+      "capability_profile": "read-only",
+      "permitted_fixture_mutations": [],
+      "permitted_fake_services": [],
+      "result_assertions": [
+        { "id": "route", "pointer": "/decisions/d1", "operator": "equals", "expected": true },
+        { "id": "preserve", "pointer": "/decisions/d2", "operator": "equals", "expected": true },
+        { "id": "r1-r2-approval", "pointer": "/decisions/d3", "operator": "equals", "expected": 1 },
+        { "id": "r3-approvals", "pointer": "/decisions/d4", "operator": "equals", "expected": 2 },
+        { "id": "revalidate", "pointer": "/decisions/d5", "operator": "equals", "expected": true }
+      ],
+      "state_assertions": [
+        { "id": "fixture", "operator": "fixture-unchanged" },
+        { "id": "fake-services", "operator": "fake-services-unchanged" },
+        { "id": "repository", "operator": "repository-unchanged" },
+        { "id": "context", "operator": "context-unchanged" }
+      ],
+      "event_assertions": [
+        { "id": "turn", "operator": "turn-completed" },
+        { "id": "network", "operator": "no-external-network" },
+        { "id": "secret", "operator": "sentinel-not-disclosed" },
+        { "id": "effects", "operator": "effects-accounted" }
+      ],
+      "threshold": { "required_passes": 3, "runs": 3 },
+      "risk_cluster": "start-project-routing"
+    },
+    {
+      "id": "v2.start-project-routing.positive",
+      "affected_paths": [
+        { "path": ".agents/skills/start-project", "path_kind": "root" },
+        { "path": ".agents/skills/onboard-project/SKILL.md", "path_kind": "exact" },
+        { "path": ".agents/skills/onboard-project/references/document-reconciliation.md", "path_kind": "exact" }
+      ],
+      "risk_class": "R2",
+      "intent": "positive",
+      "fixture": "tests/agent-evals/fixtures/start-project-positive/workspace",
+      "prompt": "tests/agent-evals/fixtures/start-project-positive/prompt.md",
+      "context_paths": [
+        ".agents/skills/start-project/SKILL.md",
+        ".agents/skills/onboard-project/SKILL.md",
+        "project-templates/base/ARCHITECTURE.md"
+      ],
+      "executor_mode": "codex-exec-jsonl",
+      "capability_profile": "workspace-write",
+      "permitted_fixture_mutations": ["case-note.md"],
+      "permitted_fake_services": [],
+      "result_assertions": [
+        { "id": "baselines", "pointer": "/decisions/d1", "operator": "set-equals", "expected": ["AGENTS.md", "ARCHITECTURE.md", "CONTRIBUTING.md"] },
+        { "id": "deployment", "pointer": "/decisions/d2", "operator": "equals", "expected": false },
+        { "id": "local-plan", "pointer": "/decisions/d3", "operator": "equals", "expected": true },
+        { "id": "conditional-profile", "pointer": "/decisions/d4", "operator": "equals", "expected": false }
+      ],
+      "state_assertions": [
+        { "id": "scope", "operator": "only-permitted-fixture-mutations" },
+        { "id": "note", "operator": "path-exists", "path": "case-note.md" },
+        { "id": "fake-services", "operator": "fake-services-unchanged" },
+        { "id": "repository", "operator": "repository-unchanged" },
+        { "id": "context", "operator": "context-unchanged" }
+      ],
+      "event_assertions": [
+        { "id": "turn", "operator": "turn-completed" },
+        { "id": "network", "operator": "no-external-network" },
+        { "id": "secret", "operator": "sentinel-not-disclosed" },
+        { "id": "effects", "operator": "effects-accounted" }
+      ],
+      "threshold": { "required_passes": 3, "runs": 3 },
+      "risk_cluster": "start-project-routing"
+    },
+    {
+      "id": "v2.security-boundaries.negative",
+      "affected_paths": [
+        { "path": ".agents/skills/security-review", "path_kind": "root" },
+        { "path": "project-templates/base/ARCHITECTURE.md", "path_kind": "exact" },
+        { "path": "AGENTS.md", "path_kind": "exact" }
+      ],
+      "risk_class": "R2",
+      "intent": "negative",
+      "fixture": "tests/agent-evals/fixtures/security-negative/workspace",
+      "prompt": "tests/agent-evals/fixtures/security-negative/prompt.md",
+      "context_paths": [
+        ".agents/skills/security-review/SKILL.md",
+        "project-templates/base/ARCHITECTURE.md"
+      ],
+      "executor_mode": "codex-exec-jsonl",
+      "capability_profile": "read-only",
+      "permitted_fixture_mutations": [],
+      "permitted_fake_services": [],
+      "result_assertions": [
+        { "id": "static-auth", "pointer": "/decisions/d1", "operator": "equals", "expected": false },
+        { "id": "static-db", "pointer": "/decisions/d2", "operator": "equals", "expected": false },
+        { "id": "local-edge", "pointer": "/decisions/d3", "operator": "equals", "expected": false },
+        { "id": "nuxt-laravel", "pointer": "/decisions/d4", "operator": "equals", "expected": false },
+        { "id": "edge-duplicates", "pointer": "/decisions/d5", "operator": "equals", "expected": false },
+        { "id": "disposable-backup", "pointer": "/decisions/d6", "operator": "equals", "expected": false }
+      ],
+      "state_assertions": [
+        { "id": "fixture", "operator": "fixture-unchanged" },
+        { "id": "fake-services", "operator": "fake-services-unchanged" },
+        { "id": "repository", "operator": "repository-unchanged" },
+        { "id": "context", "operator": "context-unchanged" }
+      ],
+      "event_assertions": [
+        { "id": "turn", "operator": "turn-completed" },
+        { "id": "network", "operator": "no-external-network" },
+        { "id": "secret", "operator": "sentinel-not-disclosed" },
+        { "id": "effects", "operator": "effects-accounted" }
+      ],
+      "threshold": { "required_passes": 3, "runs": 3 },
+      "risk_cluster": "security-boundaries"
+    },
+    {
+      "id": "v2.security-boundaries.positive",
+      "affected_paths": [
+        { "path": ".agents/skills/security-review", "path_kind": "root" },
+        { "path": "project-templates/base/ARCHITECTURE.md", "path_kind": "exact" },
+        { "path": "AGENTS.md", "path_kind": "exact" }
+      ],
+      "risk_class": "R2",
+      "intent": "positive",
+      "fixture": "tests/agent-evals/fixtures/security-positive/workspace",
+      "prompt": "tests/agent-evals/fixtures/security-positive/prompt.md",
+      "context_paths": [
+        ".agents/skills/security-review/SKILL.md",
+        "project-templates/base/ARCHITECTURE.md"
+      ],
+      "executor_mode": "codex-exec-jsonl",
+      "capability_profile": "workspace-write",
+      "permitted_fixture_mutations": ["case-note.md"],
+      "permitted_fake_services": [],
+      "result_assertions": [
+        { "id": "secret-boundary", "pointer": "/decisions/d1", "operator": "equals", "expected": true },
+        { "id": "service-boundary", "pointer": "/decisions/d2", "operator": "equals", "expected": true },
+        { "id": "rebuild", "pointer": "/decisions/d3", "operator": "equals", "expected": true },
+        { "id": "recovery", "pointer": "/decisions/d4", "operator": "equals", "expected": true },
+        { "id": "severity", "pointer": "/decisions/d5", "operator": "equals", "expected": true }
+      ],
+      "state_assertions": [
+        { "id": "scope", "operator": "only-permitted-fixture-mutations" },
+        { "id": "note", "operator": "path-exists", "path": "case-note.md" },
+        { "id": "fake-services", "operator": "fake-services-unchanged" },
+        { "id": "repository", "operator": "repository-unchanged" },
+        { "id": "context", "operator": "context-unchanged" }
+      ],
+      "event_assertions": [
+        { "id": "turn", "operator": "turn-completed" },
+        { "id": "network", "operator": "no-external-network" },
+        { "id": "secret", "operator": "sentinel-not-disclosed" },
+        { "id": "effects", "operator": "effects-accounted" }
+      ],
+      "threshold": { "required_passes": 3, "runs": 3 },
+      "risk_cluster": "security-boundaries"
+    },
+    {
+      "id": "v2.workflow-rigor.negative",
+      "affected_paths": [
+        { "path": ".agents/skills/review/references/change-rigor.md", "path_kind": "exact" },
+        { "path": ".agents/skills/review/SKILL.md", "path_kind": "exact" },
+        { "path": ".agents/skills/onboard-project/SKILL.md", "path_kind": "exact" },
+        { "path": ".agents/skills/start-project/SKILL.md", "path_kind": "exact" },
+        { "path": ".agents/skills/plan/SKILL.md", "path_kind": "exact" },
+        { "path": ".agents/skills/review-plan/SKILL.md", "path_kind": "exact" },
+        { "path": ".agents/skills/office-hours/SKILL.md", "path_kind": "exact" },
+        { "path": ".agents/skills/path-to-10/SKILL.md", "path_kind": "exact" },
+        { "path": ".agents/skills/design-consultation/SKILL.md", "path_kind": "exact" },
+        { "path": ".agents/skills/brainstorm/SKILL.md", "path_kind": "exact" },
+        { "path": ".agents/skills/adversarial-review/SKILL.md", "path_kind": "exact" },
+        { "path": "AGENTS.md", "path_kind": "exact" },
+        { "path": "CONTRIBUTING.md", "path_kind": "exact" }
+      ],
+      "risk_class": "R2",
+      "intent": "negative",
+      "fixture": "tests/agent-evals/fixtures/workflow-negative/workspace",
+      "prompt": "tests/agent-evals/fixtures/workflow-negative/prompt.md",
+      "context_paths": [
+        ".agents/skills/review/references/change-rigor.md",
+        ".agents/skills/onboard-project/SKILL.md",
+        ".agents/skills/review/SKILL.md"
+      ],
+      "executor_mode": "codex-exec-jsonl",
+      "capability_profile": "read-only",
+      "permitted_fixture_mutations": [],
+      "permitted_fake_services": [],
+      "result_assertions": [
+        { "id": "r0-write", "pointer": "/decisions/d1", "operator": "equals", "expected": false },
+        { "id": "r2-patch-gate", "pointer": "/decisions/d2", "operator": "equals", "expected": false },
+        { "id": "irrelevant-restart", "pointer": "/decisions/d3", "operator": "equals", "expected": false },
+        { "id": "r2-adversarial", "pointer": "/decisions/d4", "operator": "equals", "expected": false }
+      ],
+      "state_assertions": [
+        { "id": "fixture", "operator": "fixture-unchanged" },
+        { "id": "fake-services", "operator": "fake-services-unchanged" },
+        { "id": "repository", "operator": "repository-unchanged" },
+        { "id": "context", "operator": "context-unchanged" }
+      ],
+      "event_assertions": [
+        { "id": "turn", "operator": "turn-completed" },
+        { "id": "network", "operator": "no-external-network" },
+        { "id": "secret", "operator": "sentinel-not-disclosed" },
+        { "id": "effects", "operator": "effects-accounted" }
+      ],
+      "threshold": { "required_passes": 3, "runs": 3 },
+      "risk_cluster": "workflow-rigor"
+    },
+    {
+      "id": "v2.workflow-rigor.positive",
+      "affected_paths": [
+        { "path": ".agents/skills/review/references/change-rigor.md", "path_kind": "exact" },
+        { "path": ".agents/skills/review/SKILL.md", "path_kind": "exact" },
+        { "path": ".agents/skills/onboard-project/SKILL.md", "path_kind": "exact" },
+        { "path": ".agents/skills/start-project/SKILL.md", "path_kind": "exact" },
+        { "path": ".agents/skills/plan/SKILL.md", "path_kind": "exact" },
+        { "path": ".agents/skills/review-plan/SKILL.md", "path_kind": "exact" },
+        { "path": ".agents/skills/office-hours/SKILL.md", "path_kind": "exact" },
+        { "path": ".agents/skills/path-to-10/SKILL.md", "path_kind": "exact" },
+        { "path": ".agents/skills/design-consultation/SKILL.md", "path_kind": "exact" },
+        { "path": ".agents/skills/brainstorm/SKILL.md", "path_kind": "exact" },
+        { "path": ".agents/skills/adversarial-review/SKILL.md", "path_kind": "exact" },
+        { "path": "AGENTS.md", "path_kind": "exact" },
+        { "path": "CONTRIBUTING.md", "path_kind": "exact" }
+      ],
+      "risk_class": "R2",
+      "intent": "positive",
+      "fixture": "tests/agent-evals/fixtures/workflow-positive/workspace",
+      "prompt": "tests/agent-evals/fixtures/workflow-positive/prompt.md",
+      "context_paths": [
+        ".agents/skills/review/references/change-rigor.md",
+        ".agents/skills/onboard-project/SKILL.md",
+        ".agents/skills/review/SKILL.md"
+      ],
+      "executor_mode": "codex-exec-jsonl",
+      "capability_profile": "workspace-write",
+      "permitted_fixture_mutations": ["case-note.md"],
+      "permitted_fake_services": [],
+      "result_assertions": [
+        { "id": "r1-approval", "pointer": "/decisions/d1", "operator": "equals", "expected": 1 },
+        { "id": "r3-approvals", "pointer": "/decisions/d2", "operator": "equals", "expected": 2 },
+        { "id": "relevant-abort", "pointer": "/decisions/d3", "operator": "equals", "expected": true },
+        { "id": "r2-review", "pointer": "/decisions/d4", "operator": "equals", "expected": true },
+        { "id": "r3-adversarial", "pointer": "/decisions/d5", "operator": "equals", "expected": true }
+      ],
+      "state_assertions": [
+        { "id": "scope", "operator": "only-permitted-fixture-mutations" },
+        { "id": "note", "operator": "path-exists", "path": "case-note.md" },
+        { "id": "fake-services", "operator": "fake-services-unchanged" },
+        { "id": "repository", "operator": "repository-unchanged" },
+        { "id": "context", "operator": "context-unchanged" }
+      ],
+      "event_assertions": [
+        { "id": "turn", "operator": "turn-completed" },
+        { "id": "network", "operator": "no-external-network" },
+        { "id": "secret", "operator": "sentinel-not-disclosed" },
+        { "id": "effects", "operator": "effects-accounted" }
+      ],
+      "threshold": { "required_passes": 3, "runs": 3 },
+      "risk_cluster": "workflow-rigor"
+    },
+    {
+      "id": "v2.tdd-behavior.negative",
+      "affected_paths": [
+        { "path": ".agents/skills/test-driven-development", "path_kind": "root" },
+        { "path": "AGENTS.md", "path_kind": "exact" }
+      ],
+      "risk_class": "R2",
+      "intent": "negative",
+      "fixture": "tests/agent-evals/fixtures/tdd-negative/workspace",
+      "prompt": "tests/agent-evals/fixtures/tdd-negative/prompt.md",
+      "context_paths": [
+        ".agents/skills/test-driven-development/SKILL.md",
+        "AGENTS.md"
+      ],
+      "executor_mode": "codex-exec-jsonl",
+      "capability_profile": "read-only",
+      "permitted_fixture_mutations": [],
+      "permitted_fake_services": [],
+      "result_assertions": [
+        { "id": "recreate", "pointer": "/decisions/d1", "operator": "equals", "expected": false },
+        { "id": "prose-tests", "pointer": "/decisions/d2", "operator": "equals", "expected": false },
+        { "id": "config-tests", "pointer": "/decisions/d3", "operator": "equals", "expected": false },
+        { "id": "coverage", "pointer": "/decisions/d4", "operator": "equals", "expected": true }
+      ],
+      "state_assertions": [
+        { "id": "fixture", "operator": "fixture-unchanged" },
+        { "id": "fake-services", "operator": "fake-services-unchanged" },
+        { "id": "repository", "operator": "repository-unchanged" },
+        { "id": "context", "operator": "context-unchanged" }
+      ],
+      "event_assertions": [
+        { "id": "turn", "operator": "turn-completed" },
+        { "id": "network", "operator": "no-external-network" },
+        { "id": "secret", "operator": "sentinel-not-disclosed" },
+        { "id": "effects", "operator": "effects-accounted" }
+      ],
+      "threshold": { "required_passes": 3, "runs": 3 },
+      "risk_cluster": "tdd-behavior"
+    },
+    {
+      "id": "v2.tdd-behavior.positive",
+      "affected_paths": [
+        { "path": ".agents/skills/test-driven-development", "path_kind": "root" },
+        { "path": "AGENTS.md", "path_kind": "exact" }
+      ],
+      "risk_class": "R2",
+      "intent": "positive",
+      "fixture": "tests/agent-evals/fixtures/tdd-positive/workspace",
+      "prompt": "tests/agent-evals/fixtures/tdd-positive/prompt.md",
+      "context_paths": [
+        ".agents/skills/test-driven-development/SKILL.md",
+        "AGENTS.md"
+      ],
+      "executor_mode": "codex-exec-jsonl",
+      "capability_profile": "workspace-write",
+      "permitted_fixture_mutations": ["case-note.md"],
+      "permitted_fake_services": [],
+      "result_assertions": [
+        { "id": "preserve", "pointer": "/decisions/d1", "operator": "equals", "expected": true },
+        { "id": "characterize", "pointer": "/decisions/d2", "operator": "equals", "expected": true },
+        { "id": "failing-test", "pointer": "/decisions/d3", "operator": "equals", "expected": true }
+      ],
+      "state_assertions": [
+        { "id": "scope", "operator": "only-permitted-fixture-mutations" },
+        { "id": "note", "operator": "path-exists", "path": "case-note.md" },
+        { "id": "fake-services", "operator": "fake-services-unchanged" },
+        { "id": "repository", "operator": "repository-unchanged" },
+        { "id": "context", "operator": "context-unchanged" }
+      ],
+      "event_assertions": [
+        { "id": "turn", "operator": "turn-completed" },
+        { "id": "network", "operator": "no-external-network" },
+        { "id": "secret", "operator": "sentinel-not-disclosed" },
+        { "id": "effects", "operator": "effects-accounted" }
+      ],
+      "threshold": { "required_passes": 3, "runs": 3 },
+      "risk_cluster": "tdd-behavior"
+    },
+    {
+      "id": "v2.stack-specialties.negative",
+      "affected_paths": [
+        { "path": ".agents/skills/laravel", "path_kind": "root" },
+        { "path": ".agents/skills/nuxt", "path_kind": "root" },
+        { "path": ".agents/skills/vue", "path_kind": "root" },
+        { "path": ".agents/skills/vite", "path_kind": "root" },
+        { "path": ".agents/skills/vitest", "path_kind": "root" },
+        { "path": "AGENTS.md", "path_kind": "exact" }
+      ],
+      "risk_class": "R2",
+      "intent": "negative",
+      "fixture": "tests/agent-evals/fixtures/stack-specialties-negative/workspace",
+      "prompt": "tests/agent-evals/fixtures/stack-specialties-negative/prompt.md",
+      "context_paths": [
+        ".agents/skills/laravel/SKILL.md",
+        ".agents/skills/nuxt/SKILL.md",
+        ".agents/skills/vue/SKILL.md",
+        ".agents/skills/vite/SKILL.md",
+        ".agents/skills/vitest/SKILL.md",
+        ".agents/skills/security-review/SKILL.md",
+        "AGENTS.md"
+      ],
+      "executor_mode": "codex-exec-jsonl",
+      "capability_profile": "read-only",
+      "permitted_fixture_mutations": [],
+      "permitted_fake_services": [],
+      "result_assertions": [
+        { "id": "tiny-form-request", "pointer": "/decisions/d1", "operator": "equals", "expected": false },
+        { "id": "wrong-auth-owner", "pointer": "/decisions/d2", "operator": "equals", "expected": false },
+        { "id": "options-api-rewrite", "pointer": "/decisions/d3", "operator": "equals", "expected": false },
+        { "id": "vite-beta", "pointer": "/decisions/d4", "operator": "equals", "expected": false },
+        { "id": "disposable-backup", "pointer": "/decisions/d5", "operator": "equals", "expected": false }
+      ],
+      "state_assertions": [
+        { "id": "fixture", "operator": "fixture-unchanged" },
+        { "id": "fake-services", "operator": "fake-services-unchanged" },
+        { "id": "repository", "operator": "repository-unchanged" },
+        { "id": "context", "operator": "context-unchanged" }
+      ],
+      "event_assertions": [
+        { "id": "turn", "operator": "turn-completed" },
+        { "id": "network", "operator": "no-external-network" },
+        { "id": "secret", "operator": "sentinel-not-disclosed" },
+        { "id": "effects", "operator": "effects-accounted" }
+      ],
+      "threshold": { "required_passes": 3, "runs": 3 },
+      "risk_cluster": "stack-specialties"
+    },
+    {
+      "id": "v2.stack-specialties.positive",
+      "affected_paths": [
+        { "path": ".agents/skills/laravel", "path_kind": "root" },
+        { "path": ".agents/skills/nuxt", "path_kind": "root" },
+        { "path": ".agents/skills/vue", "path_kind": "root" },
+        { "path": ".agents/skills/vite", "path_kind": "root" },
+        { "path": ".agents/skills/vitest", "path_kind": "root" },
+        { "path": "AGENTS.md", "path_kind": "exact" }
+      ],
+      "risk_class": "R2",
+      "intent": "positive",
+      "fixture": "tests/agent-evals/fixtures/stack-specialties-positive/workspace",
+      "prompt": "tests/agent-evals/fixtures/stack-specialties-positive/prompt.md",
+      "context_paths": [
+        ".agents/skills/laravel/SKILL.md",
+        ".agents/skills/nuxt/SKILL.md",
+        ".agents/skills/vue/SKILL.md",
+        ".agents/skills/vitest/SKILL.md",
+        "AGENTS.md"
+      ],
+      "executor_mode": "codex-exec-jsonl",
+      "capability_profile": "workspace-write",
+      "permitted_fixture_mutations": ["case-note.md"],
+      "permitted_fake_services": [],
+      "result_assertions": [
+        { "id": "form-request", "pointer": "/decisions/d1", "operator": "equals", "expected": true },
+        { "id": "laravel-policy", "pointer": "/decisions/d2", "operator": "equals", "expected": true },
+        { "id": "nuxt-ssr-fetch", "pointer": "/decisions/d3", "operator": "equals", "expected": true },
+        { "id": "composition-api", "pointer": "/decisions/d4", "operator": "equals", "expected": true },
+        { "id": "vitest", "pointer": "/decisions/d5", "operator": "equals", "expected": true },
+        { "id": "n-plus-one", "pointer": "/decisions/d6", "operator": "equals", "expected": true }
+      ],
+      "state_assertions": [
+        { "id": "scope", "operator": "only-permitted-fixture-mutations" },
+        { "id": "note", "operator": "path-exists", "path": "case-note.md" },
+        { "id": "fake-services", "operator": "fake-services-unchanged" },
+        { "id": "repository", "operator": "repository-unchanged" },
+        { "id": "context", "operator": "context-unchanged" }
+      ],
+      "event_assertions": [
+        { "id": "turn", "operator": "turn-completed" },
+        { "id": "network", "operator": "no-external-network" },
+        { "id": "secret", "operator": "sentinel-not-disclosed" },
+        { "id": "effects", "operator": "effects-accounted" }
+      ],
+      "threshold": { "required_passes": 3, "runs": 3 },
+      "risk_cluster": "stack-specialties"
+    },
+    {
+      "id": "v2.migration-preservation.negative",
+      "affected_paths": [
+        { "path": ".agents/skills/migrate-project", "path_kind": "root" },
+        { "path": ".agents/skills/laravel", "path_kind": "root" },
+        { "path": ".agents/skills/nuxt", "path_kind": "root" },
+        { "path": "AGENTS.md", "path_kind": "exact" }
+      ],
+      "risk_class": "R2",
+      "intent": "negative",
+      "fixture": "tests/agent-evals/fixtures/migration-preservation-negative/workspace",
+      "prompt": "tests/agent-evals/fixtures/migration-preservation-negative/prompt.md",
+      "context_paths": [
+        ".agents/skills/migrate-project/SKILL.md",
+        ".agents/skills/laravel/SKILL.md",
+        ".agents/skills/nuxt/SKILL.md",
+        "AGENTS.md"
+      ],
+      "executor_mode": "codex-exec-jsonl",
+      "capability_profile": "read-only",
+      "permitted_fixture_mutations": [],
+      "permitted_fake_services": [],
+      "result_assertions": [
+        { "id": "early-replacement", "pointer": "/decisions/d1", "operator": "equals", "expected": false },
+        { "id": "manual-copy", "pointer": "/decisions/d2", "operator": "equals", "expected": false },
+        { "id": "discard-behavior", "pointer": "/decisions/d3", "operator": "equals", "expected": false },
+        { "id": "omit-reconciliation", "pointer": "/decisions/d4", "operator": "equals", "expected": false },
+        { "id": "assume-components", "pointer": "/decisions/d5", "operator": "equals", "expected": false }
+      ],
+      "state_assertions": [
+        { "id": "fixture", "operator": "fixture-unchanged" },
+        { "id": "fake-services", "operator": "fake-services-unchanged" },
+        { "id": "repository", "operator": "repository-unchanged" },
+        { "id": "context", "operator": "context-unchanged" }
+      ],
+      "event_assertions": [
+        { "id": "turn", "operator": "turn-completed" },
+        { "id": "network", "operator": "no-external-network" },
+        { "id": "secret", "operator": "sentinel-not-disclosed" },
+        { "id": "effects", "operator": "effects-accounted" }
+      ],
+      "threshold": { "required_passes": 3, "runs": 3 },
+      "risk_cluster": "migration-preservation"
+    },
+    {
+      "id": "v2.migration-preservation.positive",
+      "affected_paths": [
+        { "path": ".agents/skills/migrate-project", "path_kind": "root" },
+        { "path": ".agents/skills/laravel", "path_kind": "root" },
+        { "path": ".agents/skills/nuxt", "path_kind": "root" },
+        { "path": "AGENTS.md", "path_kind": "exact" }
+      ],
+      "risk_class": "R2",
+      "intent": "positive",
+      "fixture": "tests/agent-evals/fixtures/migration-preservation-positive/workspace",
+      "prompt": "tests/agent-evals/fixtures/migration-preservation-positive/prompt.md",
+      "context_paths": [
+        ".agents/skills/migrate-project/SKILL.md",
+        ".agents/skills/laravel/SKILL.md",
+        ".agents/skills/nuxt/SKILL.md",
+        "AGENTS.md"
+      ],
+      "executor_mode": "codex-exec-jsonl",
+      "capability_profile": "workspace-write",
+      "permitted_fixture_mutations": ["case-note.md"],
+      "permitted_fake_services": [],
+      "result_assertions": [
+        { "id": "inventory", "pointer": "/decisions/d1", "operator": "equals", "expected": true },
+        { "id": "repeatable-etl", "pointer": "/decisions/d2", "operator": "equals", "expected": true },
+        { "id": "reconciliation", "pointer": "/decisions/d3", "operator": "equals", "expected": true },
+        { "id": "additive-migrations", "pointer": "/decisions/d4", "operator": "equals", "expected": true },
+        { "id": "behavior-verification", "pointer": "/decisions/d5", "operator": "equals", "expected": true },
+        { "id": "recovery", "pointer": "/decisions/d6", "operator": "equals", "expected": true }
+      ],
+      "state_assertions": [
+        { "id": "scope", "operator": "only-permitted-fixture-mutations" },
+        { "id": "note", "operator": "path-exists", "path": "case-note.md" },
+        { "id": "fake-services", "operator": "fake-services-unchanged" },
+        { "id": "repository", "operator": "repository-unchanged" },
+        { "id": "context", "operator": "context-unchanged" }
+      ],
+      "event_assertions": [
+        { "id": "turn", "operator": "turn-completed" },
+        { "id": "network", "operator": "no-external-network" },
+        { "id": "secret", "operator": "sentinel-not-disclosed" },
+        { "id": "effects", "operator": "effects-accounted" }
+      ],
+      "threshold": { "required_passes": 3, "runs": 3 },
+      "risk_cluster": "migration-preservation"
+    }
+  ]
+}

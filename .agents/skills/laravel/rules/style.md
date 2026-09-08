@@ -91,7 +91,9 @@ $uri = Uri::of('https://example.com/search')
 
 Use `$request->string('name')` to get a fluent `Stringable` directly from request input for immediate chaining.
 
-Use `search-docs` for the full list of available methods — these helpers are extensive.
+Consult sources for the installed Laravel version or the official Laravel
+documentation for the full list of available methods; these helpers are
+extensive.
 
 ## No Inline JS/CSS in Blade
 

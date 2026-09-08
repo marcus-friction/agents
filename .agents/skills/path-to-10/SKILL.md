@@ -20,7 +20,7 @@ Before passing judgment, you must understand the environment and select the rule
 4. **Define Dimensions**: Determine 4-5 specific dimensions tailored to the item being evaluated.
    - *Backend examples*: Query efficiency, Abstraction, Type safety.
    - *Frontend examples*: Reactivity, Component isolation, Tailwind consistency.
-   - *Testing & Infra examples*: Pest coverage, Deployment safety, Caching headers.
+   - *Testing & Infra examples*: Pest/Vitest coverage, Deployment safety, Caching headers.
 
 ---
 
@@ -56,5 +56,10 @@ Based on the flaws identified:
 
 ## Phase 4: Handoff & Approval
 
-Once the path is charted, ask the user:
-> "This is the Path to 10. Do you approve of executing these corrections?"
+For a report-only or evaluation-only request, end after presenting the evaluation
+and path forward. Do not ask for approval to execute corrections, write an
+artifact, or begin implementation.
+
+If the user also requested corrections or implementation, continue only within
+that supplied authority. Ask for a decision only when a material choice or an
+R3 effect still lacks approval; do not add a generic execution gate.

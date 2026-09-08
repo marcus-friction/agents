@@ -1,0 +1,66 @@
+{
+  "record_format": "NUL-delimited sorted type, relative path, POSIX owner-execute mode, and content SHA-256",
+  "roots": {
+    "laravel": {
+      "entries": 23,
+      "sha256": "9446072cf4a908040871e87e4632de06ef6f9a5f6ced370d819e6637376e524c"
+    },
+    "ma-architecture-review": {
+      "entries": 2,
+      "sha256": "7be6dcf00b6bc68ae74968addb5f9bf61f8a8a91d1bd5368b2ef30f3cc811d46"
+    },
+    "ma-performance-review": {
+      "entries": 2,
+      "sha256": "fb1d8622218b7d6bb594e5df27285d33127128d44b464b7358df559765088c2b"
+    },
+    "ma-review": {
+      "entries": 2,
+      "sha256": "49ee51a0adfb0fe180c5b28e8d36f2db52780121211939122c8b16a893f453da"
+    },
+    "ma-security-review": {
+      "entries": 2,
+      "sha256": "d762dacc83e28884ce2de76467f4756145ddf2644368f8b312e139ffe3799a00"
+    },
+    "nitro": {
+      "entries": 17,
+      "sha256": "e0212bbc20103430aed254608d96b3f455d0f15b9c764307d6928174e0697b72"
+    },
+    "nuxt": {
+      "entries": 22,
+      "sha256": "f8a7733bd4aaa3fdd83e4370049a889db52e0b0a8f2c81b4ec166cb9e20571c8"
+    },
+    "pinia": {
+      "entries": 13,
+      "sha256": "9498355cd14875522bf76585ab4b78205b87b04903921936e59a7bccd4cde8b5"
+    },
+    "vite": {
+      "entries": 10,
+      "sha256": "7c5b8eea95e597809609e46d5859184eef0710212a75361a984c88b015673fef"
+    },
+    "vitest": {
+      "entries": 23,
+      "sha256": "53485612cc9099344d37ab3fe34854ae0aa50b86ec4d88f5b35d7a48e7191e6b"
+    },
+    "vue": {
+      "entries": 7,
+      "sha256": "b38eb316029b55295668a7cafbe61a24ff8216b36a952c86654812a45662ee21"
+    },
+    "vue-best-practices": {
+      "entries": 208,
+      "sha256": "5c2c7b9cfc22acd3af6860ea514e4606b860a2bf9f257c5ea96ae4fe9aea19e9"
+    },
+    "vue-router-best-practices": {
+      "entries": 13,
+      "sha256": "42305fbc7bf190235bb8455e4901255a34b34b57fa1b21e34276f0b513c12e4b"
+    },
+    "vue-testing-best-practices": {
+      "entries": 16,
+      "sha256": "bb4b4ccb8838240d819193aaa9c921ceed819f56a523a10cd36af84dd07652a6"
+    },
+    "vueuse-functions": {
+      "entries": 271,
+      "sha256": "d40b22627fee550db091b65cb1a64eaa6d3c71cee6135a9a323eed9061ca0622"
+    }
+  },
+  "schema_version": 1
+}

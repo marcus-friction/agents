@@ -1,123 +1,91 @@
 ---
 name: contribute-back
-description: Scan local agent ecosystem (.agents/) for modifications or new skills, propose them to the user, and automatically create a Pull Request to the central marcus-friction/agents repository.
+description: Compare local .agents improvements with the central marcus-friction/agents repository (or another explicitly named upstream) and prepare a safe contribution proposal. Use only when the user asks to contribute, upstream, or open a pull request; publication remains a separate exact approval.
 ---
 
-# Agent Instruction: Contribute Back
+# Contribute Back
 
-You are tasked with comparing the user's local `.agents/` directory against the upstream central repository (`https://github.com/marcus-friction/agents.git`) to identify improvements, new skills, or fixes that can be contributed back to the community.
+Discover useful `.agents/` changes without publishing private project material.
+The workflow stays local and proposal-only until the complete publication batch
+is approved.
 
-## Execution Pipeline
+Use `https://github.com/marcus-friction/agents.git` as the default upstream.
+Replace it only when the user explicitly names another destination. Resolve and
+record the exact base ref rather than assuming a moving branch is unchanged.
 
-### Phase 1: Diff & Analysis
-You must first determine what has changed locally without modifying the user's project. Run the following bash script to generate a diff of local changes vs upstream. 
+## 1. Inspect without changing the project
 
-Copy and execute the following complete script:
+Resolve the project root and inspect status before comparing files. Use a fresh
+system-created temporary directory for any upstream checkout; never reuse a
+fixed path. Mark it as test/tool-owned, keep it outside the project, and remove
+it only after verifying that exact physical directory and marker. A failed
+cleanup is reported rather than broadened.
 
-```bash
-set -e
+A public upstream read is not publication, but disclose and resolve any needed
+network or credential boundary before accessing a private destination. Do not
+add remotes, branches, commits, or files to the user's checkout during analysis.
 
-echo "Environment clean. Initializing diff comparison..."
-TMP_DIR="/tmp/agents-contribute"
+Compare physical regular files in upstream-managed `.agents/skills/` and
+`.agents/tools/` with the intended upstream base. Include nested skill support
+files such as `.agents/skills/<name>/README.md`. Exclude project-owned
+`.agents/project/` and staged `.agents/templates/`, as well as root project
+documents and everything under `docs/solutions/`. Preserve selected file bytes
+exactly; do not lint or rewrite them as part of contribution.
 
-# Resilient Cleanup Trap
-trap 'rm -rf "$TMP_DIR"' EXIT
+## 2. Return a local proposal
 
-# Isolate & Fetch
-rm -rf "$TMP_DIR"
-if ! git clone --depth 1 https://github.com/marcus-friction/agents.git "$TMP_DIR" > /dev/null 2>&1; then
-    echo "Error: Failed to clone the repository."
-    exit 1
-fi
+Report new and changed skills in chat. For a candidate that may contain project,
+personal, credential, or customer information, report only its presence,
+category, and relative path, with the value redacted. Never reproduce a
+suspected sensitive value or include that file in a publication batch; ask the
+user to sanitize it separately. Ask which safe candidates, if any, should
+advance to a publication preview. Selection is not publication approval.
 
-# Exclusion list: project-specific templates that must NEVER leak upstream
-EXCLUDE=""
+For each selected file, bind lightweight evidence for its source, its license or
+permission, and authority to redistribute those exact bytes to the named
+destination. Reuse repository metadata and specific user-supplied ownership or
+permission first; a general request to contribute is not redistribution
+authority. Do not turn this into blanket research across unselected files. Only
+files with affirmative redistribution authority may enter the batch. If any
+file remains unresolved, exclude it from the batch or stop when the requested
+batch cannot proceed without it, and report the missing evidence.
 
-echo ""
-echo "=== MODIFIED/NEW FILES IN LOCAL .agents/ ==="
-# Compare local .agents/ against upstream, ignoring project-specific config templates
-SUMMARY=$(diff -qr $EXCLUDE "$TMP_DIR/.agents" .agents 2>/dev/null || true)
+## 3. Build the exact publication batch
 
-if [ -z "$SUMMARY" ]; then
-  echo "No local modifications detected. Your ecosystem is in sync with upstream."
-  exit 0
-fi
+For selected candidates, expand directories to an explicit file list. Verify
+that every source is a physical regular file, not a symlink or special file,
+and is inside `.agents/`. Record each relative path and content hash.
 
-echo "$SUMMARY"
+Prepare one unchanged publication batch containing:
 
-echo ""
-echo "=== DETAILED DIFF OF CHANGES ==="
-diff -ruN $EXCLUDE "$TMP_DIR/.agents" .agents || true
-```
+- destination owner/repository, base ref, fork/branch if used, and visibility;
+- the exact physical files, relative target paths, and content hashes;
+- the per-file source and license-or-permission evidence supporting
+  redistribution to this destination;
+- the commit message, pull-request title, and full pull-request body;
+- the authenticated host/identity to be used, expected public exposure, exact
+  publication steps, and recovery or closure path.
 
-### Phase 2: Proposal
-Analyze the terminal output of the diff script. You must identify:
-1. **New Skills**: Entirely new agent workflows created locally that don't exist upstream.
-2. **Modified Rules/Skills**: Core improvements made to existing standard skills or core rules.
+Show the full preview and request one decision for that exact batch. Do not
+fork, create a branch, push, or open a pull request before approval. A changed
+destination, visibility, identity, base ref, title, body, path, or hash
+invalidates the batch rather than inheriting approval.
 
-> [!WARNING]
-> DO NOT attempt to "clean up" or lint the local additions. You must take the user's raw files exactly as they are currently written locally. Do not include anything from the `docs/solutions/` directory.
+## 4. Publish only the approved batch
 
-Present a concise summary to the user:
-> *"I have analyzed your local agent ecosystem. Here are the enhancements that differ from the central repository:"*
-> - *[List changes clearly]*
-> 
-> *"Which of these changes would you like me to contribute back to the central repository via a Pull Request?"*
+Immediately before publication, revalidate the source paths and hashes, the
+per-file redistribution evidence, the destination/base ref, and the
+authenticated identity. Stop for a new preview if any fact changed or authority
+is no longer affirmative.
 
-**STOP and wait for the user to confirm.**
+Use an isolated checkout or a host API; never attach a contribution remote to
+the user's project. After revalidation, materialize a verified snapshot of the
+approved bytes in that checkout (or verify the in-memory bytes sent to the API)
+and publish from the snapshot so a concurrent local edit cannot change the
+batch. Recheck its target paths and hashes before staging.
 
-### Phase 3: Creating the Pull Request
-Once the user explicitly specifies which changes to contribute back, you will submit the Pull Request. 
-
-**PR Content Directive:** Generate a descriptive PR title and body based on the user's approved selection from Phase 2. The title must summarize the specific changes (e.g., *"Add brainstorm skill, refine review-plan Phase 2 logic"*). The body must list each contributed file with a one-line explanation of what it does or what changed. Do not use generic placeholder text.
-
-Select the appropriate method based on your capabilities:
-
-**Method A: Native MCP Capabilities (Preferred)**
-If you are equipped with the GitHub MCP server (e.g., `github-mcp-server` tools):
-1. Use the `mcp_github-mcp-server_fork_repository` tool to fork `marcus-friction/agents`.
-2. Fetch the base `sha` from the main branch and explicitly create a random branch name for the PR using `mcp_github-mcp-server_create_branch`.
-3. Read the contents of the chosen local files using your local file reading tools.
-> [!CAUTION]
-> You must push ONLY the specific files the user approved in Phase 2. Do not push the entire diff set. Ensure all pushed files are strictly within the `.agents/` path — never leak the user's private project files.
-4. Push all approved changes simultaneously using `mcp_github-mcp-server_push_files` to your forked repository branch.
-5. Execute `mcp_github-mcp-server_create_pull_request` against the base repository `marcus-friction/agents`.
-
-**Method B: Fallback CLI Generation**
-If you do not have MCP integration, you MUST first verify that the user has the GitHub CLI installed and authenticated by executing `gh auth status` in their terminal before generating the script below.
-
-If `gh` is authenticated, output this absolutely safe structural `gh` script for the user to execute:
-
-> [!CAUTION]
-> Never run `gh repo fork --remote` inside the user's actual project directory. Doing so binds the upstream repo to their private commit history. You MUST stage the PR in a pure transient directory.
-
-```bash
-set -e
-
-# 1. Isolate the PR environment completely outside the user's project
-PROJECT_ROOT=$(git rev-parse --show-toplevel)
-PR_DIR=$(mktemp -d)
-
-# Resilient Cleanup Trap
-trap 'cd "$PROJECT_ROOT" && rm -rf "$PR_DIR"' EXIT
-
-cd "$PR_DIR"
-
-# 2. Fork the repo into the sandbox
-gh repo fork marcus-friction/agents --clone
-cd agents
-
-# 3. Create the staging branch
-git checkout -b feature/agent-contribution
-
-# 4. Copy authorized changes perfectly (Agent should generate exact 'cp' commands)
-# Example: cp -a "$PROJECT_ROOT/.agents/skills/new-skill" ".agents/skills/new-skill"
-
-# 5. Commit and push from the sandbox
-git add .
-git commit -m "Enhance Agent Ecosystem: [Summary]"
-git push -u origin feature/agent-contribution
-
-# 6. Create the PR (Sandbox self-destructs automatically via trap)
-gh pr create --repo marcus-friction/agents --title "Enhance Agent Ecosystem: [Summary]" --body "This PR contributes back local ecosystem improvements."
-```
+Stage only the approved paths with an exact `git add` argument list—never the
+repository root or `.`. Push only those unchanged file bytes, then create the
+approved pull request. Report the resulting links, identity, and any retained
+recovery material. Do not infer permission to merge, delete branches, tag, or
+release.

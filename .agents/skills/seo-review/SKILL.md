@@ -3,9 +3,9 @@ name: seo-review
 description: |
   Comprehensive SEO, Core Web Vitals, and Semantic HTML review. Use when building
   any user-facing page, deploying new routes, or auditing search performance.
-  Proactively suggest when new pages or dynamic routes are added to the project.
-argument-hint: "[URL or files to review]"
-disable-model-invocation: true
+  Proactively suggest when new pages or dynamic routes are added to the project,
+  but run only when explicitly requested or accepted. Review a supplied URL,
+  supplied files, or the relevant project files when no target is specified.
 ---
 
 # SEO & UI Quality Review
@@ -16,8 +16,8 @@ Perform a deep technical SEO, Core Web Vitals, and structural review of the prov
 
 ### 1. Technical SEO & Indexability
 - **Metadata:** Are meta tags (`title`, `description`, `og:image`, `og:title`) correctly implemented and dynamic? _Why: Missing or duplicate metadata causes search engines to generate poor snippets, reducing click-through rates._
-  - **Nuxt:** `useHead` or `useSeoMeta`
-  - **Laravel Blade:** `@section('meta')` or equivalent
+  - **Nuxt:** `useSeoMeta`, `useHead`, or route-aware composables
+  - **Laravel Blade:** `@section('meta')` or the project's established layout contract
   - **Generic:** `<meta>` tags in `<head>`
 - **Canonicals:** Does every indexable page output a `<link rel="canonical" href="...">` tag? _Why: Without canonicals, duplicate URLs (query params, trailing slashes, pagination) split ranking signals._
 - **Robots Directives:** Are pagination, internal dashboards, or low-value routes correctly marked with `<meta name="robots" content="noindex, follow">`? _Why: Indexing internal pages wastes crawl budget and can expose sensitive URLs._

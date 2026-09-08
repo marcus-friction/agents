@@ -173,10 +173,11 @@ defineConfig({
 - Use `--config` flag to specify a custom config path (required from subdirectories in v5)
 - `process.env.VITEST` is set to `true` when running tests
 - Test config uses `test` property, rest is Vite config
-- v4 requires **Vite >= 6** and **Node >= 20**; v5 is currently in beta
+- Vitest 5 requires **Vite >= 6.4.0** and **Node.js >= 22.12.0**
 
 <!-- 
 Source references:
 - https://vitest.dev/guide/#configuring-vitest
 - https://vitest.dev/config/
+- https://vitest.dev/blog/vitest-5
 -->

@@ -122,7 +122,8 @@ Rolldown unlocks features not possible before:
 
 ## Gradual Migration
 
-For large projects, migrate via `rolldown-vite` first:
+Projects that already trialed the migration through `rolldown-vite` can now
+complete the move to stable Vite 8:
 
 ```bash
 # Step 1: Test with rolldown-vite
@@ -131,7 +132,7 @@ pnpm add -D rolldown-vite
 # Replace vite import in config
 import { defineConfig } from 'rolldown-vite'
 
-# Step 2: Once stable, upgrade to Vite 8
+# Step 2: Upgrade to stable Vite 8
 pnpm add -D vite@8
 ```
 
@@ -151,7 +152,7 @@ When framework depends on older Vite:
 
 <!--
 Source references:
-- https://vite.dev/blog/announcing-vite8-beta
+- https://vite.dev/blog/announcing-vite8
 - https://vite.dev/blog/announcing-vite7
 - https://vite.dev/config/shared-options#oxc
 -->

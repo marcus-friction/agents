@@ -1,9 +1,9 @@
 ---
-name: /whats-next
+name: whats-next
 description: Analyzes the current project repository and workflows to provide a high-level status report. Use this skill when the user asks for a status update, wants to know "what's next", asks where development left off, or needs a summary of recent work to regain context. Do NOT use this skill if the user is asking you to actually implement the next feature, commit code, or search the codebase for specific files.
 ---
 
-# /whats-next
+# What's Next
 
 This skill allows the agent to analyze the current workspace, determine where the team is in the development cycle, summarize recent accomplishments, and suggest the next best course of action.
 
@@ -18,7 +18,9 @@ Use this skill when the user asks:
 
 ## Context Gathering (Tool-Agnostic)
 
-You must gather context by inspecting generic aspects of the local repository and the current working environment. Do NOT look for hardcoded platform directories (e.g. `~/.gemini/antigravity` or Claude memory paths) as this skill must remain tool-agnostic. 
+Gather context from the local repository and the current working environment.
+Do not inspect host-specific configuration or memory locations; this skill must
+remain tool-agnostic.
 
 Instead, perform the following to gather context:
 
@@ -36,11 +38,13 @@ Instead, perform the following to gather context:
 
 ## Development Cycle Assessment
 
-Once you have gathered the context, analyze where the current repository stands in the typical workflow cycle: `/plan -> Implement -> /review -> /wrap`:
-- **/plan**: No active coding tasks, `implementation_plan.md` exists but no git changes yet.
+Once you have gathered the context, analyze where the current repository stands
+in the typical cycle: Plan → Implement → Review → Wrap.
+
+- **Plan**: No active coding tasks, `implementation_plan.md` exists but no git changes yet.
 - **Implement**: Git has unstaged/staged code changes, tests might be missing, work is actively in flight.
-- **/review**: Code is written, tests are present, perhaps pending a `review-gstack` or similar pre-merge audits.
-- **/wrap**: The feature is complete and merged/committed, waiting for release docs or ready to start the next plan.
+- **Review**: Code is written, tests are present, perhaps pending a `review-gstack` or similar pre-merge audit.
+- **Wrap**: The feature is complete and merged/committed, waiting for release docs or ready to start the next plan.
 - **Idle**: Clean working tree and no active roadmap items.
 
 ## Reporting Format
@@ -53,7 +57,7 @@ You MUST format your output EXACTLY as follows using the provided markdown heade
 **Executive Summary:** [Provide a 1-2 sentence plain-language summary so a stakeholder instantly understands the current status in 5 seconds. E.g., "We are currently implementing the user dashboard. The database schema has been verified, and we are working on the frontend layouts."]
 
 ## 📍 Current Focus
-*   **Stage**: [/plan | Implement | /review | /wrap | Idle] - [1-sentence plain English explanation of why we are in this state. E.g., "Code is written but we need to run tests before considering it finished."]
+*   **Stage**: [Plan | Implement | Review | Wrap | Idle] - [1-sentence plain English explanation of why we are in this state. E.g., "Code is written but we need to run tests before considering it finished."]
 *   **Active Area**: [What feature or component is currently being worked on? E.g., "User Authentication System"]
 
 ## 🕰️ Recent Updates

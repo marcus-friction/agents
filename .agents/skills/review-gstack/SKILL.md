@@ -1,139 +1,77 @@
 ---
 name: review-gstack
-preamble-tier: 4
-version: 1.0.0
-description: |
-  Rigorous "Mega Review" pre-landing pipeline. Enforces Scope Drift Detection,
-  ASCII Test Flow generation, and Fix-First Auto-Fixing. Requires task.md and
-  implementation_plan.md. Use when you're about to merge, land, or push code to
-  main, even if you think the changes are small. Proactively suggest this skill
-  before any branch merge or PR submission.
-triggers:
-  - review this pr
-  - code review
-  - check my diff
-  - pre-landing review
-  - review my code
-allowed-tools:
-  - Bash
-  - Read
-  - Edit
-  - Write
-  - Grep
-  - Glob
-  - Agent
-  - AskUserQuestion
-  - WebSearch
+description: Run a rigorous pre-landing review for R3 or significant architecture, security, data, migration, permission, deployment, or production changes. Also use when explicitly requested; routine R1/R2 changes use the standard review.
+metadata:
+  version: "2.0.0"
 ---
 
-# 🕵️ review-gstack: The Mega Review
+# Mega Review
 
-You are the gatekeeper to `main`. Your job is to rigorously review the current branch's changes against the intended design (`task.md` and `implementation_plan.md`) to ensure zero-defect, complete features. 
+Use this as a deeper gate when the change risk justifies it. It does not replace
+the normal scoped review or expand the approved work.
 
-You apply a "Boil the Lake" standard: If a developer changes a function signature, you must verify *every single place* it is called. No assumptions. No "looks good".
+## Preflight
 
-## 🚧 PRE-FLIGHT CHECK
+1. Read the approved request and, when present, `implementation_plan.md` and
+   `task.md`.
+2. Resolve the comparison base and reviewed paths.
+3. Read the change-rigor reference; confirm the R3 or significant-boundary
+   reason for this review.
+4. Report and preserve unrelated dirty work. Include it only through an explicit
+   dependency trace.
 
-Before you begin reviewing, you MUST load the active context:
-1. `view_file` on the active conversation's `task.md` artifact.
-2. `view_file` on the active conversation's `implementation_plan.md` artifact.
-3. Retrieve the full git diff of the current working branch against `main` (or the target branch).
+In report-only mode, make zero repository or external writes. Autofix is allowed
+only when the user explicitly selects it.
 
----
+## 1. Scope and intent
 
-## 🛑 STEP 1: SCOPE DRIFT DETECTION
+Map each accepted item as done, partial, missing, or equivalently changed.
+Identify unauthorized additions, omissions, and behavior that differs from the
+plan. Do not require plan artifacts for a routine task that did not need them.
 
-Before reviewing code quality, check: **did they build what was requested — nothing more, nothing less?**
+## 2. Critical and architectural review
 
-Compare the git diff strictly against the active `task.md` and `implementation_plan.md` artifacts. If there is no active plan, check `git log origin/main..HEAD --oneline` for stated intent.
+Read `checklist.md`. Trace every consumer of changed public signatures,
+schemas, enums, states, permissions, and migrations. Review all in-scope files
+and every affected boundary; do not include unrelated files merely because they
+are dirty.
 
-Classify the status of the intent for each planned item:
-- **[DONE]** - Items in `task.md` that are fully implemented and verified in the diff.
-- **[PARTIAL]** - Items attempted but incomplete or missing edge cases.
-- **[NOT DONE]** - Items listed in `task.md` missing from the diff.
-- **[CHANGED]** - Items implemented using a different approach than planned, but achieving the same goal.
+Declare standards, correctness, security, performance, architecture,
+operations, testing, and compatibility applicable or not applicable with
+reasons. Use the dedicated skills for applicable passes.
 
-**Evaluate with skepticism for Scope Creep:**
-- Flag any files changed or features added in the diff that were *not* explicitly authorized in the implementation plan.
-- Flag "While I was in there..." changes that expand the blast radius.
+## 3. Conditional design review
 
-*Output your findings in an informational Scope Check section before proceeding to the code review.*
+For affected interfaces, read `design-checklist.md` and the active
+`DESIGN.md`. Skip with a reason when no interface changes.
 
----
+## 4. Test and failure-flow map
 
-## 🛡️ STEP 2: THE TWO-PASS CODE REVIEW
+Use the smallest useful ASCII flow when three or more branches or state
+transitions make coverage hard to see. Map changed observable behavior and
+meaningful failures to real unit, integration, or end-to-end tests. Do not
+create a diagram or test for ritual alone.
 
-You MUST execute `view_file` on `.agents/skills/review-gstack/checklist.md` to read the rules for Pass 1 and Pass 2.
+A bug fix needs a regression that fails without the fix. Preserve the 100% line
+and branch target for testable production behavior and explain allowed
+exclusions.
 
-**Rule: See Something, Say Something.**
-- Review all files touched. Do not ignore dirty code just because "we didn't write it today."
-- Fix mechanical issues silently (see Step 5). Raise structural issues immediately.
+## 5. Findings and fixes
 
----
+Use the standard review's severity, confidence, and action model. In explicitly
+selected autofix mode, apply only deterministic, in-scope `safe_auto` changes
+and verify them. Ask before behavior, contract, dependency, policy, permission,
+data, or subjective design changes.
 
-## 🎨 STEP 3: CONDITIONAL DESIGN REVIEW
+## 6. Independent challenge
 
-*Did any of the changes involve Vue/Nuxt files, Tailwind CSS, or UI logic?*
-- If **NO**, skip this step.
-- If **YES**:
-  1. Execute `view_file` on `.agents/skills/review-gstack/design-checklist.md`.
-  2. Perform the strict mechanical and judgment-based design checks.
+Run or recommend `adversarial-review` for the R3/significant boundary that
+triggered this workflow. Use an independent context when available. Do not make
+the handoff a blocker when an independent executor is unavailable; record that
+evidence honestly.
 
----
+## Verdict
 
-## 🗺️ STEP 4: TEST COVERAGE & ASCII DIAGRAMS
-
-We do not trust "It Works On My Machine".
-For the code paths modified in the diff:
-1. Generate an **ASCII Data Flow / Logic Map** showing the conditionals, branches, and edge cases (e.g., typical user journey vs. network failure vs. missing DB record).
-2. **Gap Analysis:** Map existing tests against the ASCII diagram. What branches are uncovered?
-3. **The Matrix:** Classify missing coverage needed based on the matrix:
-   - *Logic/Math/Format:* Needs Unit Test.
-   - *Integration/DB/Auth:* Needs Feature Test.
-   - *DOM/Interaction/Browser:* Needs Browser Test (Playwright/E2E).
-4. **The Regression Rule:** If fixing a bug, you MUST ensure a test was added that fails without the fix and passes with it. If this test is missing, this is an automatic failure.
-
----
-
-## 🔧 STEP 5: FIX-FIRST METHODOLOGY
-
-You will not overwhelm the user with a sprawling markdown list of 40 tiny issues.
-
-**1. AUTO-FIX (Mechanical Issues):**
-If a finding is mechanically correctable (e.g., missing CSS token, unused import, slight lint issue, adding a missing PHP return type, fixing a typo), DO NOT ask the user.
-*Action:* Silently execute `replace_file_content` to fix it.
-
-**2. BATCH ASK (Judgment Issues):**
-If a finding requires architectural judgment, business logic input, or changes to DB schema / LLM system prompts:
-*Action:* Compile these into a single, cohesive `AskUserQuestion` (via the `notify_user` tool). 
-Present the issue, explain the tradeoffs, and give a highly opinionated recommendation on how to fix it.
-
----
-
-## 🎭 STEP 6: ADVERSARIAL HANDOFF (The Red Team)
-
-Once you have completed Steps 1-5 and all AUTO-FIX actions are resolving, you must explicitly instruct the user on the next phase.
-
-Output the following message in your final execution loop:
-> **Review Complete. Initiating Adversarial Red Team Pass.**
-> Please switch to a different LLM model (e.g., if you are using Claude 3 Opus, switch to Gemini 1.5 Pro, or vice versa) and run the following command to begin the final adversarial tear-down:
-> `/adversarial-review`
-
----
-
-## 📋 REVIEW VERDICT
-
-After completing all steps, output a structured verdict:
-
-```
-REVIEW VERDICT
-─────────────
-Scope Drift:        CLEAN | DRIFT DETECTED — [one-line summary]
-Code Review:        PASS | FAIL — [one-line summary]
-Design Review:      PASS | FAIL | SKIPPED — [one-line summary]
-Test Coverage:      PASS | FAIL — [one-line summary]
-Auto-Fixes Applied: [count] mechanical fixes applied silently
-
-Overall: GO | NO-GO
-Blocking Issues: [numbered list, or "None"]
-```
+Report scope drift, pass applicability, findings, tests, autofixes, unavailable
+evidence, and residual risk. Overall is GO only when every blocking accepted
+item and R3 safeguard is verified.

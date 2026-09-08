@@ -1,51 +1,82 @@
 ---
 name: plan
-description: Scope, architect, and plan new tasks
+description: Scope, architect, and verify implementation plans for multi-step, cross-boundary, or high-risk work.
 ---
 
 # Plan Workflow
 
-This workflow guides the agent through scoping, architecting, and planning a new feature or project. It results in a robust, peer-reviewed implementation plan and a comprehensive task list.
+Produce an evidence-backed plan for the complete accepted increment. Do not
+inflate the increment to include adjacent product work.
 
-## When to Use
+## 1. Establish scope
 
-When the user asks to plan a new feature, project, or gives a high-level request, or explicitly uses `/plan`.
+- Restate the outcome, explicit exclusions, and observable acceptance criteria.
+- Fill answers from the request and repository before asking questions. Ask only
+  unresolved material questions; group related questions when clearer.
+- Identify external, destructive, privileged, production, data, architecture,
+  and compatibility effects.
+- Read `.agents/skills/review/references/change-rigor.md` and classify the work
+  R0–R3. Keep component applicability and boundary assurance separate.
 
-## Steps
+A report-only planning request is R0: make zero repository or external writes.
+Present the plan in chat by default. Persist `implementation_plan.md`, `task.md`,
+or another agreed path only when the user requests a file or accepts a proposed
+durable handoff because it materially helps the accepted work. Complexity alone
+does not authorize an artifact. Treat that request or acceptance as authority to
+prepare the candidate, not to bypass project-document ownership: present its
+semantic summary and exact document patch as one decision, then revalidate the
+physical target and parent before writing. R3 document triggers retain their
+separate semantic and exact-patch decisions.
 
-### 1. Discovery & Interrogation
-1. Acknowledge the user's request.
-2. Ask **clarifying questions, ONE BY ONE**. Do not overwhelm the user with a wall of 5 questions. Wait for the answer to question 1 before asking question 2.
-3. Keep asking questions until you have a complete picture of:
-   - The exact business goal.
-   - The edge cases.
-   - The technical constraints.
-   - The preferred approach (if any).
+## 2. Load relevant context
 
-### 2. Context Gathering
-Before writing the plan, you MUST read the following to inform your architecture:
-1. The project rules (`AGENTS.md and README.md`).
-2. Any relevant `.agents/skills/*.md`.
-3. The most relevant Knowledge Items (KIs) and explicitly search `docs/solutions/` for compounded learnings to avoid repeating past mistakes.
-4. Existing codebase files that will be impacted.
+Use progressive disclosure:
 
-### 3. Draft the Plan
-Draft an initial Implementation Plan based on the gathered context. Follow our architectural standards and compounded learnings.
+- always read applicable `AGENTS.md` files and the product intent in
+  `README.md`;
+- read `CONTRIBUTING.md` when planning changes;
+- read `ARCHITECTURE.md` when components, data, trust, or runtime boundaries
+  matter;
+- read `DESIGN.md` only for user-interface scope;
+- load only skills relevant to the accepted increment;
+- search `docs/solutions/` when it exists and note when it does not.
 
-### 4. The Review Loop
-Do NOT present the first draft to the user immediately.
-1. Load the `review-plan` skill (`.agents/skills/review-plan/SKILL.md`).
-2. Self-review your drafted plan using the criteria in the `review-plan` skill.
-3. Revise the plan to address any shortcomings found during the self-review.
-4. Repeat this self-review and revision loop exactly **3 times** to ensure maximum robustness.
+Inspect affected implementation and executable configuration. Reuse a current
+hash-bound context summary from an upstream workflow; re-read only changed or
+newly relevant anchors.
 
-### 5. Final Output
-After the 3rd iteration, finalize the output. You MUST generate:
-1. **Implementation Plan Artifact:** Create a **conversation artifact** detailing the proposed architecture, file changes, and verification steps.
-2. **Task Artifact:** A comprehensive `task.md` file containing every required step to complete the project, broken down into granular, actionable tasks. Ensure no parts of the project are missing.
+## 3. Draft the plan
 
-Present a summary of the plan and the tasks to the user, and ask for their approval.
+Include:
 
-## Rules
+- current evidence and constraints;
+- component applicability and affected boundary-assurance facts;
+- design and dependency decisions, including exact package purpose;
+- file-level scope and ownership;
+- ordered implementation steps;
+- tests mapped to observable behavior and failure paths;
+- data, compatibility, migration, recovery, and rollout handling when applicable;
+- a failure-modes registry;
+- explicit exclusions with rationale;
+- existing code, patterns, and knowledge to reuse;
+- verification commands and completion criteria.
 
-- **Projects are ALWAYS tackled as a whole.** They can be broken down into phases and stages, but **NO parts** of the project can be deferred. Do not say "we will handle X later" or "Y is out of scope for now" if it was part of the original request or constitutes a complete project.
+Plan the complete accepted increment: every path needed to make that increment
+usable, safe, and verifiable. Do not pull in an adjacent issue merely because it
+looks small. Keep deployment unresolved unless it is required by the accepted
+outcome and separately decided.
+
+## 4. Review to convergence
+
+Read and apply `review-plan`. Perform one self-review for a non-trivial plan.
+Revise material issues and repeat only while a new material issue is being
+resolved. Stop for owner input when the same blocker survives the third attempted
+resolution. Record unresolved non-blocking decisions rather than inventing them.
+
+## 5. Present
+
+Summarize scope, key decisions, risks, exclusions, and verification. Ask the
+user to approve or revise the plan. If the original request includes
+implementation, plan approval authorizes ordinary in-scope edits; R3 destructive,
+privileged, or external effects still require approval immediately before
+execution.

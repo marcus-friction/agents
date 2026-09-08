@@ -42,7 +42,9 @@ Route::apiResource('posts', Api\PostController::class);
 
 ## Keep Controllers Thin
 
-Aim for under 10 lines per method. Extract business logic to action or service classes.
+Keep transport coordination local. Extract business behavior to an action or
+service when cohesion, reuse, transactional ownership, or testability earns the
+boundary; method length alone is not a design rule.
 
 Incorrect:
 ```php
@@ -69,11 +71,15 @@ public function store(StorePostRequest $request, CreatePostAction $create)
 }
 ```
 
-## Type-Hint Form Requests
+## Choose Form Requests Proportionally
 
-Type-hinting Form Requests triggers automatic validation and authorization before the method executes.
+Type-hint a Form Request when meaningful or complex input, reused rules, request
+authorization, or an established project convention earns the boundary. A
+small, one-off framework-supported input may use inline validation when it
+remains clear and testable. Form Requests trigger automatic validation and
+authorization before the method executes.
 
-Incorrect:
+For substantial input, avoid leaving the full rule set in the controller:
 ```php
 public function store(Request $request): RedirectResponse
 {
@@ -88,7 +94,7 @@ public function store(Request $request): RedirectResponse
 }
 ```
 
-Correct:
+Use a Form Request instead:
 ```php
 public function store(StorePostRequest $request): RedirectResponse
 {

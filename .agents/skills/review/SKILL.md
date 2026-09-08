@@ -1,154 +1,88 @@
 ---
 name: review
-description: Multi-angle code review before merging
+description: Perform a scoped multi-angle review before merging or when the user asks to review changes. Supports read-only reporting and explicitly selected deterministic autofix.
 ---
 
 # Comprehensive Review
 
-Perform a thorough code review from multiple perspectives, sequentially.
+Review the approved scope, not the entire dirty worktree. Read
+`code-review-excellence` when available.
 
-If the `code-review-excellence` skill exists, read it first for meta-level guidance on how to review well.
+## Modes
 
-## When to Use
+- `mode:report-only` is strictly R0: make zero repository or external writes,
+  including no task, report-file, formatting, or autofix changes.
+- `mode:autofix` explicitly selects deterministic in-scope autofix.
+- Without `mode:autofix`, report findings and wait for a fix request.
+- `base:<ref>` supplies the comparison base.
 
-Before opening a PR, or when the user asks for a review of recent changes.
+Never auto-fix subjective design or policy decisions, behavior/contract changes,
+permissions, dependencies, destructive work, or anything outside reviewed scope.
 
-## Argument Parsing / Modes
-You can invoke this skill conditionally via argument hints:
-- `mode:autofix`: Automatically apply `safe_auto` fixes without asking.
-- `mode:report-only`: Strictly read-only output without modifying files.
-- `base:<sha-or-ref>`: Provide a precise Git base for diffing.
+## Scope
 
-## Steps
+Build the file set from the approved request, accepted plan, base ref, and
+explicit paths. Use conversation context to distinguish this task's changes.
+Report unrelated dirty work and preserve it; include it only when an explicit
+dependency trace proves relevance.
 
-### 1. Identify Scope
-Review all files changed **in this conversation thread**. Use `git diff` and your conversation context to build the file list. If the branch contains changes from a previous conversation, exclude those — focus only on what was created or modified during this complete thread.
+Read `.agents/skills/review/references/change-rigor.md`. Record change rigor,
+affected components, and boundary assurance. An R0 review never mutates.
+R3 or significant architecture, security, data, or production work may require
+`review-gstack` and an independent adversarial review; routine R1/R2 work does
+not.
 
-### 2. Deep Dive & Action Routing
-Before listing any findings, perform stress testing and Stakeholder Perspective Analysis:
+## Finding model
 
-**A. Stakeholder Perspective Analysis**
-Examine the changes from these angles:
-- **Developer:** Is the code maintainable, readable, and well-tested?
-- **Ops:** Are there missing logs, bad error handling, or deployment risks?
-- **End User:** Is the UI/UX negatively impacted? Is accessibility compromised?
-- **Security:** Are we introducing vulnerabilities?
-- **Business:** Does this align with the project goals?
+For each finding record severity, confidence, evidence, consequence,
+verification, and one action:
 
-**B. Action Routing & Fix Triggers**
-Map every finding you discover into one of these actions:
-| `autofix_class` | Meaning | Agent Action |
-|---|---|---|
-| `safe_auto` | Local, deterministic fix suitable for immediate autofix. | Fix silently in interactive/autofix mode. |
-| `gated_auto` | Concrete fix, but alters behavior, contracts, or permissions. | Requires user approval before fixing. |
-| `manual` | Actionable work that should be handed off. | Add to `task.md` residual work. |
-| `advisory` | Report-only output (residual risks, rollout notes). | Keep in review report only. |
+| Action | Meaning |
+|---|---|
+| `safe_auto` | Local deterministic correction eligible only in explicit `mode:autofix`. |
+| `gated_auto` | Concrete change needing owner approval because it affects behavior, contracts, policy, dependencies, or permissions. |
+| `manual` | Actionable work requiring project judgment or external coordination. |
+| `advisory` | Residual risk or observation; no repository action. |
 
-**C. Confidence Gating**
-- Suppress findings below `0.60` confidence. 
-- Exception: **P0 (Critical)** findings at `0.50+` confidence survive the gate — critical-but-uncertain issues must not be silently dropped.
+Suppress findings below 0.60 confidence, except plausible P0 findings at 0.50 or
+higher. Do not turn formatting covered by project automation into review noise.
 
-### 3. Review Passes
-Execute the following passes against the codebase, keeping the findings structured logically:
+## Passes
 
-**Standards** — Check all changes against the relevant coding standards:
-   - PHP changes → `AGENTS.md`
-   - Vue/Nuxt changes → `AGENTS.md`
-   - Styling changes → `DESIGN.md`
-   - **Knowledge Re-use:** Did the implementation re-invent the wheel or correctly leverage compounded learnings from existing Knowledge Items (KIs)?
-   - Flag any deviations.
+Declare every pass **applicable** or **not applicable**, with a reason.
 
-**Security** — Review changes through the lens of `AGENTS.md`:
-   - User input handling — is everything validated?
-   - Authorization — are policies enforced?
-   - Secrets — any hardcoded values or exposed keys?
-   - SQL injection, XSS, CSRF — applicable?
-   If the `security-review` skill exists, read it for deeper guidance.
+- **Standards:** Check applicable `AGENTS.md`, `CONTRIBUTING.md`, established
+  structure, and reusable project knowledge.
+- **Correctness:** Trace changed behavior, error paths, boundaries, concurrency,
+  compatibility, and user-visible outcomes.
+- **Security:** Use the `security-review` applicability preflight. Do not apply
+  controls for absent components.
+- **Performance:** Use `performance-review` only where the change can affect
+  runtime cost, capacity, or latency.
+- **Architecture:** Use `architecture-review`; enforce adopted boundaries, not
+  generic class, route, transaction, or directory shapes.
+- **UI/accessibility/SEO:** Load `DESIGN.md` and the relevant review skills only
+  for affected user interfaces or public pages.
+- **Testing:** Confirm changed observable behavior and meaningful failures are
+  protected. Coverage of lines without useful assertions is insufficient.
+- **Operations:** Scale logging, health, recovery, migration, and rollout checks
+  to real exposure, data materiality, and production impact.
 
-**Performance** — Review changes through the lens of `AGENTS.md`. Look for:
-   - N+1 queries (missing eager loading)
-   - Unnecessary database calls in loops
-   - Missing indexes for new query patterns
-   - Large payloads without pagination
-   - Frontend: unnecessary re-renders, missing `lazy` loading
-   If the `performance-review` skill exists, read it for deeper guidance.
+Run all applicable passes even after finding an issue.
 
-**Architecture** — Verify:
-   - Business logic in Actions, not controllers
-   - Thin controllers pattern maintained
-   - API versioning respected
-   - No circular dependencies introduced
-   - Design system tokens used (not hardcoded values)
-   If the `architecture-review` skill exists, read it for deeper guidance.
+## Autofix
 
-**SEO & UI** — Check:
-   - Semantic HTML and heading hierarchy
-   - Core Web Vitals impact (LCP, CLS, INP)
-   - Structured data / Schema.org where applicable
-   If the `seo-review` skill exists, read it for deeper guidance.
+In explicit `mode:autofix`, apply only `safe_auto` changes whose expected
+output is deterministic and inside scope. Re-run the narrowest affected check
+after each group, then the relevant suite. Convert any uncertain fix to
+`gated_auto` or `manual`; do not widen scope.
 
-**Accessibility** — Review changes through the lens of `AGENTS.md`. For frontend code:
-   - Design system tokens used (no hardcoded colors, spacing)
-   - Responsive at all breakpoints (320px → 1440px)
-   - Semantic HTML, keyboard accessible, WCAG AA contrast
-   - Loading, empty, and error states handled
-   If the `ui-accessibility-review` skill exists, read it for the full checklist.
+## Report
 
-**Testing** — Check:
-   - New code has test coverage
-   - Edge cases are tested
-   - Test naming follows conventions
-   - No tests were removed or skipped without justification
+Lead with findings ordered P0–P3. Each item names files/lines, confidence,
+action, evidence, impact, smallest correction, and verification. Then list
+pass applicability, tests run, unavailable evidence, and residual risk.
 
-### 4. Reporting
-When the review is complete, you must present the findings in three ways:
-
-1. **Detailed Report Artifact:** Create a **conversation artifact** containing the full review details.
-2. **Task Artifact:** Add `manual` and unapproved `gated_auto` findings as executable items to the Task artifact (`task.md`).
-3. **Chat Summary:** Communicate the report and the updated task list to the user in the chat using a **pipe-delimited Markdown table** for the findings.
-
-**Detailed Report Artifact Format:**
-
-Group findings by severity, with a detailed block for each item:
-
-```markdown
-# Review: [Short Scope Description]
-**Date:** YYYY-MM-DD
-**Files reviewed:** [count]
-
----
-
-## 🚨 Critical (P0)
-> Must fix before merge. Exploitable vulnerability, data loss/corruption, hard breakage.
-
-## 🔴 High (P1)
-> Should fix. High-impact defect likely hit in normal usage, breaking contract.
-
-## 🟡 Moderate (P2)
-> Fix if straightforward. Meaningful downside but narrower scope (edge case, perf regression).
-
-## 🟢 Low (P3) / Advisory
-> User's discretion. Formatting, style recommendations, or advisory notes.
-```
-
-Each finding within a group follows this structure:
-
-```markdown
-### [Short Description]
-**File(s):** `path/to/file.ext`
-**Class:** `safe_auto` | `gated_auto` | `manual` | `advisory`
-
-**Issue:** [Detailed description of what is wrong]
-
-**Recommended Fix:** [Specific instructions or code snippet to resolve]
-```
-
-If a severity group has no findings, include the heading with "No findings." beneath it — confirmation is valuable.
-
-
-## Rules
-
-- Run all passes even if early ones find issues — give the complete picture.
-- Be specific — "this might have performance issues" is not useful. "Line 42: `User::all()` inside a loop will cause N+1" is.
-- Don't nitpick formatting if Pint/ESLint will handle it.
-- If no issues found in a pass, say so explicitly — confirmation is valuable.
+In mutating review modes, add only unresolved `manual` and approved workflow
+items to `task.md`. In report-only mode, keep everything in the response.
+If there are no findings, say so directly rather than inventing work.

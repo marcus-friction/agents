@@ -26,9 +26,12 @@ class User extends Model
 
 Never use `$guarded = []` on models that accept user input.
 
-## Authorize Every Action
+## Authorize Every Protected Laravel-Owned Action
 
-Use policies or gates in controllers. Never skip authorization.
+When Laravel owns a protected resource, use policies or gates at that server
+boundary and never skip authorization. If another server owns the resource,
+enforce its domain authorization there rather than inventing a duplicate
+Laravel policy.
 
 Incorrect:
 ```php

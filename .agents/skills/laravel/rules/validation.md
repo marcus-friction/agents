@@ -1,10 +1,18 @@
 # Validation & Forms Best Practices
 
-## Use Form Request Classes
+## Choose the Validation Boundary Proportionally
 
-Extract validation from controllers into dedicated Form Request classes.
+Use a dedicated Form Request when a meaningful or complex untrusted payload,
+reused rules, request authorization, or the project's established convention
+earns a named boundary. A small, one-off framework-supported input may be
+validated inline when the transport remains clear and testable.
 
-Incorrect:
+| Case | Evidence | Default boundary |
+|---|---|---|
+| `trivial-local` | One small input, no reused rules, no request authorization, and no established Form Request convention | Inline validation at the current Laravel transport boundary is acceptable. |
+| `substantial-or-shared` | Meaningful or complex payload, reused rules, request authorization, or an established Form Request convention | Use a dedicated Form Request and consume its validated data. |
+
+For a substantial payload, avoid leaving the full rule set in the controller:
 ```php
 public function store(Request $request)
 {
@@ -15,7 +23,7 @@ public function store(Request $request)
 }
 ```
 
-Correct:
+Use a Form Request instead:
 ```php
 public function store(StorePostRequest $request)
 {
@@ -35,9 +43,11 @@ Array syntax is more readable and composes cleanly with `Rule::` objects. Prefer
 'email' => 'required|email|unique:users',
 ```
 
-## Always Use `validated()`
+## Use Only Validated Data
 
-Get only validated data. Never use `$request->all()` for mass operations.
+Get only validated data. Never use `$request->all()` for mass operations. With
+a Form Request, use `validated()` or `safe()`; inline validation should use the
+array returned by `$request->validate()`.
 
 Incorrect:
 ```php
@@ -47,6 +57,21 @@ Post::create($request->all());
 Correct:
 ```php
 Post::create($request->validated());
+```
+
+For a trivial local input:
+
+```php
+public function index(Request $request)
+{
+    $validated = $request->validate([
+        'direction' => ['sometimes', Rule::in(['asc', 'desc'])],
+    ]);
+
+    return Post::query()
+        ->orderBy('created_at', $validated['direction'] ?? 'desc')
+        ->paginate();
+}
 ```
 
 ## Use `Rule::when()` for Conditional Validation

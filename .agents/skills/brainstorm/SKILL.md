@@ -1,6 +1,6 @@
 ---
 name: brainstorm
-description: Structured brainstorming for exploring new features or solving complex problems
+description: Explore technical solutions, architecture choices, feature approaches, and complex engineering tradeoffs. Use for technical brainstorming; route product viability and "is this worth building?" questions to office-hours.
 ---
 
 # Brainstorming Workflow
@@ -36,9 +36,15 @@ Evaluate the explored options against the constraints from Step 1.
 - Select a recommended approach.
 
 ### 4. Output
-Generate a structured brief.
 
-Write the output to `docs/brainstorms/YYYY-MM-DD-[topic]-brainstorm.md`.
+Present the structured brief in chat by default. If the user explicitly requests
+a saved artifact, or accepts an offered durable handoff when one would materially
+help subsequent work, prepare the agreed brief for
+`docs/brainstorms/YYYY-MM-DD-[topic]-brainstorm.md`. Before writing a project
+document, inspect its physical target and parent, present the semantic summary
+and exact document patch as one decision, then revalidate them before applying
+the approved patch. The request or handoff acceptance avoids a separate
+persistence question; invoking this skill alone does not authorize a write.
 
 ## Output Format
 ```markdown
@@ -64,5 +70,9 @@ Write the output to `docs/brainstorms/YYYY-MM-DD-[topic]-brainstorm.md`.
 ```
 
 ## Rules
-- Brainstorming MUST output a file to `docs/brainstorms/`. Do not just output text to the chat.
-- The output file should be used as the `origin:` reference when subsequently running `/lfg` (Planning phase).
+
+- Keep technical solution exploration here. Use `office-hours` when the primary
+  question is product demand, audience, wedge, or whether an idea is worth
+  building.
+- A subsequent `plan` may use the chat brief directly. Use an `origin:` file
+  reference only when the user requested or accepted the durable artifact.
