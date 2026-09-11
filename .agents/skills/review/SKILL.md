@@ -1,154 +1,128 @@
 ---
 name: review
-description: Multi-angle code review before merging
+description: Perform a scoped multi-angle code review of local changes, an explicit path set, or a branch or pull-request diff before merging or when the user asks for review. Defaults to non-mutating review, records actionable work in an already-authorized plan tracker, and supports only explicitly selected deterministic autofix.
 ---
 
-# Comprehensive Review
+# Scoped Review
 
-Perform a thorough code review from multiple perspectives, sequentially.
+Review the accepted change and its intent, not the repository in general. Read
+`code-review-excellence` when available; this skill's scope, severity, and
+output contracts take precedence.
 
-If the `code-review-excellence` skill exists, read it first for meta-level guidance on how to review well.
+## Modes and authority
 
-## When to Use
+- Default and `mode:report-only` make no reviewed-code, configuration, report
+  file, checkout, external, or autofix changes. They are R0 unless an accepted
+  plan already authorizes the bounded `tasks.md` update described below; that
+  tracker-only effect is R1 and does not authorize a fix.
+- `mode:autofix` authorizes only deterministic `safe_auto` corrections inside
+  the reviewed local scope. Without it, report findings and stop.
+- `base:<ref>` supplies a comparison base. Never switch branches or check out a
+  remote review target.
 
-Before opening a PR, or when the user asks for a review of recent changes.
+Never infer permission to commit, push, publish, file tickets, change policy or
+contracts, add dependencies, or send code or review data to an external model,
+provider, or service. Those actions need their own authority.
 
-## Argument Parsing / Modes
-You can invoke this skill conditionally via argument hints:
-- `mode:autofix`: Automatically apply `safe_auto` fixes without asking.
-- `mode:report-only`: Strictly read-only output without modifying files.
-- `base:<sha-or-ref>`: Provide a precise Git base for diffing.
+## 1. Establish scope and intent
 
-## Steps
+Read these references completely:
 
-### 1. Identify Scope
-Review all files changed **in this conversation thread**. Use `git diff` and your conversation context to build the file list. If the branch contains changes from a previous conversation, exclude those — focus only on what was created or modified during this complete thread.
+- `.agents/skills/review/references/change-rigor.md`
+- `.agents/skills/review/references/scope-and-orchestration.md`
+- `.agents/skills/review/references/finding-contract.md`
 
-### 2. Deep Dive & Action Routing
-Before listing any findings, perform stress testing and Stakeholder Perspective Analysis:
+Resolve the exact target, base and head, file inventory, accepted requirements,
+governing project rules, and the matching accepted implementation plan when one
+exists. Record change rigor, affected components, and material boundary facts.
+Preserve unrelated dirty work. A tracker is eligible only when it is the regular
+`tasks.md` sibling of that plan and its authority covers the reviewed increment;
+never guess between plausible historical plans or create a missing tracker.
 
-**A. Stakeholder Perspective Analysis**
-Examine the changes from these angles:
-- **Developer:** Is the code maintainable, readable, and well-tested?
-- **Ops:** Are there missing logs, bad error handling, or deployment risks?
-- **End User:** Is the UI/UX negatively impacted? Is accessibility compromised?
-- **Security:** Are we introducing vulnerabilities?
-- **Business:** Does this align with the project goals?
+## 2. Select passes
 
-**B. Action Routing & Fix Triggers**
-Map every finding you discover into one of these actions:
-| `autofix_class` | Meaning | Agent Action |
-|---|---|---|
-| `safe_auto` | Local, deterministic fix suitable for immediate autofix. | Fix silently in interactive/autofix mode. |
-| `gated_auto` | Concrete fix, but alters behavior, contracts, or permissions. | Requires user approval before fixing. |
-| `manual` | Actionable work that should be handed off. | Add to `task.md` residual work. |
-| `advisory` | Report-only output (residual risks, rollout notes). | Keep in review report only. |
+Declare each pass applicable or not applicable with a reason. Correctness is
+always selected. Select other passes only when evidence makes them relevant:
 
-**C. Confidence Gating**
-- Suppress findings below `0.60` confidence. 
-- Exception: **P0 (Critical)** findings at `0.50+` confidence survive the gate — critical-but-uncertain issues must not be silently dropped.
+- **Standards:** applicable `AGENTS.md`, `CONTRIBUTING.md`, architecture or
+  design decisions, established structure, and reusable project knowledge.
+- **Testing:** changed behavior, failure handling, or an affected test harness.
+- **Security:** use `security-review` for changed trust, data, identity,
+  permission, dependency, or destructive-operation boundaries.
+- **Performance:** use `performance-review` when runtime cost, capacity,
+  latency, or resource use can materially change.
+- **Architecture:** use `architecture-review` for boundaries, dependencies,
+  contracts, ownership, persistence, or structural change.
+- **UI/accessibility/SEO:** load `DESIGN.md` and the relevant skills only for an
+  affected interface or public page.
+- **Operations:** select for material migration, rollout, recovery, logging,
+  health, or production behavior.
 
-### 3. Review Passes
-Execute the following passes against the codebase, keeping the findings structured logically:
+Framework-specific rules apply only to components the project marks Adopted.
+All selected passes inspect the complete accepted scope; one finding does not
+end the review.
 
-**Standards** — Check all changes against the relevant coding standards:
-   - PHP changes → `AGENTS.md`
-   - Vue/Nuxt changes → `AGENTS.md`
-   - Styling changes → `DESIGN.md`
-   - **Knowledge Re-use:** Did the implementation re-invent the wheel or correctly leverage compounded learnings from existing Knowledge Items (KIs)?
-   - Flag any deviations.
+## 3. Execute and synthesize
 
-**Security** — Review changes through the lens of `AGENTS.md`:
-   - User input handling — is everything validated?
-   - Authorization — are policies enforced?
-   - Secrets — any hardcoded values or exposed keys?
-   - SQL injection, XSS, CSRF — applicable?
-   If the `security-review` skill exists, read it for deeper guidance.
+Give every delegated pass the same compact review packet: target and intent,
+base/head, accepted file list and diff, explicit requirements, applicable
+standards, boundary facts, and the finding contract. Follow the dispatch,
+collection, independence, failure, evidence-search, and deduplication rules in
+`scope-and-orchestration.md`.
 
-**Performance** — Review changes through the lens of `AGENTS.md`. Look for:
-   - N+1 queries (missing eager loading)
-   - Unnecessary database calls in loops
-   - Missing indexes for new query patterns
-   - Large payloads without pagination
-   - Frontend: unnecessary re-renders, missing `lazy` loading
-   If the `performance-review` skill exists, read it for deeper guidance.
+Normalize every retained issue through `finding-contract.md`. Validate the
+cited line and surrounding behavior before reporting it. Keep primary and
+secondary findings verdict-relevant; list unrelated pre-existing findings
+separately. Do not turn formatter or linter output into review noise.
 
-**Architecture** — Verify:
-   - Business logic in Actions, not controllers
-   - Thin controllers pattern maintained
-   - API versioning respected
-   - No circular dependencies introduced
-   - Design system tokens used (not hardcoded values)
-   If the `architecture-review` skill exists, read it for deeper guidance.
+Elevated or significant architecture, security, data, migration, permission,
+deployment, or production work may also require `adversarial-review` after the
+selected review passes. A routine ordinary change does not.
 
-**SEO & UI** — Check:
-   - Semantic HTML and heading hierarchy
-   - Core Web Vitals impact (LCP, CLS, INP)
-   - Structured data / Schema.org where applicable
-   If the `seo-review` skill exists, read it for deeper guidance.
+## 4. Autofix, when explicitly selected
 
-**Accessibility** — Review changes through the lens of `AGENTS.md`. For frontend code:
-   - Design system tokens used (no hardcoded colors, spacing)
-   - Responsive at all breakpoints (320px → 1440px)
-   - Semantic HTML, keyboard accessible, WCAG AA contrast
-   - Loading, empty, and error states handled
-   If the `ui-accessibility-review` skill exists, read it for the full checklist.
+Apply only `safe_auto` findings whose result is deterministic, reversible, and
+inside the reviewed local scope. Re-run the narrowest affected check after each
+group and then the relevant suite. Inspect the autofix-only diff before
+finishing. Revert a failed or uncertain correction and report it as
+`gated_auto` or `manual`; do not widen scope.
 
-**Testing** — Check:
-   - New code has test coverage
-   - Edge cases are tested
-   - Test naming follows conventions
-   - No tests were removed or skipped without justification
+## 5. Update the accepted tracker
 
-### 4. Reporting
-When the review is complete, you must present the findings in three ways:
+When the matching accepted plan already authorizes its live tracker, amend only
+that `tasks.md` after synthesis:
 
-1. **Detailed Report Artifact:** Create a **conversation artifact** containing the full review details.
-2. **Task Artifact:** Add `manual` and unapproved `gated_auto` findings as executable items to the Task artifact (`task.md`).
-3. **Chat Summary:** Communicate the report and the updated task list to the user in the chat using a **pipe-delimited Markdown table** for the findings.
+- add every retained actionable P0–P3 finding as an unchecked task with its
+  stable finding ID, narrow location, smallest correction, and verification;
+- exclude advisory-only observations and avoid duplicating an existing finding
+  task;
+- keep secrets or sensitive evidence out of task text;
+- mark the review task complete only after all retained findings have been
+  recorded, including when the verdict is Not ready; and
+- leave every finding task unchecked until its correction is implemented and
+  verified.
 
-**Detailed Report Artifact Format:**
+If the tracker is absent, ambiguous, outside the accepted increment, explicitly
+excluded from writes, or unsafe to edit, make no repository write and report the
+tracking gap. Tracker authority never permits changing reviewed code or any
+other file.
 
-Group findings by severity, with a detailed block for each item:
+## 6. Report
 
-```markdown
-# Review: [Short Scope Description]
-**Date:** YYYY-MM-DD
-**Files reviewed:** [count]
+Lead with stable-numbered findings ordered P0-P3. Each finding includes exact
+location, confidence, action, evidence, consequence, smallest correction, and
+verification. Then report:
 
----
+- scope and intent;
+- explicit requirements as complete, partial, missing, or equivalently met;
+- every pass as completed, not applicable, or missing coverage;
+- tests and inspections run, unavailable evidence, pre-existing issues, and
+  residual risks;
+- tracker tasks added, deduplicated, or unavailable; and
+- one verdict last: **Ready**, **Not ready**, or **Withheld**.
 
-## 🚨 Critical (P0)
-> Must fix before merge. Exploitable vulnerability, data loss/corruption, hard breakage.
-
-## 🔴 High (P1)
-> Should fix. High-impact defect likely hit in normal usage, breaking contract.
-
-## 🟡 Moderate (P2)
-> Fix if straightforward. Meaningful downside but narrower scope (edge case, perf regression).
-
-## 🟢 Low (P3) / Advisory
-> User's discretion. Formatting, style recommendations, or advisory notes.
-```
-
-Each finding within a group follows this structure:
-
-```markdown
-### [Short Description]
-**File(s):** `path/to/file.ext`
-**Class:** `safe_auto` | `gated_auto` | `manual` | `advisory`
-
-**Issue:** [Detailed description of what is wrong]
-
-**Recommended Fix:** [Specific instructions or code snippet to resolve]
-```
-
-If a severity group has no findings, include the heading with "No findings." beneath it — confirmation is valuable.
-
-
-## Rules
-
-- Run all passes even if early ones find issues — give the complete picture.
-- Be specific — "this might have performance issues" is not useful. "Line 42: `User::all()` inside a loop will cause N+1" is.
-- Don't nitpick formatting if Pint/ESLint will handle it.
-- If no issues found in a pass, say so explicitly — confirmation is valuable.
+Use **Not ready** for unresolved P0/P1 findings or an incomplete explicit
+requirement. Use **Withheld** when missing required coverage or unavailable
+material evidence prevents a defensible verdict. Otherwise use **Ready**. If
+there are no findings, say so directly, but never call the change Ready when a
+required pass did not complete.

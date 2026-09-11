@@ -1,0 +1,1 @@
+CREATE TABLE inventory (sku TEXT PRIMARY KEY, quantity INTEGER NOT NULL);

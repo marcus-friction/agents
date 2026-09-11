@@ -1,205 +1,55 @@
 # Tailwind v4 + shadcn/ui Skill
 
-**Status**: Production Ready ✅
-**Last Updated**: 2026-01-03
-**Production Tested**: WordPress Auditor (https://wordpress-auditor.webfonts.workers.dev)
+Guidance for reconciling Tailwind CSS v4 and shadcn/ui with an adopted Vite +
+React project. [`SKILL.md`](SKILL.md) is the normative workflow; this README is
+only a navigation aid.
 
----
+## Use it for
 
-## Auto-Trigger Keywords
+- adding or reviewing Tailwind CSS v4 in a Vite + React project;
+- integrating shadcn/ui or an existing shadcn/ui configuration;
+- setting up semantic theme tokens and light/dark behavior;
+- diagnosing v3-to-v4 configuration, plugin, `@apply`, or CSS-variable issues;
+- planning a bounded Tailwind v3 migration.
 
-This skill should be invoked when user mentions ANY of:
+This is a Vite-specific setup skill; do not use it for Next.js setup. Route a
+Next.js project to the project's adopted Next.js guidance instead. Do not apply
+this skill when Tailwind, React, or the proposed UI stack is merely optional or
+unresolved.
 
-### Primary Triggers:
-- `tailwind v4`
-- `tailwind css v4`
-- `shadcn/ui`
-- `shadcn ui`
-- `vite + react + tailwind`
-- `@tailwindcss/vite`
+## Operating contract
 
-### Secondary Triggers:
-- `dark mode setup`
-- `theme provider`
-- `theme switching`
-- `@theme inline`
-- `css variables not working`
-- `colors not applying`
-- `tailwind utilities missing`
+1. Inspect the package manifest, lockfile, package manager evidence, existing
+   CSS and configuration, framework structure, and relevant dirty state.
+2. Resolve compatible exact dependency and generator versions. State the
+   purpose of every proposed package.
+3. Preview material generator, migration, removal, and overwrite effects.
+   Supplied implementation scope needs no redundant approval; unresolved
+   dependencies or destructive effects retain their normal boundary.
+4. Reconcile the reference templates with project-owned files. Never copy them
+   over an existing configuration without comparing meaning and usage.
+5. Add `tw-animate-css` only when selected output actually requires it.
+6. Run the repository's focused build and behavior checks after the change.
 
-### Error-Based Triggers:
-- `tw-animate-css` (common error)
-- `@apply deprecated`
-- `dark: variant not working`
-- `colors all black/white`
-- `bg-primary doesn't work`
-- `@import typography` (wrong v4 syntax)
-- `require @tailwindcss/typography` (v3 syntax in v4)
-- `prose class not working`
-- `@plugin directive`
+## Package planning
 
----
+Relevant packages may include `tailwindcss`, `@tailwindcss/vite`, `clsx`, and
+`tailwind-merge`. React, Vite, and TypeScript normally already belong to the
+host project. Treat names here as discovery hints, not version or installation
+approval.
 
-## What This Skill Does
+## Repository contents
 
-Sets up **production-ready** Vite + React + Tailwind CSS v4 + shadcn/ui with:
+- [`SKILL.md`](SKILL.md) — normative inspection, planning, implementation, and
+  verification workflow.
+- [`commands/setup.md`](commands/setup.md) — command-oriented setup guidance.
+- [`rules/tailwind-v4-shadcn.md`](rules/tailwind-v4-shadcn.md) — compact rules.
+- [`references/common-gotchas.md`](references/common-gotchas.md) — common
+  integration failures.
+- [`references/dark-mode.md`](references/dark-mode.md) — theme behavior.
+- [`references/migration-guide.md`](references/migration-guide.md) — v3-to-v4
+  migration considerations.
+- `templates/` — reference files to compare and reconcile, never blind-copy.
 
-✅ **Correct v4 architecture** - @theme inline pattern, no config file
-✅ **Dark mode** - ThemeProvider with system/light/dark support
-✅ **Error prevention** - Fixes tw-animate-css, duplicate @layer, @apply deprecation
-✅ **Semantic colors** - Full color palette with proper CSS variables
-✅ **Path aliases** - @/* imports configured
-✅ **TypeScript** - Full type safety
-✅ **Templates** - Proven file templates ready to copy
-
----
-
-## Known Issues This Skill Prevents
-
-| Issue | Why It Happens | How Skill Fixes It |
-|-------|---------------|-------------------|
-| `tw-animate-css` import error | shadcn init adds non-existent import | Provides clean CSS template |
-| Duplicate `@layer base` | shadcn init adds second block with @apply | Single clean @layer block |
-| Colors don't work | Missing `@theme inline` mapping | Complete mapping provided |
-| Dark mode broken | No ThemeProvider or wrong setup | Full ThemeProvider template |
-| Wrong config | `tailwind.config.ts` used for theme | Empty config, CSS-only theme |
-| Double hsl() wrapping | Common pattern mistake | Correct variable usage |
-| Wrong plugin syntax | Using @import or require() for plugins | Correct @plugin directive documented |
-
----
-
-## When to Use This Skill
-
-### ✅ Use When:
-- Starting a new Vite + React project with Tailwind v4
-- Adding Tailwind v4 to existing Vite project
-- Migrating from Tailwind v3 to v4
-- Integrating shadcn/ui components
-- Setting up dark mode with theme switching
-- Debugging Tailwind v4 color/theme issues
-- Need production-tested v4 patterns
-
-### ❌ Don't Use When:
-- Using Tailwind v3 (different architecture)
-- Using Next.js (different setup, use Next.js skill instead)
-- Using PostCSS instead of Vite plugin
-- Building pure CSS library (no React needed)
-- User specifically requests manual setup for learning
-
----
-
-## Template Structure
-
-```
-~/.claude/skills/tailwind-v4-shadcn/
-├── README.md                  # This file - auto-trigger keywords
-├── SKILL.md                   # Complete documentation (623 lines)
-├── templates/                 # Ready-to-copy file templates
-│   ├── index.css              # v4 CSS architecture
-│   ├── components.json        # shadcn/ui v4 config
-│   ├── vite.config.ts         # Vite + Tailwind plugin
-│   ├── tsconfig.app.json      # TypeScript with aliases
-│   ├── theme-provider.tsx     # Dark mode provider
-│   └── utils.ts               # cn() utility
-└── reference/                 # Deep-dive docs
-    ├── architecture.md
-    ├── dark-mode.md
-    ├── common-gotchas.md
-    └── migration-guide.md
-```
-
----
-
-## Quick Usage
-
-When Claude detects trigger keywords, it should:
-
-1. **Confirm with user**: "I found the `tailwind-v4-shadcn` skill. Use it?"
-2. **Explain benefits**: "This prevents tw-animate-css errors and includes dark mode"
-3. **Use templates**: Copy from `templates/` directory
-4. **Follow SKILL.md**: Complete step-by-step in SKILL.md
-5. **Verify**: Test dev server, check dark mode toggle
-
----
-
-## Token Efficiency
-
-| Approach | Tokens Used | Errors |
-|----------|------------|--------|
-| Manual setup (no skill) | ~65,000 | 2-3 common errors |
-| With this skill | ~20,000 | 0 (prevented) |
-| **Savings** | **~70%** | **100% reduction** |
-
----
-
-## Dependencies Installed
-
-```json
-{
-  "dependencies": {
-    "tailwindcss": "^4.1.18",
-    "@tailwindcss/vite": "^4.1.18",
-    "clsx": "^2.1.1",
-    "tailwind-merge": "^3.4.0",
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0"
-  },
-  "devDependencies": {
-    "@types/node": "^25.0.3",
-    "@vitejs/plugin-react": "^5.1.2",
-    "vite": "^7.3.0",
-    "typescript": "~5.9.0",
-    "tw-animate-css": "^1.4.0"
-  }
-}
-```
-
----
-
-## Example Skill Invocation
-
-```
-User: "Set up a new Vite + React project with Tailwind v4"
-↓
-Claude: [Checks ~/.claude/skills/tailwind-v4-shadcn/]
-↓
-Claude: "I found the tailwind-v4-shadcn skill. Use it?
-        (Prevents tw-animate-css error, includes dark mode)"
-↓
-User: "Yes"
-↓
-Claude: [Uses templates/ + follows SKILL.md]
-↓
-Result: Working project in ~1 minute, 0 errors
-```
-
----
-
-## Skill Metadata
-
-```yaml
-name: tailwind-v4-shadcn
-version: 2.0.1
-category: frontend-setup
-stack: [vite, react, tailwind-v4, shadcn-ui]
-confidence: high  # Production-tested pattern
-auto_invoke_threshold: 0.7  # Invoke if 70%+ match
-maintained_by: jeremy@jezweb.net
-last_tested: 2026-01-03
-```
-
----
-
-## Related Skills
-
-- `react-vite-base` - Vite + React without Tailwind
-- `cloudflare-react-full-stack` - Adds Cloudflare Workers
-- `react-form-zod` - React Hook Form + Zod validation
-
----
-
-## Support
-
-- **Full Documentation**: See `SKILL.md` (623 lines)
-- **Troubleshooting**: See `reference/common-gotchas.md`
-- **Official Docs**: https://ui.shadcn.com/docs/tailwind-v4
+For upstream framework behavior and current compatibility, verify the official
+Tailwind CSS and shadcn/ui documentation at implementation time.

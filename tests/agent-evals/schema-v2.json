@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Agents Ecosystem live agent evaluation result v2",
+  "type": "object",
+  "properties": {
+    "case_id": {
+      "type": "string"
+    },
+    "decisions": {
+      "type": "object",
+      "properties": {
+        "d1": {
+          "anyOf": [
+            { "type": "boolean" },
+            { "type": "integer" },
+            { "type": "number" },
+            { "type": "string" },
+            { "type": "array", "items": { "type": "string" } },
+            { "type": "null" }
+          ]
+        },
+        "d2": {
+          "anyOf": [
+            { "type": "boolean" },
+            { "type": "integer" },
+            { "type": "number" },
+            { "type": "string" },
+            { "type": "array", "items": { "type": "string" } },
+            { "type": "null" }
+          ]
+        },
+        "d3": {
+          "anyOf": [
+            { "type": "boolean" },
+            { "type": "integer" },
+            { "type": "number" },
+            { "type": "string" },
+            { "type": "array", "items": { "type": "string" } },
+            { "type": "null" }
+          ]
+        },
+        "d4": {
+          "anyOf": [
+            { "type": "boolean" },
+            { "type": "integer" },
+            { "type": "number" },
+            { "type": "string" },
+            { "type": "array", "items": { "type": "string" } },
+            { "type": "null" }
+          ]
+        },
+        "d5": {
+          "anyOf": [
+            { "type": "boolean" },
+            { "type": "integer" },
+            { "type": "number" },
+            { "type": "string" },
+            { "type": "array", "items": { "type": "string" } },
+            { "type": "null" }
+          ]
+        },
+        "d6": {
+          "anyOf": [
+            { "type": "boolean" },
+            { "type": "integer" },
+            { "type": "number" },
+            { "type": "string" },
+            { "type": "array", "items": { "type": "string" } },
+            { "type": "null" }
+          ]
+        }
+      },
+      "required": ["d1", "d2", "d3", "d4", "d5", "d6"],
+      "additionalProperties": false
+    },
+    "summary": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "case_id",
+    "decisions",
+    "summary"
+  ],
+  "additionalProperties": false
+}

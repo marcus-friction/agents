@@ -1,5 +1,8 @@
 # JSON Schemas
 
+<!-- Modified by TomFit AG in 2026 to document repository-local evaluation
+schemas and provenance fields. -->
+
 This document defines the JSON schemas used by skill-creator.
 
 ---
@@ -225,7 +228,7 @@ Output from Benchmark mode. Located at `benchmarks/<timestamp>/benchmark.json`.
   "metadata": {
     "skill_name": "pdf",
     "skill_path": "/path/to/pdf",
-    "executor_model": "claude-sonnet-4-20250514",
+    "executor_model": "provider-model-id",
     "analyzer_model": "most-capable-model",
     "timestamp": "2026-01-15T10:30:00Z",
     "evals_run": [1, 2, 3],

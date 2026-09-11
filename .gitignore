@@ -1,1 +1,5 @@
 .claude/
+.idea/
+__pycache__/
+*.py[cod]
+tests/agent-evals/evidence/

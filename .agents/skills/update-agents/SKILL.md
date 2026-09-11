@@ -1,89 +1,104 @@
 ---
 name: update-agents
-description: Pulls the latest agent rules and skills from the remote repository without wiping local project customizations. Use this skill when the user asks to "update agents", "sync agents", or "pull the latest agent rules".
+description: Refresh upstream-managed agent skills, inactive documentation candidates, and discovery adapters while preserving project-owned files. Use when asked to update, sync, or pull the latest agent rules in one or more projects.
 ---
 
-# Agent Instruction: Run Agent Update
+# Update Agent Ecosystem
 
-You are tasked with updating the local project's `.agents/` directory (rules and skills) from the central upstream repository (`https://github.com/marcus-friction/agents.git`). 
+Refresh the selected project from a known Agents Ecosystem distribution source. Keep
+mechanical distribution updates separate from semantic adoption of project
+documentation.
 
-**Crucial Objective**: This update MUST be purely non-destructive to local adjustments. You cannot blindly overwrite active uncommitted work or bespoke project-level customizations.
+## Trigger and authority
 
-## Execution Pipeline
+A bare update or sync request defaults to the current stable release. Use the
+mutable edge channel or a local development checkout only when the user asks for
+it or the surrounding task already selected it.
 
-You must execute the update using the single, unified bash script provided below. Do not attempt to run these commands individually, as agent environments reset their shell state between blocks.
+For one project, the request authorizes only the installer's scoped changes to
+managed assets, inactive templates, and discovery adapters.
+Updates install no host packages or runtime dependencies. They do not authorize
+edits to active project context, legacy cleanup, commits, pushes, or publication.
+Bulk preparation and bulk publication have separate authority; see
+`references/source-and-bulk.md`.
 
-Copy and execute the following complete script:
+## Ownership contract
 
-```bash
-set -e
+| Target | Update behavior |
+|---|---|
+| Files recorded in `.agents/.agents-ecosystem-managed-state-v2` | Update or retire only while their recorded content and mode remain unchanged; a verified v1 state migrates on success |
+| `.agents/templates/` | Regenerate inactive upstream candidates; never activate them as project documents |
+| Paths absent from managed state | Preserve as local extensions; a pre-state install may adopt historical paths with exact content and matching Git executable state, allowing the original umask. Unverified paths stay local; upstream collisions block the update |
+| `.agents/project/`, root or nested project documents, `.agents/rules/`, and `.agent/` | Leave project-owned and untouched |
+| Registered discovery paths | Accept only the expected adapter target; a different link, file, or directory blocks registration |
 
-# 1. Base Environment & Cleanliness Gate
-cd "$(git rev-parse --show-toplevel)" || { echo "Must be in a git repository."; exit 1; }
+Use managed state or the installer's historical inventory, never names, banners,
+or a match to current upstream content alone. A dirty
+`.agents/` tree is not by itself a blocker: the managed state and complete
+installer preflight decide whether existing work is safe to preserve.
 
-if ! git diff --quiet HEAD -- .agents/ AGENTS.md CONTRIBUTING.md CLAUDE.md 2>/dev/null; then
-  echo "ERROR: Uncommitted changes detected in your agent files."
-  echo "You must commit or stash active work before running an update to prevent data loss."
-  exit 1
-fi
+## Source modes
 
-echo "Environment clean. Initializing update..."
-TMP_DIR="/tmp/agents-update"
+| Mode | Required evidence | Installer argument |
+|---|---|---|
+| Stable (default) | Requested release's full 40-character lowercase commit SHA; clean detached physical checkout supplied or materialized at that commit | `--ref <full-commit-sha>` |
+| Edge | Explicit choice of the moving branch; clean physical checkout and the resolved commit disclosed as non-reproducible | Omit `--ref` |
+| Local development | Exact physical checkout selected for the task; disclose its branch, commit, and dirty state | Omit `--ref` |
 
-# 2. Resilient Cleanup Trap
-# Ensures the temporary isolation directory is ALWAYS deleted, even if the script aborts midway.
-trap 'rm -rf "$TMP_DIR"' EXIT
+Never relabel a tag or branch as an immutable release, silently move an existing
+checkout, or turn a stable request into edge. If no suitable source checkout is
+already available, read `references/source-and-bulk.md` completely and use its
+temporary public-source bootstrap.
 
-# 3. Isolate & Fetch
-rm -rf "$TMP_DIR"
-git clone --depth 1 https://github.com/marcus-friction/agents.git "$TMP_DIR"
+## Workflow
 
-# 4. Legacy Migration
-if [ -d ".agents/rules" ]; then
-  echo "Migrating legacy .agents/rules to new structure..."
-  
-  # Migrate project constraints to README.md
-  echo -e "\n## Legacy Project Context\n" >> README.md
-  [ -f ".agents/rules/10_project.md" ] && cat .agents/rules/10_project.md >> README.md
-  [ -f ".agents/rules/20_stack.md" ] && cat .agents/rules/20_stack.md >> README.md
-  [ -f ".agents/rules/60_infrastructure.md" ] && cat .agents/rules/60_infrastructure.md >> README.md
-  
-  # Migrate design context to DESIGN.md
-  echo -e "\n## Legacy Design Context\n" >> DESIGN.md
-  [ -f ".agents/rules/11_design.md" ] && cat .agents/rules/11_design.md >> DESIGN.md
-  
-  rm -rf .agents/rules
-fi
+1. Resolve and enter the exact target project root. Record relevant pre-update
+   status, managed state, local extensions, active and legacy context, target
+   types, and adapter paths so existing work is not attributed to the update.
+2. Select the source mode. For a supplied checkout, verify its physical source,
+   resolved commit, required cleanliness, and regular `install.sh`. For remote
+   bootstrap, verify the physical bootstrap and let it validate the materialized
+   source before project preflight.
+3. From the target root, run stable installation as:
 
-# 5. File Synchronization & Protection
+   ```bash
+   bash /path/to/agents/install.sh \
+     --from-local /path/to/agents \
+     --ref <full-commit-sha>
+   ```
 
-# Update Skills: Recursively replace standard skills, untouched local bespoke skills stay safe
-rsync -a "$TMP_DIR/.agents/skills/" .agents/skills/
+   For explicitly selected edge or local development, omit `--ref`:
 
-# Register skills with Claude Code
-mkdir -p .claude
-ln -sfn ../.agents/skills .claude/skills 2>/dev/null || { rm -rf .claude/skills; cp -R .agents/skills .claude/skills; }
+   ```bash
+   bash /path/to/agents/install.sh \
+     --from-local /path/to/agents
+   ```
 
-# Update Base Routers (Do not overwrite README.md automatically)
-cp "$TMP_DIR/AGENTS.md" ./AGENTS.md
-[ -f "$TMP_DIR/CONTRIBUTING.md" ] && cp "$TMP_DIR/CONTRIBUTING.md" ./CONTRIBUTING.md || true
-[ -f "$TMP_DIR/CLAUDE.md" ] && cp "$TMP_DIR/CLAUDE.md" ./CLAUDE.md || true
+   Let the installer perform the complete managed-tree, template, and adapter
+   preflight. Do not reproduce or weaken that logic in ad hoc copy commands.
+4. On any conflict or failure, stop. Do not overwrite, stash, relocate, delete,
+   retry with a weaker mode, or classify a changed managed path as local. Report
+   the exact blocker and preserve any recovery path printed by the installer.
+5. On success, compare post-update status and diffs with the recorded baseline.
+   Distinguish updated and retired managed files from preserved local
+   extensions. If inactive templates changed, offer `onboard-project` as a
+   separate semantic reconciliation only when the user wants active documents
+   updated.
 
-# 6. Orphan Analysis & Verification
-echo ""
-echo "--- ORPHAN ANALYSIS (SKILLS) ---"
-echo "The following skills exist locally but are NOT present in the upstream repository:"
-comm -23 <(ls -1 .agents/skills/ | sort) <(ls -1 "$TMP_DIR/.agents/skills/" | sort)
-echo "--------------------------------"
-echo ""
+For more than one repository, read `references/source-and-bulk.md` and use the
+bounded planner. Preparing review artifacts never authorizes its apply mode,
+which creates commits, pushes branches, and may open pull requests.
 
-echo "Update complete. Reviewing final git status:"
-git status
-```
+## Report
 
-### Final Report & User Interaction
-End your turn by presenting the user with:
-1. A summary of the skills that were modified or added (based on the `git status` output).
-2. Confirmation that local custom templates were safely bypassed.
-3. **CRITICAL**: Explicitly read the `ORPHAN ANALYSIS` outputs from the terminal. If any orphaned skills are listed, prompt the user: 
-   > *"I noticed the following items exist locally but not upstream: `[Item X, Item Y]`. Are these your custom workflows, or are they deprecated upstream files you would like me to clean up?"*
+Report:
+
+- target, selected channel, source path, and resolved commit;
+- changed and retired managed files, plus any v1-to-v2 state migration;
+- preserved local extensions and unchanged active or legacy project context;
+- adapter changes, inactive template candidates, and whether reconciliation is
+  still pending;
+- conflicts, incomplete effects, and retained recovery paths.
+
+Do not describe a retired managed file as a local extension or claim the project
+is fully reconciled merely because its managed distribution is current.

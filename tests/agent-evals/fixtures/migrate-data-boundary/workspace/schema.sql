@@ -1,0 +1,1 @@
+CREATE TABLE orders (id UUID PRIMARY KEY, total_cents BIGINT NOT NULL);

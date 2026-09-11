@@ -18,7 +18,8 @@ Vitest is a next-generation testing framework powered by Vite. It provides a Jes
 - Built-in coverage via V8 or Istanbul
 - Snapshot testing, mocking, and spy utilities
 
-> The skill is based on Vitest 5.x (beta), generated at 2026-06-22.
+> The skill is based on stable Vitest 5, released September 3, 2026. See the
+> [official Vitest 5 announcement](https://vitest.dev/blog/vitest-5).
 
 ## Core
 

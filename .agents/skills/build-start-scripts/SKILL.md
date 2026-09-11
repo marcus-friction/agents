@@ -1,6 +1,6 @@
 ---
 name: build-start-scripts
-description: Standards and patterns for building reliable local dev startup scripts (serve.sh, start.sh). Use this skill when creating, modifying, or reviewing any shell script that boots Docker containers, Sail, dev servers, or background services. Also use when the user mentions "serve script", "startup script", "docker compose up", "sail up", or asks to fix orphaned containers, port conflicts, or flaky local environments. Proactively suggest when you see startup-related issues in scripts being edited.
+description: Standards and patterns for building reliable local dev startup scripts (serve.sh, start.sh). Use this skill when creating, modifying, or reviewing any shell script that boots Docker containers, Laravel Sail, Nuxt dev servers, or background services. Also use when the user mentions "serve script", "startup script", "docker compose up", "sail up", or asks to fix orphaned containers, port conflicts, or flaky local environments. Proactively suggest when you see startup-related issues in scripts being edited.
 ---
 
 # Start Scripts
@@ -9,16 +9,25 @@ How to build local dev startup scripts that are reliable, idempotent, and pleasa
 
 Startup scripts are the first thing a developer runs. If they fail, nothing else matters. These patterns exist because we've hit every failure mode below in production — orphaned containers blocking ports, silent hangs on unhealthy databases, zombie processes after Ctrl+C.
 
-## Clean Slate Startup
+## Reconcile before starting
 
-Containers from a previous run are never trustworthy. State drifts — volumes get corrupted, networks get orphaned, port bindings leak. Starting fresh eliminates an entire class of "works on my machine" bugs.
+Normal startup does not run `docker compose down`. Resolve the Compose project
+name and inspect its services, health, ports, and ownership first. Reuse healthy
+dependencies, start only missing or stopped services, and fail with a clear
+diagnosis when an unknown process owns a required port. Do not kill or replace
+unknown processes.
 
-```bash
-# Remove all containers for this project, including orphans from renamed services
-docker compose down --remove-orphans 2>/dev/null || true
-```
+An explicit reset may remove containers or orphans only after verifying the
+named Compose project is disposable and previewing the affected services,
+volumes, and recovery. A reset is a separate destructive operation, not startup
+hygiene.
 
-Do this as the **first operational step**, before `sail up` or `docker compose up`. The `|| true` ensures a clean first run (when there's nothing to remove) doesn't abort the script.
+After showing the exact effect preview, obtain one exact decision for the named
+project and listed effects. An already-supplied decision is sufficient only when
+it matches that preview. Only then execute the reset.
+
+Snapshot service state before `up` and track which services transitioned to
+running during the current invocation. That ownership record controls cleanup.
 
 ## Port Discipline
 
@@ -33,45 +42,59 @@ Port conflicts are the #1 cause of "the script worked yesterday" failures. Every
 - When ports change, update **every** reference. The blast radius is larger than you'd expect:
   - `.env` and `.env.example`
   - `docker-compose.yml` defaults
-  - Framework configs (nuxt.config.ts proxy targets, cors.php defaults)
+  - Framework configs (`nuxt.config.ts` proxy targets, Laravel CORS defaults)
   - Startup script banner output
   - Infrastructure documentation
   - README files
 
-The infrastructure rule (`README.md`) is the single source of truth for this project's port mapping. Defer to it.
+The infrastructure rule (`README.md`) is the single source of truth for the
+project's port mapping. Defer to it rather than inventing a baseline port.
 
 ## Graceful Shutdown
 
-Zombie processes and orphaned containers make the next startup fail. Trap signals to clean up everything the script started, in reverse order — child processes first, then containers.
+Trap signals to clean up what this invocation started, in reverse order—child
+processes first, then services. Preserve pre-existing or shared processes,
+containers, networks, and volumes.
 
 ```bash
+STARTED_SERVICES=()
+
 cleanup() {
     echo -e "${YELLOW}Shutting down...${NC}"
 
-    # Kill background processes (Nuxt, watchers, etc.)
+    # Kill background processes (Nuxt, queue watchers, etc.)
     if [[ -n "${NUXT_PID:-}" ]]; then
         kill "$NUXT_PID" 2>/dev/null || true
         wait "$NUXT_PID" 2>/dev/null || true
     fi
 
-    # Stop containers last
-    cd "$API_DIR" && ./vendor/bin/sail down 2>/dev/null || true
+    # Stop only services recorded as transitioned by this invocation.
+    if [[ ${#STARTED_SERVICES[@]} -gt 0 ]]; then
+        if ! docker compose stop "${STARTED_SERVICES[@]}"; then
+            echo -e "${YELLOW}Some current-run services could not be stopped; inspect them manually.${NC}"
+        fi
+    fi
 
-    echo -e "${GREEN}All services stopped.${NC}"
+    echo -e "${GREEN}Current-run services stopped.${NC}"
     exit 0
 }
 
 trap cleanup SIGINT SIGTERM
 ```
 
-The `${VAR:-}` pattern avoids `set -u` errors if the variable was never set (e.g., script failed before reaching that step). The `wait` prevents zombie processes.
+Initialize `STARTED_SERVICES=()` before installing the trap. Record a service
+only after verifying its transition from the pre-start snapshot. The
+`${VAR:-}` pattern avoids `set -u` errors if a PID was never set, and `wait`
+prevents zombie processes. If ownership is uncertain, retain the service and
+report it instead of broadening cleanup.
 
 ## Idempotency
 
 The script must be safe to run repeatedly without manual cleanup. This means:
 
 - **Dependency installation**: Only when missing (e.g., check `node_modules` existence before `npm install`).
-- **Migrations**: Run non-interactively with `--force`. Idempotent by nature — already-applied migrations are skipped.
+- **Migrations**: Run Laravel migrations non-interactively with `--force` after
+  the database is healthy. Already-applied migrations remain unchanged.
 - **No interactive prompts**: The script should work unattended. No `read` calls, no confirmations.
 
 ```bash
@@ -80,13 +103,14 @@ if [[ ! -d "node_modules" ]]; then
     npm install
 fi
 
-# --force skips the "are you sure?" prompt
-./vendor/bin/sail artisan migrate --force 2>/dev/null
+./vendor/bin/sail artisan migrate --force
 ```
 
 ## Health Checks
 
-Starting a service doesn't mean it's ready. Databases in particular take a few seconds to accept connections. If you run migrations against an unready database, you get cryptic connection errors.
+Starting a service doesn't mean it is ready. Databases in particular take a few
+seconds to accept connections. Running Laravel migrations against an unready
+database produces misleading connection failures.
 
 Wait with a bounded timeout — never hang forever.
 
@@ -122,12 +146,13 @@ set -euo pipefail
 Number steps sequentially in comments so log output maps to code:
 
 ```bash
-# ── 1. Remove existing containers ─────────────────────────
-# ── 2. Start Sail ─────────────────────────────────────────
-# ── 3. Run migrations ────────────────────────────────────
-# ── 4. Install frontend dependencies ─────────────────────
-# ── 5. Start Nuxt dev server ─────────────────────────────
-# ── 6. Ready ──────────────────────────────────────────────
+# ── 1. Inspect current processes, ports, and services ─────
+# ── 2. Start missing Laravel Sail services ────────────────
+# ── 3. Wait for health checks ─────────────────────────────
+# ── 4. Run Laravel migrations / seeds ─────────────────────
+# ── 5. Install frontend dependencies if needed ────────────
+# ── 6. Start Nuxt dev server ──────────────────────────────
+# ── 7. Ready ──────────────────────────────────────────────
 ```
 
 Define all paths relative to script location so the script works from any working directory:
@@ -135,6 +160,7 @@ Define all paths relative to script location so the script works from any workin
 ```bash
 ROOT_DIR="$(cd "$(dirname "$0")" && pwd)"
 API_DIR="$ROOT_DIR/platform/api"
+WEB_DIR="$ROOT_DIR/platform/dashboard"
 ```
 
 ## Output
@@ -149,7 +175,7 @@ CYAN='\033[0;36m'
 NC='\033[0m'
 ```
 
-- **Cyan** for progress ("Starting Sail containers...")
+- **Cyan** for progress ("Starting Laravel Sail services...")
 - **Green** for success (ready banner)
 - **Red** for errors ("Database did not become ready")
 - **Yellow** for warnings and shutdown messages
@@ -168,7 +194,8 @@ echo ""
 echo -e "  Press ${YELLOW}Ctrl+C${NC} to stop all services."
 ```
 
-Suppress noisy subprocess output with `2>/dev/null` where it's safe — but never suppress error output from steps that might fail (like `sail up`).
+Suppress noisy subprocess output with `2>/dev/null` where it is safe, but never
+suppress error output from steps that might fail.
 
 ## Complete Template
 
@@ -185,12 +212,12 @@ ROOT_DIR="$(cd "$(dirname "$0")" && pwd)"
 # Color definitions
 # Cleanup trap
 
-# ── 1. Remove existing containers (including orphans)
-# ── 2. Start containers
-# ── 3. Wait for health checks
-# ── 4. Run migrations / seeds
-# ── 5. Install frontend dependencies (if needed)
-# ── 6. Start dev servers (backgrounded)
+# ── 1. Snapshot current processes, ports, and Compose service state
+# ── 2. Start only missing or stopped Sail services; record transitions
+# ── 3. Wait for bounded health checks
+# ── 4. Install backend dependencies and run Laravel migrations / seeds
+# ── 5. Install frontend dependencies if needed
+# ── 6. Start a tracked Nuxt dev process
 # ── 7. Print ready banner
-# ── 8. Wait for background processes
+# ── 8. Wait for background processes; clean up only current-run ownership
 ```

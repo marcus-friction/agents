@@ -114,9 +114,10 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
 
 ### Using shadcn/ui Dropdown Menu
 
-```bash
-pnpm dlx shadcn@latest add dropdown-menu
-```
+Use the exact shadcn CLI version already resolved for the project. Preview the
+`dropdown-menu` generator output in a disposable copy (or with a trustworthy
+dry-run), then apply only the approved unchanged files. Preserve an existing
+dropdown implementation.
 
 ```typescript
 // src/components/mode-toggle.tsx

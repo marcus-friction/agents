@@ -1,88 +1,94 @@
 ---
 name: performance-review
-description: Performance analysis checklist for code review
+description: Review code or plans when a change can materially affect latency, throughput, capacity, database work, memory, network, rendering, or cache behavior.
 ---
 
-# Performance Review Skill
+# Performance Review
 
-Systematic performance analysis for code changes. Use during the performance pass of `/review` or when optimizing. See `AGENTS.md` rule for implementation standards.
+Use during a scoped review when runtime cost, capacity, latency, or resource use
+can change. Otherwise mark this pass not applicable with a reason.
 
-## Checklist
+## Preflight
 
-### Backend — Database
+Identify the affected runtime, expected workload, material data size, latency or
+capacity objective, and available measurements. Apply framework checks only to
+adopted components. Do not demand caches, queues, indexes, CDNs, or monitoring
+because they appear on a generic checklist.
 
-- [ ] **N+1 queries**: All relationship access uses eager loading (`with()`, `load()`)
-- [ ] **Query count**: Use `DB::enableQueryLog()` or Telescope to verify query count per request
-- [ ] **Missing indexes**: New `WHERE`, `ORDER BY`, or `JOIN` columns have indexes
-- [ ] **Unnecessary queries**: No DB calls inside loops — batch or collect first
-- [ ] **Pagination**: Large result sets use `paginate()` or `cursorPaginate()` — never `all()`
-- [ ] **Select specifics**: Use `select()` when only a few columns are needed
-- [ ] **Chunk processing**: Large datasets processed with `chunk()` or `lazy()` — never load all into memory
+## Data and backend
 
-### Backend — Caching
+When a data-backed service is affected:
 
-- [ ] **Cache appropriateness**: Expensive computations or slow queries cached with appropriate TTL
-- [ ] **Method choice**: High-traffic endpoints use `Cache::flexible()` (SWR); standard queries use `Cache::remember()`
-- [ ] **Tagged caching**: Related cache entries grouped with tags for collective invalidation
-- [ ] **Cache invalidation**: Cache cleared on data mutation — no stale data risk
-- [ ] **Event-driven invalidation**: Model observers or event listeners handle invalidation, not manual `forget()` scattered through code
-- [ ] **TTL alignment**: TTL matches data volatility (see tiered strategy in `AGENTS.md`)
-- [ ] **Null handling**: `Cache::remember()` closures don't return bare `null` (treated as cache miss)
-- [ ] **Key naming**: Cache keys follow `entity:id:attribute` convention — descriptive and hierarchical
+- Look for N+1 access, repeated calls in loops, unbounded result sets, missing
+  batching, avoidable serialization, and transaction scopes that hold scarce
+  resources longer than the use case requires.
+- Recommend pagination or streaming when observed or plausible cardinality
+  warrants it; a deliberately small bounded set may remain a list.
+- Recommend an index when an actual query/filter/order pattern and data size
+  justify its write and storage cost.
+- Keep API contracts separate from persistence entities to prevent accidental
+  graph loading.
+- Move slow work off a request only when response objectives or reliability
+  require it. Choose an adopted executor or queue rather than inventing one.
+- In Laravel, inspect Eloquent relationship access for missing eager loading,
+  prefer `loadCount()` or `loadExists()` when only aggregate state is needed,
+  and use `chunk()`, `lazy()`, `upsert()`, or batched inserts for justified bulk
+  work. Do not require these APIs when the result is proven small and bounded.
+- Keep queued Laravel job payloads narrow and reload authoritative state in the
+  handler when staleness or serialization size matters.
 
-### Backend — Application
+## Caching
 
-- [ ] **Queue offloading**: Slow operations (email, PDF, API calls) dispatched to queues — not inline
-- [ ] **Serialization**: API Resources aren't loading unnecessary relationships
-- [ ] **Middleware**: No expensive operations in globally-applied middleware
-- [ ] **Job payloads**: Queue jobs pass IDs, not full models — data fetched in `handle()`
+Treat caching as a response to measured cost or an explicit availability need.
+Before recommending it, identify the source of truth, key, freshness contract,
+invalidation owner, stampede behavior, capacity, and failure mode. Prefer the
+smallest tier that meets the requirement; “no cache” is valid.
 
-### Backend — Redis
+For an adopted Laravel cache, account for bare `null` results, stampedes, and
+invalidation. Use a DTO or sentinel where `Cache::remember()` would otherwise
+recompute a legitimate null result. Keep Redis databases for default, cache,
+session, and queue isolated when the project uses the documented topology.
 
-- [ ] **Connection isolation**: Cache, session, and queue use separate Redis databases (not all on DB 0)
-- [ ] **Memory awareness**: No unbounded `Cache::forever()` without versioning or deploy-time flush
-- [ ] **Tag cleanup**: Tagged cache sets monitored — they grow even when individual items have TTL
+## Frontend
 
-### Frontend — Rendering
+For affected interfaces:
 
-- [ ] **Lazy loading**: Below-fold components use `<Lazy>` prefix or dynamic imports
-- [ ] **Image optimization**: Images use `<NuxtImg>` with appropriate sizes/formats
-- [ ] **Component reactivity**: No unnecessary re-renders from poorly-scoped watchers
-- [ ] **Bundle size**: No large libraries imported for small features
+- Preserve Nuxt SSR and keep client-only boundaries as small as the interaction
+  allows.
+- Measure bundle or route impact before adding a large dependency.
+- Use `<NuxtImg>` or the adopted image primitive when it benefits real content;
+  do not reject native images used for valid asset or rendering reasons.
+- Check request waterfalls, payload size, rendering churn, layout stability, and
+  caching behavior against user-visible outcomes.
+- Prefer `useFetch` or `useAsyncData` for initial SSR data, with stable keys and
+  cache behavior where reuse matters. Select server or client fetching from
+  freshness, interaction, SEO, and trust boundaries, not a universal rule.
+- Inspect watchers, computed state, Pinia subscriptions, lazy components, and
+  Nuxt `routeRules` only where the changed flow can affect rendering or request
+  cost.
 
-### Frontend — Data Fetching & Caching
+## Infrastructure
 
-- [ ] **useFetch/useAsyncData**: Data-fetching composables used — no raw `fetch()` in lifecycle hooks
-- [ ] **Deduplication**: Same data not fetched multiple times (key your requests)
-- [ ] **getCachedData**: Navigation-heavy pages use `getCachedData` to prevent redundant API calls
-- [ ] **Payload optimization**: API responses contain only needed fields
-- [ ] **SSR vs Client**: Data needed for SEO/initial render fetched on server; interactive data can be client-side
-- [ ] **routeRules**: Appropriate caching strategy set per route (prerender/ISR/SWR/SSR)
+Check compression, connection pools, HTTP caching, CDN behavior, and autoscaling
+only at components that own those controls and only where load or exposure makes
+them relevant. Verified ingress controls count; do not require duplicates.
 
-### Infrastructure — HTTP & CDN
+For Laravel/Nuxt deployments, distinguish browser and shared-cache policy,
+prevent authenticated or `Set-Cookie` responses from being cached publicly, and
+verify Cloudflare, Forge, PM2, and immutable `/_nuxt/` behavior only when those
+components are adopted.
 
-- [ ] **Cache-Control headers**: API responses include appropriate directives (`public`/`private`/`no-store`)
-- [ ] **s-maxage**: CDN edge TTL set independently from browser TTL where needed
-- [ ] **Set-Cookie check**: Cacheable responses don't include `Set-Cookie` headers (blocks Cloudflare caching)
-- [ ] **Cloudflare Cache Rules**: Static assets and SSR pages configured in Cache Rules (not deprecated Page Rules)
-- [ ] **Asset immutability**: `/_nuxt/*` served with `Cache-Control: public, max-age=31536000, immutable`
-- [ ] **Compression**: Responses gzipped/brotli compressed
-- [ ] **Connection pooling**: Database connections not exhausted under load
+## Findings
 
-## Red Flags
+Cite evidence or label the claim as a hypothesis requiring measurement. Report
+the affected workload, realistic consequence, expected benefit, tradeoff,
+smallest correction, and benchmark or observation that would verify it. Avoid
+arbitrary line, query, payload, or duration thresholds without project evidence.
 
-These patterns almost always indicate a performance problem:
+## Parent review handoff
 
-| Pattern | Issue | Fix |
-|---------|-------|-----|
-| `Model::all()` | Loads entire table | `paginate()` or scoped query |
-| `foreach ($items as $item) { $item->relation }` | N+1 | `$items->load('relation')` |
-| `DB::` inside a loop | Repeated queries | Batch query before the loop |
-| `sleep()` in request | Blocks worker | Queue job |
-| `file_get_contents()` for URLs | No timeout, blocking | HTTP client with timeout, or queue |
-| `Cache::forever()` without invalidation | Stale data after changes | Version keys or tag-flush on deploy |
-| `Cache::remember()` returning `null` | Infinite re-computation | Wrap in DTO or sentinel |
-| Caching with `public` on auth responses | Data leaks between users | `private` or `no-store` |
-| `Cache::tags()` with `file` driver | Runtime exception | Enforce Redis driver |
-| Raw `fetch()` in Nuxt lifecycle hooks | No SSR dedup, no caching | `useFetch` / `useAsyncData` |
-| Missing `key` on `useFetch` | Cache collisions | Always set explicit key |
+When invoked by the parent review, use its supplied finding contract and review
+packet. Do not widen the accepted file set. Return either an evidence-backed
+not-applicable reason or normalized findings with classification, severity,
+confidence, exact location, workload and failure path, consequence, smallest
+correction, benchmark or observation, and pre-existing status.

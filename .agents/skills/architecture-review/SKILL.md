@@ -1,60 +1,106 @@
 ---
 name: architecture-review
-description: Architecture compliance checklist for code review
+description: Review code or plans when a change affects component boundaries, dependencies, contracts, data ownership, layering, or adopted project architecture decisions.
 ---
 
-# Architecture Review Skill
+# Architecture Review
 
-Verify changes comply with the project's architectural patterns. Use during the architecture pass of `/review`.
+Review the approved change against the project's own `AGENTS.md`,
+`ARCHITECTURE.md`, manifests, and executable configuration. Mark this pass not
+applicable with a reason when no architecture boundary changes.
 
-## Checklist
+## Preflight
 
-### Layer Separation
+- Identify the reviewed paths and accepted scope.
+- List affected components and their **Adopted**, **Optional**, **Not
+  applicable**, or **Unresolved** status.
+- Apply framework-specific rules only to adopted components.
+- Protect published or consumed contracts. A private or pre-release breaking
+  change is acceptable only when explicitly approved.
+- Treat dependencies named with an exact purpose in the approved plan or direct
+  request as approved. Escalate unplanned packages, replacements, major
+  upgrades, licensing concerns, external services, and permission expansion.
 
-- [ ] **Controllers are thin**: No business logic — delegate to Actions
-- [ ] **Actions are single-purpose**: One public `__invoke()` method per Action class
-- [ ] **Models are clean**: No business logic in models — only relationships, scopes, casts, accessors
-- [ ] **Services wrap externals**: Third-party SDKs wrapped in Service classes, never called directly from controllers/actions
-- [ ] **No cross-layer leaking**: Controllers don't import Models directly (use Actions); Actions don't import Request objects
+## Boundaries
 
-### API Design
+### Laravel, when adopted
 
-- [ ] **Versioned routes**: New endpoints in `routes/api/v1.php`
-- [ ] **API Resources**: All responses go through Resource classes — no raw model serialization
-- [ ] **Consistent naming**: RESTful resource naming (`/api/v1/orders`, not `/api/v1/getOrders`)
-- [ ] **Form Requests**: Validation in dedicated Request classes, not inline in controllers
-- [ ] **No breaking changes**: Existing API contracts preserved — additive changes only
+- Controllers translate HTTP and delegate business behavior. Extract controller
+  logic beyond the project's small transport boundary into `app/Actions/`.
+- Prefer constructor injection for lifetime dependencies; allow method injection
+  for a single container-invoked action or handler. Do not hide dependencies behind
+  `app()`, `resolve()`, or ad hoc construction.
+- Actions own use cases and atomic mutation boundaries. Models own persistence
+  relationships, scopes, casts, and accessors rather than domain orchestration.
+- Use Form Requests for meaningful or complex untrusted payloads, reused rules,
+  request authorization, or an established convention. A small, one-off input
+  may remain inline when the boundary is clear and testable.
+- When Laravel is the resource-owning server, authorize protected resources
+  through its Policies or Gates. Do not make Laravel a policy dependency for a
+  resource owned by another server.
+- Keep Eloquent models out of public contracts. Use API Resources or the
+  repository's established response types when they provide an explicit output
+  contract.
+- Use relationships and scopes before raw queries, define `$fillable`, group
+  `orWhere` clauses, and preserve additive Laravel migration history.
+- Wrap external services behind an owned adapter with explicit timeouts and
+  failure behavior.
+- Follow the project's compatibility strategy for routes. Do not add a version
+  prefix automatically.
 
-### Frontend Architecture
+### Nuxt and Vue, when adopted
 
-- [ ] **Components follow hierarchy**: `base/` for primitives, feature components grouped by domain
-- [ ] **Composables for shared logic**: Reusable logic in `composables/`, not duplicated across components
-- [ ] **Stores for global state**: Pinia stores for cross-component state, `useState` for SSR-safe reactive state
-- [ ] **Server proxy**: API calls go through `server/api/` routes — no direct backend URLs in client code
-- [ ] **Types in `shared/`**: Shared types live in `shared/types/` — accessible to both client and server
+- Use Vue 3 Composition API with `<script setup>` and TypeScript. Follow local
+  conventions for `ref`, `reactive`, `import type`, and `satisfies`.
+- Fetch initial SSR data with `useFetch` or `useAsyncData`; avoid client-only
+  lifecycle fetching that creates hydration or duplicate-request behavior.
+- Keep shared reactive behavior in composables, cross-component state in Pinia,
+  and SSR-safe request state in the project's established Nuxt boundary.
+- Keep secrets in private `runtimeConfig` and domain authorization at the
+  resource-owning server. A Nitro proxy is not a second policy owner for a
+  Laravel-owned resource, while a Nuxt/Nitro-owned resource is authorized in
+  that server boundary without requiring Laravel.
+- Prefer composition and existing state conventions. Refactor when behavior,
+  cohesion, readability, or reuse reveals a boundary—not at an arbitrary prop,
+  line, or class count.
+- Follow the active Tailwind and component system. Reuse established primitives
+  where they improve consistency; semantic HTML remains valid.
+- Verify responsive and hydration behavior rather than prohibiting fixed values
+  universally.
 
-### Design System
+### Shared boundaries
 
-- [ ] **Tokens used**: Colors, spacing, typography from design tokens — no hardcoded values
-- [ ] **Base components**: `BaseButton`, `BaseInput`, etc. used — no raw HTML for common patterns
-- [ ] **Responsive**: Layouts use Tailwind responsive utilities — no fixed widths
+| Case | Authoritative owner | Required control | Non-owner behavior |
+|---|---|---|---|
+| `nuxt-owned` | Nuxt/Nitro resource-owning server | Enforce domain authorization in the owning server handler or policy boundary. | Laravel is not required. |
+| `laravel-owned` | Laravel resource-owning server | Enforce Policies or Gates before protected access. | Nuxt may establish or forward identity but must not duplicate domain policy. |
 
-### Dependency Direction
+- Dependencies flow inward from UI and transport to application contracts;
+  application and persistence layers do not depend on UI or HTTP types.
+- Background work enters through an approved use case with an appropriate user
+  or service identity.
+- External integrations have an owner, timeout, failure policy, and data
+  contract.
+- Caches and indexes have a source, invalidation rule, and rebuild path.
+- Identity establishment, browser sessions, service claims, and authoritative
+  resource authorization have explicit owners; do not introduce duplicate
+  policy authorities.
+- Deployment decisions remain unresolved unless the approved scope and
+  executable evidence establish them.
 
-```
-Controllers → Actions → Models
-     ↓            ↓
-  Requests    Services (external)
-     ↓
-  Resources (output)
-```
+## Repository fit
 
-- [ ] Dependencies flow downward — never upward or circular
-- [ ] No new dependency added without explicit approval
-- [ ] Package usage aligns with stack choices in `README.md`
+Place new files in the repository's established module and test layout. Every
+file should have a clear owner, but a review must not invent directories or
+renames solely to match another ecosystem's convention.
 
-### File Organization
+Report each issue with the violated project decision, evidence, consequence,
+smallest correction, and a concrete verification step.
 
-- [ ] New files follow existing directory structure (see `README.md` layouts)
-- [ ] Test files mirror source structure in `tests/Feature/` and `tests/Unit/`
-- [ ] No orphan files — everything belongs to a clear module or domain area
+## Parent review handoff
+
+When invoked by the parent review, use its supplied finding contract and review
+packet. Do not widen the accepted file set. Return either an evidence-backed
+not-applicable reason or normalized findings with classification, severity,
+confidence, exact location, violated decision, consequence, smallest
+correction, verification, and pre-existing status.

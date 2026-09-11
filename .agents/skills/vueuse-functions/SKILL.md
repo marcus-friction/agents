@@ -1,6 +1,6 @@
 ---
 name: vueuse-functions
-description: Apply VueUse composables where appropriate to build concise, maintainable Vue.js / Nuxt features.
+description: Apply VueUse composables in projects that already use VueUse, or when the user explicitly asks to evaluate or adopt it, when they materially simplify established Vue.js or Nuxt behavior. Do not add VueUse or optional integrations without approval.
 license: MIT
 metadata:
     author: SerKo <https://github.com/serkodev>
@@ -10,13 +10,19 @@ compatibility: Requires Vue 3 (or above) or Nuxt 3 (or above) project
 
 # VueUse Functions
 
-This skill is a decision-and-implementation guide for VueUse composables in Vue.js / Nuxt projects. It maps requirements to the most suitable VueUse function, applies the correct usage pattern, and prefers composable-based solutions over bespoke code to keep implementations concise, maintainable, and performant.
+This skill is a decision-and-implementation guide for VueUse composables in
+Vue.js and Nuxt projects that already adopt VueUse. It maps requirements to the
+most suitable function and applies the correct usage pattern when that produces
+a clearer, maintainable result.
 
 ## When to Apply
 
-- Apply this skill whenever assisting user development work in Vue.js / Nuxt.
-- Always check first whether a VueUse function can implement the requirement.
-- Prefer VueUse composables over custom code to improve readability, maintainability, and performance.
+- Confirm `@vueuse/core` or the relevant VueUse package is already adopted.
+  Do not install VueUse or an optional integration dependency without approval.
+- Check whether a VueUse function materially simplifies the requirement. Prefer
+  built-in Vue and browser primitives for trivial behavior when they are clearer.
+- Prefer an applicable VueUse composable over bespoke lifecycle and cleanup code
+  when it improves readability, maintainability, or correctness.
 - Map requirements to the most appropriate VueUse function and follow the function’s invocation rule.
 - Please refer to the `Invocation` field in the below functions table. For example:
   - `AUTO`: Use automatically when applicable.
@@ -59,6 +65,7 @@ IMPORTANT: Each function entry includes a short `Description` and a detailed `Re
 | [`useDraggable`](references/useDraggable.md) | Make elements draggable | AUTO |
 | [`useDropZone`](references/useDropZone.md) | Create a zone where files can be dropped | AUTO |
 | [`useElementBounding`](references/useElementBounding.md) | Reactive [bounding box](https://developer.mozilla.org/en-US/docs/Web/API/Element/getBoundingClientRect) of an HTML element | AUTO |
+| [`useElementOverflow`](references/useElementOverflow.md) | Reactive element's overflow state | AUTO |
 | [`useElementSize`](references/useElementSize.md) | Reactive size of an HTML element | AUTO |
 | [`useElementVisibility`](references/useElementVisibility.md) | Tracks the visibility of an element within the viewport | AUTO |
 | [`useIntersectionObserver`](references/useIntersectionObserver.md) | Detects changes to a target element's visibility | AUTO |
@@ -416,5 +423,3 @@ IMPORTANT: Each function entry includes a short `Description` and a detailed `Re
 | Function | Description | Invocation |
 |----------|-------------|------------|
 | [`useSound`](https://github.com/vueuse/sound#examples) | Play sound effects reactively. | EXTERNAL |
-
-

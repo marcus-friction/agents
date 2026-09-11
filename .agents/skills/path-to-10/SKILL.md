@@ -1,60 +1,86 @@
 ---
 name: path-to-10
-description: |
-  A rigorous meta-workflow designed to enforce a ruthless 10/10 quality standard on 
-  agent outputs, plans, and architectural decisions. It mandates citing specific 
-  project rules, demanding technical proof of constraints, and thorough environmental execution.
+description: Evaluate an output, plan, architecture decision, or implementation against its accepted intent and project evidence. Use when the user asks for a path to 10, quality score, gap-to-excellent analysis, or rigorous quality assessment.
 ---
 
-# 🚀 path-to-10: The Ultimate Quality Standard
+# Path to 10
 
-You are an adversarial perfectionist evaluating another agent's work (or your own plan). Your goal is to apply a ruthless, non-negotiable standard of a perfect 10/10. Laziness, unverified claims, and generic problem-solving are unacceptable.
+Identify the smallest evidence-backed changes that would make the evaluated
+work excellent for its accepted purpose. A 10 is not abstract perfection; it is
+the best supported result within the real scope and constraints.
 
-## Phase 1: Context & Dimension Structuring
+## Authority and target
 
-Before passing judgment, you must understand the environment and select the rules of engagement.
+Resolve what is being evaluated and the accepted intent from the request and
+conversation. Use a task file or implementation plan when one exists and is
+relevant; neither file is a prerequisite.
 
-1. **Understand Intent**: Review the active `task.md` and `implementation_plan.md`.
-2. **Persistent Knowledge**: Consult the project's historical knowledge, rules, or persistent context using your generic agent tools (e.g., semantic search, grep, or Knowledge Items). You MUST explicitly check `docs/solutions/` for learnings compounded via the `compound` skill protocol. You cannot grade an item without knowing its historical struggles or standards.
-3. **Active Code Gathering**: If evaluating a specific component, you MUST use your file-reading, search, and grep tools to proactively trace its dependencies, implementations, and usages across the wider codebase.
-4. **Define Dimensions**: Determine 4-5 specific dimensions tailored to the item being evaluated.
-   - *Backend examples*: Query efficiency, Abstraction, Type safety.
-   - *Frontend examples*: Reactivity, Component isolation, Tailwind consistency.
-   - *Testing & Infra examples*: Pest coverage, Deployment safety, Caching headers.
+An evaluation-only request is report-only: make zero repository or external
+writes. If the user also asks to improve the work, implement only the supplied
+scope and re-evaluate it. Do not add a generic approval gate; stop only for a
+material choice or elevated effect that lacks authority.
 
----
+## Establish evidence
 
-## Phase 2: The Brutal Evaluation
+Use the strongest relevant evidence available:
 
-Evaluate the item across the dynamic dimensions you defined above.
+- accepted requirements, constraints, and owner decisions;
+- applicable project rules, architecture or design decisions, and established
+  patterns;
+- observed behavior, executable tests, measurements, and the artifact itself;
+- relevant project knowledge when it exists and plausibly matches the topic;
+- current primary documentation for external limits when proof is required.
 
-### Rule Citation Enforcement (MANDATORY)
-Every flaw highlighted below MUST be explicitly backed by a citation to a specific project rule.
-(Example: *Violates `AGENTS.md` because the API resource is not abstracted.*)
+For implementation work, trace the affected behavior, dependencies, callers,
+tests, and boundaries far enough to support the assessment. Do not review the
+whole repository by default.
 
-> [!IMPORTANT]
-> **Output your evaluation using the exact table structure below. Do not alter the columns.**
-> **Sort the table by score, lowest to highest.**
-> 
-> | Dimension | Score / 10 | Primary Flaw (Citation) |
-> | :--- | :---: | :--- |
-> | **[Custom Dimension 1]** | X | [Your cited flaw] |
-> | **[Custom Dimension 2]** | X | [Your cited flaw] |
-> | **[Custom Dimension 3]** | X | [Your cited flaw] |
-> | **[Custom Dimension 4]** | X | [Your cited flaw] |
+Label the basis of each material claim as an accepted requirement, project
+rule, observed behavior, external constraint, or reviewer judgment. A project
+rule is strong evidence but is not required for every valid flaw: a result can
+contradict its accepted intent or demonstrably fail without violating a written
+rule. Missing evidence stays unresolved rather than becoming a low score.
 
----
+## Choose dimensions
 
-## Phase 3: The Path Forward
+Choose the smallest set of non-overlapping relevant dimensions that covers the
+accepted outcome. Omit categories that cannot affect success. Useful dimensions
+may include requirements completeness, correctness, usability, architecture,
+security, performance, maintainability, reversibility, or verification.
 
-Based on the flaws identified:
+For each dimension, state what a 10 means before scoring it. Use integer scores
+with these anchors:
 
-1. **The Mandate**: Write a bulleted list of the exact technical actions required to achieve a 10/10. Be extremely specific. Use GitHub alerts (`> [!WARNING]` or `> [!IMPORTANT]`) to highlight severe architectural offsets.
-2. **Contextual Perfection (Demand Proof)**: If a perfect 10/10 is genuinely impossible due to external limits (e.g., API limits, framework boundaries), you MUST define what a "Contextual 10" is—the absolute best state possible within those boundaries. You **must provide objective technical proof** (e.g., framework docs, github issue). Imaginary "framework constraints" are not permitted as an excuse.
+- **10:** accepted intent is met, relevant verification passes, and no material
+  supported gap remains.
+- **8-9:** intent is met with a small evidenced improvement remaining.
+- **6-7:** a material but bounded gap remains.
+- **3-5:** several material gaps or one severe gap undermine the outcome.
+- **0-2:** the work is unusable, unsafe, or fundamentally misses its intent.
 
----
+Do not average scores into false precision. The overall assessment is governed
+by the most important unresolved dimension. Do not invent a gap merely to avoid
+awarding 10.
 
-## Phase 4: Handoff & Approval
+## Build the path forward
 
-Once the path is charted, ask the user:
-> "This is the Path to 10. Do you approve of executing these corrections?"
+For every supported gap, provide the smallest concrete correction and an
+observable check that would prove it closed. Order actions by outcome and risk,
+not by ease or file order. Separate required corrections from optional polish.
+
+Define a **Contextual 10** only when a hard external constraint prevents the
+ideal result. Prove that constraint with current primary documentation,
+executable evidence, or an explicit owner-controlled boundary. If proof is
+unavailable, mark the constraint unresolved and preserve the scores that are
+otherwise supported.
+
+## Report
+
+Lead with the current quality judgment and the strongest reason. A compact
+dimension table normally uses `Dimension | Score | Evidence | Gap to 10`, but
+use a clearer shape when the artifact calls for it. Then give the prioritized
+path forward, verification for each action, and unresolved evidence.
+
+If the work already earns 10 for its accepted intent, say so and identify the
+evidence; do not manufacture work. When implementation was requested, finish
+with the checks run and the re-evaluated result.

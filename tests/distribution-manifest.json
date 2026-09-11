@@ -1,0 +1,126 @@
+{
+  "schema_version": 1,
+  "default_classification": "active-provider-neutral-text",
+  "managed_roots": [
+    ".agents/legal",
+    ".agents/skills",
+    ".agents/.claude-plugin",
+    "project-templates"
+  ],
+  "root_interfaces": [
+    "install.sh",
+    "install-global.sh",
+    "CLAUDE.md",
+    "README.md",
+    "docs/ecosystem-reference.md",
+    ".claude-plugin/marketplace.json"
+  ],
+  "executable_graph": {
+    "entrypoints": [
+      "install.sh",
+      "install-global.sh"
+    ],
+    "script_roots": [
+      {
+        "path": "scripts",
+        "pattern": "*.sh",
+        "recursive": false
+      },
+      {
+        "path": "scripts/skill-adapters",
+        "pattern": "*",
+        "recursive": true
+      }
+    ]
+  },
+  "exceptions": [
+    {
+      "path": ".agents/legal",
+      "path_kind": "root",
+      "classification": "legal-notice",
+      "reason": "License and attribution text is distributed for compliance and is not executable agent guidance.",
+      "owner": "agents ecosystem maintainers",
+      "provider_neutral_path": ".agents/legal"
+    },
+    {
+      "path": ".agents/.claude-plugin",
+      "path_kind": "root",
+      "classification": "provider-adapter",
+      "reason": "Claude plugin metadata exposes the canonical provider-neutral skill tree to that host.",
+      "owner": "agents ecosystem maintainers",
+      "provider_neutral_path": ".agents/skills"
+    },
+    {
+      "path": ".claude-plugin/marketplace.json",
+      "path_kind": "exact",
+      "classification": "provider-adapter",
+      "reason": "Claude marketplace metadata is an optional discovery adapter.",
+      "owner": "agents ecosystem maintainers",
+      "provider_neutral_path": ".agents/skills"
+    },
+    {
+      "path": "CLAUDE.md",
+      "path_kind": "exact",
+      "classification": "provider-adapter",
+      "reason": "This compatibility router gives Claude hosts the project-owned AGENTS.md instructions.",
+      "owner": "agents ecosystem maintainers",
+      "provider_neutral_path": "AGENTS.md"
+    },
+    {
+      "path": "README.md",
+      "path_kind": "exact",
+      "classification": "provider-adapter",
+      "reason": "The public installation interface documents several optional host adapters by name.",
+      "owner": "agents ecosystem maintainers",
+      "provider_neutral_path": ".agents/skills"
+    },
+    {
+      "path": "docs/ecosystem-reference.md",
+      "path_kind": "exact",
+      "classification": "provider-adapter",
+      "reason": "The ecosystem reference documents optional host-specific discovery and installation paths.",
+      "owner": "agents ecosystem maintainers",
+      "provider_neutral_path": ".agents/skills"
+    },
+    {
+      "path": "scripts/install-cursor-cloud.sh",
+      "path_kind": "exact",
+      "classification": "provider-adapter",
+      "reason": "This optional installer exists only for Cursor Cloud environments.",
+      "owner": "agents ecosystem maintainers",
+      "provider_neutral_path": "install.sh"
+    },
+    {
+      "path": "scripts/skill-adapters",
+      "path_kind": "root",
+      "classification": "provider-adapter",
+      "reason": "Each file in this bounded directory adapts canonical skills to a host discovery contract.",
+      "owner": "agents ecosystem maintainers",
+      "provider_neutral_path": ".agents/skills"
+    },
+    {
+      "path": ".agents/skills/skill-creator/scripts/run_eval.py",
+      "path_kind": "exact",
+      "classification": "provider-adapter",
+      "reason": "The imported optional evaluator invokes the Claude CLI when that host is available.",
+      "owner": "upstream Anthropic skill import",
+      "provider_neutral_path": ".agents/skills/skill-creator/SKILL.md"
+    },
+    {
+      "path": ".agents/skills/skill-creator/scripts/improve_description.py",
+      "path_kind": "exact",
+      "classification": "provider-adapter",
+      "reason": "The imported optional optimizer invokes the Claude CLI when that host is available.",
+      "owner": "upstream Anthropic skill import",
+      "provider_neutral_path": ".agents/skills/skill-creator/SKILL.md"
+    },
+    {
+      "path": ".agents/skills/skill-creator/scripts/run_loop.py",
+      "path_kind": "exact",
+      "classification": "provider-adapter",
+      "reason": "The imported optional loop coordinates the two Claude CLI adapter scripts.",
+      "owner": "upstream Anthropic skill import",
+      "provider_neutral_path": ".agents/skills/skill-creator/SKILL.md"
+    }
+  ]
+}

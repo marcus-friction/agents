@@ -1,0 +1,62 @@
+{
+  "record_format": "NUL-delimited sorted type, relative path, POSIX owner-execute mode, and content SHA-256",
+  "roots": {
+    "laravel": {
+      "entries": 23,
+      "sha256": "88968446e6f7256633ad1f72a1e472fdecfea49ee4a161ea8e8df971a59e2699"
+    },
+    "nitro": {
+      "entries": 17,
+      "sha256": "7ca4e6493d28444ea15302729af1ad5f0411ebfc27266c3c44c7b4b6a70519cf"
+    },
+    "nuxt": {
+      "entries": 22,
+      "sha256": "f8a7733bd4aaa3fdd83e4370049a889db52e0b0a8f2c81b4ec166cb9e20571c8"
+    },
+    "pinia": {
+      "entries": 13,
+      "sha256": "9498355cd14875522bf76585ab4b78205b87b04903921936e59a7bccd4cde8b5"
+    },
+    "stack-architecture-review": {
+      "entries": 2,
+      "sha256": "53307b20837ee50814579176496b293cd015bcc54ab8ea5f89988f118a4292f9"
+    },
+    "stack-performance-review": {
+      "entries": 2,
+      "sha256": "25e75f1d2a23b5175b8791a2a515e3e71af752fd926e3e8066c5fc6a4c0abf95"
+    },
+    "stack-security-review": {
+      "entries": 2,
+      "sha256": "61f89d40107011cff414bdea784fced72a59456cd98be5b44ec94c7e41939c01"
+    },
+    "vite": {
+      "entries": 10,
+      "sha256": "7c5b8eea95e597809609e46d5859184eef0710212a75361a984c88b015673fef"
+    },
+    "vitest": {
+      "entries": 23,
+      "sha256": "53485612cc9099344d37ab3fe34854ae0aa50b86ec4d88f5b35d7a48e7191e6b"
+    },
+    "vue": {
+      "entries": 7,
+      "sha256": "b38eb316029b55295668a7cafbe61a24ff8216b36a952c86654812a45662ee21"
+    },
+    "vue-best-practices": {
+      "entries": 27,
+      "sha256": "a78fb8e47f99cc725ede66051a88ccc4578e25359e9ef52adf2d649dfa66e817"
+    },
+    "vue-router-best-practices": {
+      "entries": 13,
+      "sha256": "a97244ab1fd4d8cf8b63108bc17a0c418107e5dbd34c61903fe654832ab6e826"
+    },
+    "vue-testing-best-practices": {
+      "entries": 16,
+      "sha256": "bb4b4ccb8838240d819193aaa9c921ceed819f56a523a10cd36af84dd07652a6"
+    },
+    "vueuse-functions": {
+      "entries": 272,
+      "sha256": "72fe05cd01c7bd23043adc271cb348a881b3b8f5bd29e086373892b22feb7849"
+    }
+  },
+  "schema_version": 1
+}

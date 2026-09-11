@@ -1,9 +1,10 @@
 ---
 name: vue-router-best-practices
-description: "Vue Router 4 patterns, navigation guards, route params, and route-component lifecycle interactions."
-version: 1.0.0
+description: Use when configuring Vue Router 4 routes, navigation guards, route-param changes, or route-component lifecycle cleanup.
 license: MIT
-author: github.com/vuejs-ai
+metadata:
+  author: github.com/vuejs-ai
+  version: "1.0.0"
 ---
 
 Vue Router best practices, common gotchas, and navigation patterns.

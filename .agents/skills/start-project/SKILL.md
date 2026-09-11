@@ -1,106 +1,132 @@
 ---
 name: start-project
-description: Interactive onboarding and project planning. Make sure to use this skill whenever the user mentions setting up a new project, wanting to brainstorm a new idea, creating a new product from scratch, or asks to start the project workflow.
+description: Start a new project through a focused product interview, the adopted Laravel/Nuxt core stack, a complete project-document baseline, and a persisted executable first-increment plan. Use for new products, empty or scaffold-only repositories, or an explicit start-project request; use onboard-project once meaningful product behavior exists.
 ---
 
-# Start Project Skill: Your Product Foundation
+# Start Project
 
-You are a top-tier Product Manager and startup advisor (think Y Combinator partner). You don't just take orders — you interrogate ideas for depth, challenge assumptions, and push for extreme specificity. You are strict but supportive, and your goal is to ensure the project foundation is rock-solid before any code is written.
+Turn an idea into the smallest valuable, testable first increment without
+reopening the approved technical foundation or exhausting the owner with
+low-value questions.
 
-**Your posture:** Product visionary and interrogator. You listen, challenge the premise, and synthesize the chaos into a coherent plan. At any point, the user can just talk to you about any of this — it's a conversation, not an interrogation form.
+## 1. Qualify and inspect
 
----
+Treat an empty repository or one containing only generated scaffolding and no
+meaningful product behavior as a new project. If meaningful behavior already
+exists, use `onboard-project` instead.
 
-## Phase 0: Pre-checks
+Read applicable `AGENTS.md`, active project documents, manifests, repository
+status, and enough implementation evidence to make that distinction. Inspect
+the five candidates under `.agents/templates/` by path and type without reading
+secret values. Treat active documents as project-owned and surface conflicts
+instead of overwriting them. Never write through a symlink or non-regular
+target.
 
-**Ensure Claude Skills Registration:**
-Transparently map `.agents/skills` to `.claude/skills` in the background based on the user's host OS. Use `mkdir -p .claude && ln -sfn ../.agents/skills .claude/skills` on Linux/macOS, or the equivalent directory symlink/copy command on Windows.
+## 2. Run a focused product interview
 
-**Check for existing project context:**
-Use `view_file` to check `README.md`.
-If `README.md` already contains real project content (not just a template), ask the user: *"You already have a project defined here. Do you want to **update/pivot** the existing project, **start completely fresh** (which will overwrite it), or just **brainstorm**?"*
+Answer from supplied context first. Ask one question at a time and drive quickly
+toward what to build and for whom. Target a 15–20 minute interview and normally
+ask no more than eight questions. Exceed that cap only for a decision that
+blocks a safe or accurate first increment.
 
-**Branching Logic:**
-- If the user chooses to **update/pivot**, ask them what has changed and only update the requested sections in Phase 3.
-- If the user chooses to **brainstorm**, temporarily pause the strict 7-question interrogation. Use your advisory posture or suggest running the `office-hours` skill or `/brainstorm` workflow to help them hash out their ideas. Once they reach clarity, you can resume Phase 1.
-- If the user chooses to **start completely fresh** (or the file is empty), proceed to Phase 1.
+Resolve only material gaps, in this order:
 
-If the codebase is currently empty and the user just says "start project", explicitly let them know: *"Before I ask you questions, remember that at any point you can just drop into chat and we'll talk through anything — this isn't a rigid form, it's a conversation."*
+- the specific user and painful current workaround;
+- the valuable outcome and observable first success;
+- the narrowest complete wedge and explicit non-goals;
+- material timing, budget, legal, compatibility, and operational constraints;
+- why the proposed advantage matters to the user.
 
----
+Do not over-index on naming, speculative scale, exhaustive personas, distant
+features, or implementation detail that cannot change the first increment.
+Challenge a vague material assumption concretely, then respect and record the
+owner's decision. Keep success evidence lightweight and observable; do not
+force a numeric target or fixed statement format.
 
-## Phase 1: Capture the Core Idea
-1. Begin the interaction by asking the user to describe the project in a few words.
-2. If they haven't provided one yet, **stop and wait for their response before proceeding.**
+## 3. Apply the adopted technical foundation
 
-**Handling the Pre-Written Brain Dump:** If the user bypasses this and pastes a massive, pre-written project dump upfront, DO NOT skip Phase 2. Digest their dump, fill out what you can, and then immediately push back on the specific points that lack constraint (e.g., "You provided great context, but your target audience is still too broad. Let's narrow it down. Who is the exact...").
+The default core stack is already approved and **Adopted**:
 
----
+- Nuxt 4, Vue 3, TypeScript, and Tailwind CSS 4 for the web interface;
+- Laravel 13 and PHP 8.4 for the application API;
+- PostgreSQL 17 for primary data; and
+- Redis for adopted cache, session, queue, and application workloads, kept as
+  separate failure domains.
 
-## Phase 2: Rigorous Interrogation
+Build on this core without asking the owner to accept it, comparing alternatives,
+or proposing replacements. A core component that is unnecessary for the first
+increment remains **Adopted but deferred**; do not reclassify it or scaffold it
+merely to prove adoption. Only an explicit owner decision may replace or remove
+a core component, and that decision must be recorded in active project context
+before planning.
 
-Once the user provides the core idea, ask follow-up questions to fill out the standard project template (see `README.template.md`). 
+Classify additional capabilities **Adopted**, **Optional**, **Not applicable**,
+or **Unresolved** from product need and owner decisions. Record material
+exposure, data, privilege, reversibility, and control ownership. Deployment
+remains **Unresolved / TBD** until separately decided.
 
-**CRITICAL: Ask these questions STRICTLY one by one.** Do not batch them into a single massive prompt. Wait for the user's answer and actively review it against the forcing functions below before asking the next one. If answers use buzzwords ("better UX"), lack measurable outcomes, or gloss over constraints, you must challenge the user and demand specificity.
+Present a concise synthesis of user, problem, first increment, success measure,
+non-goals, constraints, adopted and deferred components, explicit stack
+overrides, and material unknowns. Do not require a separate synthesis approval.
+If a missing choice would substantially change the product or architecture,
+ask the next focused question before continuing.
 
-**Yield Protocol:** If the user pushes back or explicitly overrides your challenge twice on the same point, yield gracefully. Document their choice with a warning, but move on to the next question. You are an advisor, not a roadblock.
+## 4. Establish the complete baseline
 
-Walk through these areas sequentially:
-1. **Name**: What is the project called?
-2. **Vision**: What problem does it solve, and why does it matter? **Challenge the premise:** What are users doing *right now* to solve this badly, and what does that workaround cost them?
-3. **Goals**: What does success look like? **Demand reality:** Reject "growth." Push for measurable behavior or milestones.
-4. **Users**: Who exactly uses this? **Push for desperate specificity:** Reject generic categories (e.g., "SMBs"). Force them to name the actual human role (e.g., "shift managers who spend 4 hours a week scheduling").
-5. **Problems & Pain Points**: What acute pain points does this address? **Bleeding neck check:** It must be an acute problem, not a mild inconvenience.
-6. **Competitive Landscape**: How is this uniquely better than the alternatives? **True moat check:** Is the differentiator a real advantage or just a feature claim?
-7. **Constraints**: What are the non-negotiable limitations (budget, timeline, regulatory)? **Narrowest wedge:** Find the absolute smallest version of this platform that delivers value against these constraints.
+An explicit request to start the project authorizes ordinary creation or
+reconciliation of all five active baseline documents:
 
----
+- `.agents/templates/README.md` to `README.md`;
+- `.agents/templates/AGENTS.md` to `AGENTS.md`;
+- `.agents/templates/ARCHITECTURE.md` to `ARCHITECTURE.md`;
+- `.agents/templates/CONTRIBUTING.md` to `CONTRIBUTING.md`; and
+- `.agents/templates/DESIGN.md` to `DESIGN.md`.
 
-## Phase 3: Product Synthesis & Amend README.md
+Adapt every candidate to the accepted product; do not activate placeholder text
+or copy the candidate mechanically. Record the core as Adopted and mark unused
+core layers deferred in the active `ARCHITECTURE.md`. Use `onboard-project` to
+reconcile any existing active document while preserving its meaning. Verify
+that the complete active baseline exists and is internally consistent before
+planning.
 
-Once all sections pass your depth checks, compile the collected information.
-**Present this synthesis to the user for a final "CEO-style" review first.** Ask: *"Does this accurately capture the product vision, or did I miss any crucial constraints? Please review this drafted context before I lock it in."*
+If any required candidate is missing, stop and report that the agent
+distribution is incomplete. Do not invent or reconstruct the candidate. Ask
+for authority to run `update-agents`, disclosing that it refreshes all managed
+agent assets and adapters as well as templates. Resume only after that workflow
+succeeds and all five candidates pass the path and type checks. A start-project
+request alone does not authorize the broader distribution refresh.
 
-After user approval:
-- Write the collected insights into `README.md`, structuring it according to `README.template.md`.
-- Strip out any marketing fluff and keep it objective.
-- Preserve any existing YAML frontmatter.
+An exploratory or explicitly no-write request remains read-only and receives
+the product synthesis only; explain that creating the baseline requires an
+explicit start-project request.
 
----
+## 5. Plan the first increment
 
-## Phase 4: Design Consultation Handoff
+Use `plan` for every start-project result. It must persist and review these
+paired artifacts:
 
-Before drafting a technical implementation plan, we must establish the visual identity and structural constraints.
+```text
+docs/plans/<YYYY-MM-DD>-<slug>/
+├── implementation-plan.md
+└── tasks.md
+```
 
-Explicitly ask the user: *"Would you like to run a **design consultation** (using the `design-consultation` skill) to establish the project's visual identity before we start building?"*
+For a new increment, choose a concise kebab-case slug. If its folder exists,
+select the next available numeric suffix such as `-2`; never overwrite it.
+When the user explicitly asks to revise an existing plan, update that plan and
+its sibling tracker in place without duplication.
 
-If the user agrees:
-- Wait until the design consultation is complete and the new design file (`DESIGN.md`) has been written.
-- Incorporate these newly established visual and structural constraints when moving to Phase 5.
+Plan the complete first increment, not the imagined full product. Include file
+scope, exact dependencies and purpose, observable tests, failure handling,
+compatibility, and completion criteria. Keep deferred core components out of
+the implementation sequence until needed. Keep optional components and
+deployment out unless the increment requires and explicitly adopts or resolves
+them.
 
-If the user declines, proceed directly to Phase 5.
-
----
-
-## Phase 5: Draft the Implementation Plan
-
-With the project context locked in (and the design constraints established, if applicable), draft an implementation plan for the initial MVP. 
-
-Before drafting the plan, you are encouraged to ask any further clarifying questions needed to shape the architecture. **Ask these questions strictly one by one** so the user isn't overwhelmed.
-
-Follow the core principles of the `/plan` flow to build the plan:
-1. **Review Standards**: You MUST review and adhere to the project's architectural standards outlined explicitly in `AGENTS.md` and `README.md`.
-2. **Review Knowledge Space**: Explicitly cross-reference the problem space against provided **Knowledge Item (KI) summaries** (found in the persistent context) and explicitly search `docs/solutions/` for compounded learnings. If we have built similar features before, leverage those past patterns to speed up and secure the architecture.
-3. **Draft the Plan**: Draft the initial implementation plan. **CRITICAL:** The implementation plan MUST cover a complete, end-to-end first version of the project. No part of the project scope can be deferred ("we will handle X later" is unacceptable).
-4. **Review Loop**: Perform a 3-loop self-review using the `review-plan` skill to ensure robustness and uncover blind spots.
-5. **Final Output**: Present the results as an `implementation_plan.md` artifact and a comprehensive `task.md` artifact.
-
----
-
-## Phase 6: Execution Kickoff
-
-Once the `implementation_plan.md` and `task.md` are accepted by the user, explicitly transition out of the product manager persona.
-
-Ask the user: *"We have a solid plan and task list. Are you ready for me to begin executing the tasks?"*
-
-Once the user approves, formally close the onboarding skill and transition into standard execution tracking your progress via `task.md`.
+Always apply `review-plan`, revise material issues to convergence, and keep
+`tasks.md` synchronized with the reviewed plan. Present the plan paths and ask
+the owner to approve or revise the plan. If the original request includes
+implementation, plan approval authorizes ordinary in-scope work. Follow the
+plan and update `tasks.md` throughout execution. Confirm elevated destructive,
+privileged, production, publication, secret/permission, or irreversible effects
+immediately before they occur.
