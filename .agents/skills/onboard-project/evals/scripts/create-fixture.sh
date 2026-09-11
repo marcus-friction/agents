@@ -3,6 +3,27 @@
 set -euo pipefail
 umask 022
 
+for git_variable in "${!GIT_@}"; do
+  unset "$git_variable"
+done
+export GIT_CONFIG_NOSYSTEM=1
+export GIT_CONFIG_GLOBAL=/dev/null
+export GIT_NO_REPLACE_OBJECTS=1
+export GIT_OPTIONAL_LOCKS=0
+
+safe_git() {
+  GIT_CONFIG=/dev/null \
+  GIT_ASKPASS=/usr/bin/false \
+  GIT_TERMINAL_PROMPT=0 \
+  SSH_ASKPASS=/usr/bin/false \
+  SSH_ASKPASS_REQUIRE=never \
+    git --no-replace-objects \
+      -c core.hooksPath=/dev/null \
+      -c core.fsmonitor=false \
+      -c credential.helper= \
+      "$@"
+}
+
 if [ "$#" -ne 3 ]; then
   echo "Usage: create-fixture.sh FIXTURE DESTINATION STATE_DIR" >&2
   exit 1
@@ -43,11 +64,12 @@ if [ "$FIXTURE" = "conflicting-deployment" ]; then
   ln -s docs/architecture.md "$DESTINATION/ARCHITECTURE.md"
 fi
 
-git -C "$DESTINATION" init -q
-git -C "$DESTINATION" config user.name "Onboarding Eval"
-git -C "$DESTINATION" config user.email "onboarding-eval@example.invalid"
-git -C "$DESTINATION" add .
-git -C "$DESTINATION" commit -qm "fixture baseline"
+safe_git -C "$DESTINATION" init -q
+safe_git -C "$DESTINATION" add .
+safe_git -C "$DESTINATION" \
+  -c user.name="Onboarding Eval" \
+  -c user.email="onboarding-eval@example.invalid" \
+  commit -qm "fixture baseline"
 
 if [ "$FIXTURE" = "conflicting-deployment" ]; then
   printf '\n- Preserve this uncommitted owner decision.\n' >> \
@@ -73,7 +95,7 @@ done < <(
     \( -type f -o -type l \) -print0 | LC_ALL=C sort -z
 )
 
-git -C "$DESTINATION" status --porcelain=v1 --untracked-files=all > \
+safe_git -C "$DESTINATION" status --porcelain=v1 --untracked-files=all > \
   "$STATE_DIR/git-status.txt"
 
 echo "Created $FIXTURE fixture at $DESTINATION"

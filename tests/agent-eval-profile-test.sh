@@ -61,6 +61,53 @@ for required in \
   fi
 done
 
+snapshot_repo="$TEST_ROOT/snapshot-repository"
+mkdir "$snapshot_repo"
+git -C "$snapshot_repo" init --quiet
+git -C "$snapshot_repo" config user.name "Snapshot Test"
+git -C "$snapshot_repo" config user.email "snapshot@example.invalid"
+printf 'baseline\n' > "$snapshot_repo/baseline.txt"
+git -C "$snapshot_repo" add baseline.txt
+git -C "$snapshot_repo" commit --quiet -m baseline
+printf 'staged candidate\n' > "$snapshot_repo/staged.txt"
+git -C "$snapshot_repo" add staged.txt
+PYTHONDONTWRITEBYTECODE=1 python3 - "$EVAL_ROOT" "$snapshot_repo" <<'PY'
+from __future__ import annotations
+
+import hashlib
+from pathlib import Path
+import sys
+
+sys.path.insert(0, sys.argv[1])
+from verify import repository_snapshot
+
+repo = Path(sys.argv[2])
+objects = repo / ".git" / "objects"
+
+
+def object_records() -> dict[str, str]:
+    return {
+        path.relative_to(objects).as_posix(): hashlib.sha256(path.read_bytes()).hexdigest()
+        for path in objects.rglob("*")
+        if path.is_file()
+    }
+
+
+before = object_records()
+repository_snapshot(repo)
+after = object_records()
+if after != before:
+    created = sorted(after.keys() - before.keys())
+    removed = sorted(before.keys() - after.keys())
+    changed = sorted(
+        path for path in before.keys() & after.keys() if before[path] != after[path]
+    )
+    raise SystemExit(
+        "Repository snapshot mutated Git objects: "
+        f"created={created!r}; removed={removed!r}; changed={changed!r}"
+    )
+PY
+
 for compatibility_wrapper in \
   "$REPO_ROOT/tests/start-project-skill-agent-test.sh" \
   "$REPO_ROOT/tests/security-review-skill-agent-test.sh" \

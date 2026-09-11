@@ -166,7 +166,7 @@ def git_snapshot(root: Path, *, bare: bool = False) -> dict[str, Any]:
     }
     if not bare:
         status = git_output(root, "status", "--porcelain=v2", "-z", "--untracked-files=all")
-        index_tree = optional_git_output(root, "write-tree").decode().strip()
+        index_entries = git_output(root, "ls-files", "--stage", "-z")
         index_patch = git_output(
             root, "diff", "--cached", "--binary", "--full-index", "--no-ext-diff"
         )
@@ -177,7 +177,8 @@ def git_snapshot(root: Path, *, bare: bool = False) -> dict[str, Any]:
             {
                 "status_sha256": sha256(status),
                 "status_size": len(status),
-                "index_tree": index_tree or None,
+                "index_entries_sha256": sha256(index_entries),
+                "index_entries_size": len(index_entries),
                 "index_patch_sha256": sha256(index_patch),
                 "worktree_patch_sha256": sha256(worktree_patch),
             }

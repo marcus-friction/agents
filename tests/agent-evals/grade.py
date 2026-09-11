@@ -1196,7 +1196,14 @@ def evaluate_state(
         unexpected = changed - permitted
         before_git = before["fixture"]["git"]
         after_git = after["fixture"]["git"]
-        protected_git_fields = ("head", "refs_sha256", "refs_size", "index_tree", "index_patch_sha256")
+        protected_git_fields = (
+            "head",
+            "refs_sha256",
+            "refs_size",
+            "index_entries_sha256",
+            "index_entries_size",
+            "index_patch_sha256",
+        )
         git_history_and_index_unchanged = all(
             before_git.get(field) == after_git.get(field) for field in protected_git_fields
         )

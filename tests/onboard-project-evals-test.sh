@@ -25,6 +25,28 @@ done
   exit 1
 }
 
+ambient_template="$TEST_ROOT/ambient-git-template"
+ambient_config="$TEST_ROOT/ambient-gitconfig"
+ambient_hook_marker="$TEST_ROOT/ambient-hook-ran"
+mkdir -p "$ambient_template/hooks"
+cat > "$ambient_template/hooks/pre-commit" <<'HOOK'
+#!/usr/bin/env bash
+set -euo pipefail
+: > "$ONBOARD_EVAL_AMBIENT_HOOK_MARKER"
+HOOK
+chmod +x "$ambient_template/hooks/pre-commit"
+git config --file "$ambient_config" init.templateDir "$ambient_template"
+GIT_CONFIG_GLOBAL="$ambient_config" \
+ONBOARD_EVAL_AMBIENT_HOOK_MARKER="$ambient_hook_marker" \
+  bash "$CREATE_FIXTURE" \
+    sparse-python-service \
+    "$TEST_ROOT/ambient-fixture" \
+    "$TEST_ROOT/ambient-fixture-state" >/dev/null
+if [ -e "$ambient_hook_marker" ]; then
+  echo "Onboarding fixture creation executed an ambient Git template hook" >&2
+  exit 1
+fi
+
 fixtures=(
   mature-monorepo
   sparse-python-service
