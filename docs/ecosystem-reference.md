@@ -91,8 +91,9 @@ use its full 40-character commit SHA for both acquisition and installation:
 ```
 
 This verifies source consistency after a revision is selected; it does not by
-itself authenticate the publisher. Version 1.7.0 identifies this integration,
-but it is not stable until a release record binds its full commit SHA.
+itself authenticate the publisher. A version becomes stable only when a release
+record binds its full commit SHA. Use the
+[v1.7.0 release record](https://github.com/marcus-friction/agents/releases/tag/v1.7.0).
 
 ### User-level installation
 
@@ -431,9 +432,9 @@ to the legal files for the authoritative classification.
 
 ## Releases
 
-- **v1.7.0 — unreleased integration, 2026-09-07:** Added proportional
-  governance, candidate ownership, safer distribution semantics, and workflow
-  contracts while retaining Laravel/Nuxt specialties. See
+- **v1.7.0 — 2026-09-11:** Aligned with TomFit Agents 0.2.0, added Laravel
+  Cloud deployment guidance, and hardened installation and evaluation boundaries
+  while retaining Laravel/Nuxt specialties. See
   [`2026-09-07-proportional-ecosystem-port.md`](releases/2026-09-07-proportional-ecosystem-port.md).
 - **v1.6.0 — 2026-08-20:** Synchronized Nuxt, Vitest, VueUse, Nitro, Laravel,
   debugging, TDD, marketing, SEO, and review references; consolidated root
@@ -452,8 +453,8 @@ original scope and are not rewritten by later policy.
 
 ## Known Limitations
 
-- Version 1.7.0 is an unreleased integration version. `master` remains an edge
-  channel; no immutable stable release is published by this update.
+- `master` remains a mutable edge channel. Stable installations must use the
+  full commit SHA recorded in the selected release, not a moving branch or tag.
 - Provider links do not cross machines or remote environments automatically.
 - The ecosystem does not provision host runtimes or project dependencies;
   projects keep those choices and installation steps in their own setup docs.
@@ -472,5 +473,5 @@ Contributor-owned ecosystem material is licensed under the repository
 [`LICENSE`](../LICENSE). Adapted and retained material keeps the source,
 revision, license, notices, and modification status recorded in
 [`THIRD_PARTY_NOTICES.md`](../THIRD_PARTY_NOTICES.md) and the distributed
-provenance lock. Version 1.7.0 remains an unreleased integration; publication
-still requires a release record that binds its exact full commit SHA.
+provenance lock. The release record identifies the exact full commit SHA for
+the published distribution.

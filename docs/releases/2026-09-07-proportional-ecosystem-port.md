@@ -1,58 +1,42 @@
-# v1.7.0 (Unreleased) — Proportional Ecosystem Port
+# v1.7.0 — Agent Ecosystem and Cloud Deployment
 
-## Summary
-
-The agent ecosystem now scales planning, approval, testing, and review to the
-actual change while preserving its Laravel 13 and Nuxt 4 specialization. The
-update also separates upstream-managed distribution assets from project-owned
-documents so installation can refresh capabilities without silently changing a
-project's policy.
+Release date: 2026-09-11. The
+[GitHub release record](https://github.com/marcus-friction/agents/releases/tag/v1.7.0)
+binds this version to its full commit SHA. `master` remains a mutable edge channel.
 
 ## Changes
 
-- Added the R0–R2 change-rigor model. R0 is read-only, R1 covers ordinary
-  reversible repository work, and R2 effects require exact authorization and
-  revalidation.
-- Separated component applicability, boundary assurance, and change rigor.
-  Projects activate guidance only for adopted components and record evidence for
-  security and operational controls.
-- Added canonical candidates under `project-templates/base/`. Installation
-  stages inactive copies under `.agents/templates/` and never creates, appends
-  to, or replaces active root project documents.
-- Removed the superseded root `README.template.md`; the canonical inactive
-  README candidate now lives at `project-templates/base/README.md`.
-- Defined managed-tree ownership for skills, tools, legal metadata, and provider
-  adapters while preserving `.agents/project/` and local-only skill paths.
-- Refined TDD around changed observable behavior and meaningful failure paths.
-  The 100% line and branch coverage goal remains for testable production
-  behavior without requiring ritual tests for prose or inert configuration.
-- Added public-repository installation semantics, component-selective dependency
-  planning, multi-tool skill discovery, immutable full-SHA support, concise
-  document budgets, and an extended ecosystem reference.
+- Aligned workflow skills with TomFit Agents 0.2.0, including its review workflow,
+  proportional R0–R2 rigor, and removal of retired skills.
+- Retained and tuned Laravel/Nuxt stack guidance. Direct installs use declared
+  skill names; the Claude plugin uses `ma:`, not `ma-`.
+- Added `deploy` for Laravel-only and Laravel + Nuxt applications on Laravel
+  Cloud, covering readiness, separate app releases, verification and recovery.
+  Existing hosting choices and external-effect approval remain required.
+- Hardened global snapshots, legacy migration, edge fast-forward checks,
+  managed ownership, discovery registration and private filesystem boundaries.
+- Isolated evaluation fixtures and rejected unsafe paths before reading input.
+- Simplified onboarding documentation and kept project templates inactive until
+  adopted. Installers preserve project-owned documents and local extensions.
 
-## Preserved Specializations
+## Updating
 
-Laravel 13, PHP 8.4, PostgreSQL 17, Redis, Filament 4, Sanctum, Scout,
-Meilisearch, Horizon, Telescope, Pulse, Pest 4, Larastan, and Pint remain the
-backend baseline. Nuxt 4, Vue 3 Composition API, Nitro, Pinia, Vite, Vitest,
-VueUse, TypeScript, Tailwind CSS 4, and Playwright remain the frontend baseline.
-Sail, Forge, PM2, and Cloudflare remain the preferred adopted delivery path.
+Use the full 40-character SHA from the release record with `--ref`; see the
+[installation reference](../ecosystem-reference.md). Reload your coding tool
+after updating. Local edits or ambiguous ownership can block an update; inspect
+the reported paths instead of deleting local state to force installation.
+Verified legacy global checkouts retain a recovery copy. Known unchanged legacy
+project files can be adopted, while unknown or modified local files stay local.
 
-The port excludes source-specific framework skills, cloud assumptions,
-private-source authentication, branding, and captured evaluation evidence.
-Existing multi-agent review skills remain and align with the new report-only
-and proportional-review semantics.
+The stack remains Laravel 13/PHP 8.4, Nuxt 4/Vue 3 and PostgreSQL 17. Optional
+services are adopted only when needed. Cloud guidance does not migrate a project
+from Forge, PM2, Cloudflare or another existing provider automatically.
 
-## Release Boundary
+## Verification
 
-Version 1.7.0 names the integration but remains unreleased. This change does not
-publish an immutable stable release, and `master` remains a mutable edge channel.
-Audited installations may pin a reviewed full 40-character commit SHA; a future
-stable release must identify its exact commit separately.
-
-## Verification Contract
-
-The integrated change should pass the offline repository suite, shell syntax and
-portability checks, skill validation, document-budget checks, JSON validation,
-and `git diff --check`. Consuming projects must still run their own Laravel,
-Nuxt, and browser checks for adopted components.
+The offline deterministic suite and independent reviews passed during the
+integration; release PR checks verify the final candidate. Deploy guidance also
+passed simulated readiness, release, authentication and recovery scenarios.
+Live Cloud integration, registered live-agent evaluations, ShellCheck and macOS
+runtime checks were not performed. Consuming applications still need their own
+Laravel, Nuxt and browser verification.
