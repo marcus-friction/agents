@@ -1,36 +1,49 @@
 ---
 name: playwright
-description: End-to-End browser testing standards, locators, and best practices for interacting with web interfaces safely.
+description: Apply when writing, reviewing, or debugging Playwright tests, fixtures, or configuration. Use as the browser-testing method layer for end-to-end work, with stable locators, isolated data, and web-first assertions.
 ---
 
-# Playwright E2E Standards
+# Playwright Standards
 
-## Element selection
+## Read the existing harness
+
+Inspect the existing Playwright config, projects, fixtures, authentication
+setup, `baseURL`, data helpers, and locator conventions. Reuse valid project
+infrastructure and run against the explicitly supplied or project-configured
+environment; do not invent a deployment target.
+
+## Select elements by contract
 
 Prefer accessible semantic locators that match how a user perceives the page:
 `getByRole` with an accessible name, `getByLabel`, and then text or placeholder
-where appropriate. This makes the test exercise the accessibility contract as
-well as behavior.
+where appropriate. Existing stable test IDs are valid when repository evidence
+establishes them as the convention or translated and repeated content has no
+stable semantic discriminator.
 
-Existing stable test IDs are also valid when repository evidence establishes
-them as the project's convention or when translated or repeated content has no
-stable semantic discriminator. Do not add test IDs to production markup solely
-to satisfy a new test. If a new identifier is genuinely needed, treat the
-production change separately from permission to test.
+For localized applications, derive accessible names from the locale or catalog
+the test exercises. When repeated matches are legitimate, scope to a stable
+parent rather than relying on position.
 
-For localized applications, derive accessible names from the same locale or
-catalog exercised by the test. Do not use an unnamed role when multiple matches
-are possible.
+Structural CSS, XPath, generated IDs, and positional selectors are a last resort
+when no user-facing or explicit stable contract exists, such as
+unchangeable third-party or canvas markup. Scope the fallback tightly, choose
+the least volatile attribute, and document why a semantic or test-ID locator
+is unavailable. Do not add test IDs to production markup solely under
+test-only authority; a production change requires its own authorization.
 
-**Forbidden:** structural CSS classes, generated IDs, nth-child selectors, or any locator coupled to layout.
+## Flow, isolation, and evidence
 
-When the repository already uses test IDs, follow its naming convention and
-never style by them. Prefer a stable domain key over a positional index for
-repeated rows.
-
-## Testing Flow & Logic
-- **Isolation**: Seed only the data the flow requires. Clean up only a proven
+- Seed only the data the flow requires. Clean up only a proven
   disposable, test-owned scope; preserve pre-existing or shared records and
   report retained fixture data when ownership cannot be verified.
-- **Action Verification**: Use standard auto-waiting assertions (e.g., `expect(locator).toBeVisible()`) after interactions to verify state transitions in the UI rather than hard-coded timeouts.
-- **Tracing**: Leverage `trace: 'on-first-retry'` to assist with difficult CI failure diagnoses.
+- Rely on Playwright auto-waiting and web-first assertions such as
+  `expect(locator).toBeVisible()` instead of fixed sleeps.
+- Assert the meaningful state transition after an interaction, not every
+  implementation detail along the way.
+- Follow the project's trace, screenshot, video, retry, and parallelism policy.
+  `trace: 'on-first-retry'` is a useful default when no stricter convention
+  exists.
+
+Run the narrowest affected project or spec first, then the relevant browser
+matrix. When a failure depends on the environment, retain the trace and report
+the observed boundary instead of weakening the assertion.

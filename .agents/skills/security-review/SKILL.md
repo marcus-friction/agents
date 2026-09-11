@@ -136,3 +136,11 @@ For each finding report: affected boundary, evidence, realistic abuse or failure
 path, severity rationale, smallest effective correction, and verification. List
 evidence-backed N/A checks briefly so reviewers can distinguish intentional
 scope from omission.
+
+## Parent review handoff
+
+When invoked by the parent review, use its supplied finding contract and review
+packet. Do not widen the accepted file set. Return either evidence-backed N/A
+coverage or normalized findings with classification, severity, confidence,
+exact location, affected boundary, abuse or failure path, consequence, smallest
+correction, verification, and pre-existing status.

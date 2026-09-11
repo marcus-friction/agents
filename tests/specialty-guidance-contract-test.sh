@@ -33,7 +33,7 @@ def reject(relative: str, pattern: str, purpose: str) -> None:
 
 validation_sources = (
     ".agents/skills/architecture-review/SKILL.md",
-    ".agents/skills/ma-architecture-review/SKILL.md",
+    ".agents/skills/stack-architecture-review/SKILL.md",
     ".agents/skills/laravel/SKILL.md",
     ".agents/skills/laravel/rules/validation.md",
     ".agents/skills/laravel/rules/routing.md",
@@ -52,8 +52,8 @@ for source in validation_sources:
     )
 
 architecture_review = ".agents/skills/architecture-review/SKILL.md"
-ma_architecture_review = ".agents/skills/ma-architecture-review/SKILL.md"
-for source in (architecture_review, ma_architecture_review):
+stack_architecture_review = ".agents/skills/stack-architecture-review/SKILL.md"
+for source in (architecture_review, stack_architecture_review):
     require(
         source,
         r"resource-owning server|server that owns (?:the )?resource",

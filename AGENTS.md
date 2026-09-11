@@ -12,7 +12,11 @@
   bounded implementation request authorizes scoped edits without a redundant
   kickoff; testing alone never authorizes production mutation.
 - Use `.agents/skills/review/references/change-rigor.md`: R0 is read-only, R1
-  clean additive, R2 bounded semantic, and R3 hazardous. The highest trigger wins.
+  ordinary repository work, and R2 an elevated external or irreversible effect.
+- Store plans at `docs/plans/<YYYY-MM-DD>-<slug>/implementation-plan.md` with a
+  sibling `tasks.md`; follow the accepted plan and maintain its checkbox tracker.
+  Review may update only an already-authorized matching tracker with actionable
+  findings, never fixes. An explicit no-write instruction still controls.
 - Stop and explain when work cascades beyond scope or the same blocker survives
   three attempted resolutions. Ask before unplanned dependencies, major
   upgrades, architecture changes, external services, or expanded permissions.
@@ -24,7 +28,8 @@
 - `project-templates/base/` contains canonical document candidates. Installation
   stages them under `.agents/templates/`; it never activates them automatically.
 - Root documents and `.agents/project/` are project-owned. Never replace or
-  write through them mechanically. Preserve local skills and reject unsafe targets.
+  write through them mechanically. A bounded implementation request authorizes
+  ordinary project-document edits. Preserve local skills and reject unsafe targets.
 
 ## Laravel 13 and Data, When Adopted
 

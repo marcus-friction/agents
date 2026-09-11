@@ -2,7 +2,7 @@
 
 > [!WARNING]
 > This inactive candidate becomes project policy only through evidence-backed
-> reconciliation and approval of its exact patch.
+> reconciliation.
 
 ## Conduct
 
@@ -13,8 +13,11 @@
   bounded implementation request authorizes scoped edits without another
   kickoff; testing alone never authorizes production mutation.
 - Use `.agents/skills/review/references/change-rigor.md`: R0 is read-only, R1
-  clean additive, R2 bounded semantic, and R3 hazardous. The highest applicable
-  trigger wins.
+  ordinary repository work, and R2 an elevated external or irreversible effect.
+- Store plans at `docs/plans/<YYYY-MM-DD>-<slug>/implementation-plan.md` with a
+  sibling `tasks.md`; follow the accepted plan and maintain its checkbox tracker.
+  Review may update only an already-authorized matching tracker with actionable
+  findings, never fixes. An explicit no-write instruction still controls.
 - Stop and explain cascading work or a blocker that survives three attempted
   resolutions. Ask before unplanned dependencies, major upgrades, architecture
   changes, external services, or expanded permissions.

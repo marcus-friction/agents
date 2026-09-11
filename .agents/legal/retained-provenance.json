@@ -29,15 +29,6 @@
       "sha256": "6b0622269e098ca1399e123e553fd385f0b6412d88ef0e9c4f5a8ea9cf1cec7b"
     },
     {
-      "source": "Superpowers",
-      "sourceUrl": "https://github.com/obra/superpowers",
-      "revision": "b36e0829c6d0140e93cfef2ca599b1b07d4a7797",
-      "upstreamPath": "skills/test-driven-development/writing-good-tests.md",
-      "upstreamGitBlob": "d3c4482fd30b4f9084bb61545fe73939a7502c28",
-      "localPath": ".agents/skills/test-driven-development/references/writing-good-tests.md",
-      "sha256": "51471c853306ff92ca8bb41dcaea05f31c0e46b03651f8f3c99754b7172f4ae1"
-    },
-    {
       "source": "Jezweb Claude Skills",
       "sourceUrl": "https://github.com/jezweb/claude-skills",
       "revision": "bf917575ed6b65eb98307ced903f469020d8cd0a",

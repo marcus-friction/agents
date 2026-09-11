@@ -130,23 +130,23 @@ tool_api_pattern = re.compile(
     r"TaskList|TaskGet|search-docs)\b"
 )
 slash_names = {
-    "adversarial-review", "architecture-review", "brainstorm",
-    "build-start-scripts", "changelog", "code-review-excellence", "compound",
+    "adversarial-review", "architecture-review",
+    "build-start-scripts", "code-review-excellence", "compound",
     "contribute-back", "copy-editing", "copywriting",
-    "design-consultation", "design-system", "end2end", "jest", "junit",
-    "laravel", "laravel-best-practices", "lfg", "ma-architecture-review",
-    "ma-performance-review", "ma-review", "ma-security-review",
-    "migrate-project", "next-best-practices", "nitro", "nuxt", "office-hours",
+    "design-system", "end2end", "jest", "junit",
+    "laravel", "laravel-best-practices", "lfg",
+    "migrate-project", "next-best-practices", "nitro", "nuxt",
     "onboard-project", "path-to-10", "performance-review", "plan",
     "pinia", "playwright", "project", "react-best-practices", "review",
-    "review-gstack", "review-plan", "security-review", "seo-review",
+    "review-plan", "security-review", "seo-review",
     "skill-creator", "skill-test", "spring-ai-patterns",
-    "spring-boot-best-practices", "start-project", "stats",
+    "spring-boot-best-practices", "stack-architecture-review",
+    "stack-performance-review", "stack-security-review", "start-project",
     "systematic-debugging", "tailwind-v4-shadcn", "terminal-blindness-fix",
-    "test-driven-development", "ui-accessibility-review", "update-agents",
+    "test-driven-development", "update-agents",
     "vite", "vitest", "vue", "vue-best-practices",
     "vue-router-best-practices", "vue-testing-best-practices",
-    "vueuse-functions", "whats-next", "wrap",
+    "vueuse-functions", "wrap",
 }
 slash_command_pattern = re.compile(
     r"(?<![A-Za-z0-9_./~-])/(?:"

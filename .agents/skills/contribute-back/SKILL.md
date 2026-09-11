@@ -1,91 +1,76 @@
 ---
 name: contribute-back
-description: Compare local .agents improvements with the central marcus-friction/agents repository (or another explicitly named upstream) and prepare a safe contribution proposal. Use only when the user asks to contribute, upstream, or open a pull request; publication remains a separate exact approval.
+description: Compare local agent-distribution improvements with a named upstream repository and prepare a safe contribution proposal. Use only when the user asks to contribute, upstream, or open a pull request; publication requires a separate exact batch approval.
 ---
 
 # Contribute Back
 
-Discover useful `.agents/` changes without publishing private project material.
-The workflow stays local and proposal-only until the complete publication batch
-is approved.
+Discover portable improvements without publishing project-owned or sensitive
+material. Discovery and selection remain local and proposal-only; selection is
+not publication approval.
 
-Use `https://github.com/marcus-friction/agents.git` as the default upstream.
-Replace it only when the user explicitly names another destination. Resolve and
-record the exact base ref rather than assuming a moving branch is unchanged.
+## 1. Resolve comparison scope
 
-## 1. Inspect without changing the project
+Identify the project root, named destination repository, destination base ref,
+and requested candidates. Use repository metadata when it establishes those
+facts; do not assume a historical hard-coded upstream. If the destination or
+base cannot be resolved, report the missing fact rather than comparing against
+an arbitrary repository.
 
-Resolve the project root and inspect status before comparing files. Use a fresh
-system-created temporary directory for any upstream checkout; never reuse a
-fixed path. Mark it as test/tool-owned, keep it outside the project, and remove
-it only after verifying that exact physical directory and marker. A failed
-cleanup is reported rather than broadened.
+Inspect the project rules or distribution manifest for repository-declared
+managed distribution sources. Compare only those roots. In this repository that
+includes `.agents/skills/` and `project-templates/`; another repository may
+declare a different set. Include nested support files such as
+`.agents/skills/<name>/README.md`.
 
-A public upstream read is not publication, but disclose and resolve any needed
-network or credential boundary before accessing a private destination. Do not
-add remotes, branches, commits, or files to the user's checkout during analysis.
+Exclude project-owned `.agents/project/`, staged `.agents/templates/`, root
+project documents, generated output, and everything under `docs/solutions/`.
+Treat removals as candidates only when the user explicitly includes them.
 
-Compare physical regular files in upstream-managed `.agents/skills/` and
-`.agents/tools/` with the intended upstream base. Include nested skill support
-files such as `.agents/skills/<name>/README.md`. Exclude project-owned
-`.agents/project/` and staged `.agents/templates/`, as well as root project
-documents and everything under `docs/solutions/`. Preserve selected file bytes
-exactly; do not lint or rewrite them as part of contribution.
+## 2. Inspect safely
 
-## 2. Return a local proposal
+Inspect project status first and do not add remotes, branches, commits, or
+files to the user's checkout. A public upstream read is not publication. Before
+accessing a private destination, resolve the necessary network and credential
+boundary without exposing credential values.
 
-Report new and changed skills in chat. For a candidate that may contain project,
-personal, credential, or customer information, report only its presence,
-category, and relative path, with the value redacted. Never reproduce a
-suspected sensitive value or include that file in a publication batch; ask the
-user to sanitize it separately. Ask which safe candidates, if any, should
-advance to a publication preview. Selection is not publication approval.
+Use a fresh system-created temporary directory for a checkout. Mark it as
+test/tool-owned, keep it outside the project, and clean up only after verifying
+that exact physical directory and marker. Report cleanup failure instead of
+broadening deletion.
 
-For each selected file, bind lightweight evidence for its source, its license or
-permission, and authority to redistribute those exact bytes to the named
-destination. Reuse repository metadata and specific user-supplied ownership or
-permission first; a general request to contribute is not redistribution
-authority. Do not turn this into blanket research across unselected files. Only
+Compare physical regular files against the intended upstream base. Reject
+symlinks and special files. Preserve candidate bytes exactly; do not lint,
+generalize, or rewrite them during discovery. If upstream compatibility would
+require adaptation, report that as separate future work rather than silently
+changing the selected source.
+
+## 3. Propose safe candidates
+
+Report added, changed, and explicitly requested removed files with a concise
+reason each might benefit the destination. When the request already identifies
+the candidates, use that selection without another gate. Ask which safe
+candidates should advance only when selection is materially ambiguous.
+
+For a candidate that may contain project, personal, credential, or customer
+information, report only its presence, category, and relative path, with the
+value redacted. Never reproduce a suspected sensitive value or include the file
+in a publication batch; ask the user to sanitize it separately.
+
+For each selected file, bind its source, license or permission, and affirmative
+authority to redistribute those exact bytes to the named destination. Reuse
+repository licensing and specific ownership evidence before researching. Only
 files with affirmative redistribution authority may enter the batch. If any
 file remains unresolved, exclude it from the batch or stop when the requested
-batch cannot proceed without it, and report the missing evidence.
+contribution cannot proceed without it.
 
-## 3. Build the exact publication batch
+If the user requested only comparison or a proposal, return the result in chat
+and stop. If there are no safe differences, say so directly.
 
-For selected candidates, expand directories to an explicit file list. Verify
-that every source is a physical regular file, not a symlink or special file,
-and is inside `.agents/`. Record each relative path and content hash.
+## 4. Preview and publish only when requested
 
-Prepare one unchanged publication batch containing:
-
-- destination owner/repository, base ref, fork/branch if used, and visibility;
-- the exact physical files, relative target paths, and content hashes;
-- the per-file source and license-or-permission evidence supporting
-  redistribution to this destination;
-- the commit message, pull-request title, and full pull-request body;
-- the authenticated host/identity to be used, expected public exposure, exact
-  publication steps, and recovery or closure path.
-
-Show the full preview and request one decision for that exact batch. Do not
-fork, create a branch, push, or open a pull request before approval. A changed
-destination, visibility, identity, base ref, title, body, path, or hash
-invalidates the batch rather than inheriting approval.
-
-## 4. Publish only the approved batch
-
-Immediately before publication, revalidate the source paths and hashes, the
-per-file redistribution evidence, the destination/base ref, and the
-authenticated identity. Stop for a new preview if any fact changed or authority
-is no longer affirmative.
-
-Use an isolated checkout or a host API; never attach a contribution remote to
-the user's project. After revalidation, materialize a verified snapshot of the
-approved bytes in that checkout (or verify the in-memory bytes sent to the API)
-and publish from the snapshot so a concurrent local edit cannot change the
-batch. Recheck its target paths and hashes before staging.
-
-Stage only the approved paths with an exact `git add` argument list—never the
-repository root or `.`. Push only those unchanged file bytes, then create the
-approved pull request. Report the resulting links, identity, and any retained
-recovery material. Do not infer permission to merge, delete branches, tag, or
-release.
+When the user asks to publish selected candidates, read
+`references/publication-batch.md` completely. Build and show one exact batch,
+then obtain one approval for that unchanged batch. Do not infer publication
+authority from discovery, candidate selection, a prior general contribution
+request, or this skill's invocation.

@@ -1,5 +1,5 @@
 {
-  "name": "agents",
+  "name": "ma",
   "description": "Agent ecosystem for Laravel, Nuxt, and pragmatic software delivery",
   "version": "1.7.0",
   "license": "MIT AND Apache-2.0",

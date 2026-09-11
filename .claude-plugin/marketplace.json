@@ -6,7 +6,7 @@
   },
   "plugins": [
     {
-      "name": "agents",
+      "name": "ma",
       "source": "./.agents",
       "description": "Agent ecosystem (edge channel; use the full-SHA Git installer for stable releases)",
       "version": "1.7.0"

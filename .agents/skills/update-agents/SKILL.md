@@ -1,164 +1,104 @@
 ---
 name: update-agents
-description: Safely refresh upstream-managed agent skills, documentation candidates, and discovery adapters while preserving project-owned files. Use when asked to "update agents", "sync agents", or "pull the latest agent rules".
+description: Refresh upstream-managed agent skills, inactive documentation candidates, and discovery adapters while preserving project-owned files. Use when asked to update, sync, or pull the latest agent rules in one or more projects.
 ---
 
 # Update Agent Ecosystem
 
-Refresh the central `marcus-friction/agents` distribution without treating a project's active
-documentation as an upstream-owned file set.
+Refresh the selected project from a known Agents Ecosystem distribution source. Keep
+mechanical distribution updates separate from semantic adoption of project
+documentation.
 
-## Ownership Contract
+## Trigger and authority
 
-| Path | Owner | Update behavior |
+A bare update or sync request defaults to the current stable release. Use the
+mutable edge channel or a local development checkout only when the user asks for
+it or the surrounding task already selected it.
+
+For one project, the request authorizes only the installer's scoped changes to
+managed assets, inactive templates, and discovery adapters.
+Updates install no host packages or runtime dependencies. They do not authorize
+edits to active project context, legacy cleanup, commits, pushes, or publication.
+Bulk preparation and bulk publication have separate authority; see
+`references/source-and-bulk.md`.
+
+## Ownership contract
+
+| Target | Update behavior |
+|---|---|
+| Files recorded in `.agents/.agents-ecosystem-managed-state-v2` | Update or retire only while their recorded content and mode remain unchanged; a verified v1 state migrates on success |
+| `.agents/templates/` | Regenerate inactive upstream candidates; never activate them as project documents |
+| Paths absent from managed state | Preserve as local extensions; a pre-state install may adopt historical paths with exact content and matching Git executable state, allowing the original umask. Unverified paths stay local; upstream collisions block the update |
+| `.agents/project/`, root or nested project documents, `.agents/rules/`, and `.agent/` | Leave project-owned and untouched |
+| Registered discovery paths | Accept only the expected adapter target; a different link, file, or directory blocks registration |
+
+Use managed state or the installer's historical inventory, never names, banners,
+or a match to current upstream content alone. A dirty
+`.agents/` tree is not by itself a blocker: the managed state and complete
+installer preflight decide whether existing work is safe to preserve.
+
+## Source modes
+
+| Mode | Required evidence | Installer argument |
 |---|---|---|
-| `.agents/skills/<upstream-name>/` | Upstream | Updated from the distribution |
-| `.agents/templates/` | Upstream | Updated candidates; never copied into root docs |
-| `.agents/project/` | Project | Never changed by install or update |
-| Paths below `.agents/skills/` absent upstream | Unknown/local | Retained and reported; never auto-deleted |
-| Root and nested project documentation | Project | Never created, appended, replaced, or deleted |
+| Stable (default) | Requested release's full 40-character lowercase commit SHA; clean detached physical checkout supplied or materialized at that commit | `--ref <full-commit-sha>` |
+| Edge | Explicit choice of the moving branch; clean physical checkout and the resolved commit disclosed as non-reproducible | Omit `--ref` |
+| Local development | Exact physical checkout selected for the task; disclose its branch, commit, and dirty state | Omit `--ref` |
 
-A local edit inside an upstream-named path is not automatically distinguishable
-from an outdated upstream version. Files that still exist upstream are refreshed.
-Paths absent upstream are retained and reported for an explicit keep-or-cleanup
-decision. Keep project-specific extensions in uniquely named skills or
-`.agents/project/` so ownership stays obvious.
+Never relabel a tag or branch as an immutable release, silently move an existing
+checkout, or turn a stable request into edge. If no suitable source checkout is
+already available, read `references/source-and-bulk.md` completely and use its
+temporary public-source bootstrap.
 
-## Safety Rules
+## Workflow
 
-- Run from the repository root.
-- Never infer file ownership from a title, banner, or matching content.
-- Do not migrate or delete `.agents/rules/` or legacy `.agent/` content during an
-  update. Preserve it for semantic reconciliation by `onboard-project`.
-- Do not append incoming text to `README.md`, `DESIGN.md`, or any other active
-  project document.
-- Stop before updating when `.agents/` has tracked or untracked changes. Ask the
-  user to commit, stash, or deliberately relocate them first.
-- For the stable channel, require the release's full 40-character commit SHA.
-  Treat tags as aliases and branches as edge-only; never silently substitute one.
-- Do not commit or push the result unless the user separately asks.
+1. Resolve and enter the exact target project root. Record relevant pre-update
+   status, managed state, local extensions, active and legacy context, target
+   types, and adapter paths so existing work is not attributed to the update.
+2. Select the source mode. For a supplied checkout, verify its physical source,
+   resolved commit, required cleanliness, and regular `install.sh`. For remote
+   bootstrap, verify the physical bootstrap and let it validate the materialized
+   source before project preflight.
+3. From the target root, run stable installation as:
 
-## Update Procedure
+   ```bash
+   bash /path/to/agents/install.sh \
+     --from-local /path/to/agents \
+     --ref <full-commit-sha>
+   ```
 
-Run this as one Bash block so the temporary checkout and cleanup trap share one
-shell process:
+   For explicitly selected edge or local development, omit `--ref`:
 
-```bash
-set -euo pipefail
+   ```bash
+   bash /path/to/agents/install.sh \
+     --from-local /path/to/agents
+   ```
 
-AGENTS_ECOSYSTEM_SHA="${AGENTS_ECOSYSTEM_SHA:?Set AGENTS_ECOSYSTEM_SHA to the approved release commit.}"
-if ! [[ "$AGENTS_ECOSYSTEM_SHA" =~ ^[0-9a-f]{40}$ ]]; then
-  echo "AGENTS_ECOSYSTEM_SHA must be a full 40-character lowercase commit SHA." >&2
-  exit 1
-fi
+   Let the installer perform the complete managed-tree, template, and adapter
+   preflight. Do not reproduce or weaken that logic in ad hoc copy commands.
+4. On any conflict or failure, stop. Do not overwrite, stash, relocate, delete,
+   retry with a weaker mode, or classify a changed managed path as local. Report
+   the exact blocker and preserve any recovery path printed by the installer.
+5. On success, compare post-update status and diffs with the recorded baseline.
+   Distinguish updated and retired managed files from preserved local
+   extensions. If inactive templates changed, offer `onboard-project` as a
+   separate semantic reconciliation only when the user wants active documents
+   updated.
 
-release_git() (
-  for git_variable in "${!GIT_@}"; do
-    unset "$git_variable"
-  done
-  export GIT_CONFIG_NOSYSTEM=1
-  export GIT_CONFIG_GLOBAL=/dev/null
-  export GIT_ASKPASS=/usr/bin/false
-  export GIT_TERMINAL_PROMPT=0
-  export GIT_NO_REPLACE_OBJECTS=1
-  export GH_PROMPT_DISABLED=1
-  export SSH_ASKPASS=/usr/bin/false
-  export SSH_ASKPASS_REQUIRE=never
-  git --no-replace-objects \
-    -c core.hooksPath=/dev/null \
-    -c core.fsmonitor=false \
-    -c credential.helper= \
-    "$@"
-)
-
-project_git() (
-  for git_variable in "${!GIT_@}"; do
-    unset "$git_variable"
-  done
-  GIT_NO_REPLACE_OBJECTS=1 git --no-replace-objects \
-    -c core.hooksPath=/dev/null \
-    -c core.fsmonitor=false \
-    "$@"
-)
-
-PROJECT_ROOT="$(project_git rev-parse --show-toplevel)" || {
-  echo "Must be in a Git repository."
-  exit 1
-}
-cd "$PROJECT_ROOT"
-
-if [ -n "$(project_git -C "$PROJECT_ROOT" status \
-  --porcelain --untracked-files=all -- .agents)" ]; then
-  echo "ERROR: .agents contains tracked or untracked changes."
-  echo "Commit, stash, or relocate them before updating upstream-managed assets."
-  exit 1
-fi
-hidden_index_state="$(project_git -C "$PROJECT_ROOT" \
-  ls-files -v -- .agents | sed -n '/^[a-zS]/p')"
-if [ -n "$hidden_index_state" ]; then
-  echo "ERROR: .agents contains assume-unchanged or skip-worktree index state."
-  echo "Clear the hidden index flags before updating upstream-managed assets."
-  exit 1
-fi
-
-UPDATE_TMP="$(mktemp -d)"
-trap 'rm -rf "$UPDATE_TMP"' EXIT
-
-release_git init -q "$UPDATE_TMP"
-release_git -C "$UPDATE_TMP" remote add origin \
-  https://github.com/marcus-friction/agents.git
-release_git -C "$UPDATE_TMP" fetch --depth 1 --no-tags origin "$AGENTS_ECOSYSTEM_SHA"
-release_git -C "$UPDATE_TMP" checkout --quiet --detach FETCH_HEAD
-
-ACTUAL_SHA="$(release_git -C "$UPDATE_TMP" rev-parse --verify 'HEAD^{commit}')"
-if [ "$ACTUAL_SHA" != "$AGENTS_ECOSYSTEM_SHA" ]; then
-  echo "Fetched checkout does not match the approved release commit." >&2
-  exit 1
-fi
-if release_git -C "$UPDATE_TMP" symbolic-ref --quiet HEAD >/dev/null 2>&1; then
-  echo "Fetched release checkout is not detached." >&2
-  exit 1
-fi
-if [ -L "$UPDATE_TMP/install.sh" ] || [ ! -f "$UPDATE_TMP/install.sh" ]; then
-  echo "Fetched installer must be a physical file." >&2
-  exit 1
-fi
-
-bash "$UPDATE_TMP/install.sh" \
-  --skip-deps \
-  --from-local "$UPDATE_TMP" \
-  --ref "$AGENTS_ECOSYSTEM_SHA"
-
-echo
-echo "--- LOCAL-ONLY SKILL PATH ANALYSIS ---"
-echo "These local paths are absent upstream and were retained:"
-LC_ALL=C comm -23 \
-  <(cd .agents/skills && find . -mindepth 1 -print | LC_ALL=C sort) \
-  <(cd "$UPDATE_TMP/.agents/skills" && find . -mindepth 1 -print | LC_ALL=C sort)
-echo "--------------------------------------"
-
-if [ -d .agents/rules ] || [ -d .agent ]; then
-  echo
-  echo "Legacy agent context is still present and was deliberately retained."
-  echo "Run onboard-project to account for its meaning before any cleanup."
-fi
-
-echo
-echo "Upstream assets refreshed. Project documents were not changed."
-echo "Review staged template changes, then run onboard-project to reconcile them."
-project_git -C "$PROJECT_ROOT" status --short
-```
+For more than one repository, read `references/source-and-bulk.md` and use the
+bounded planner. Preparing review artifacts never authorizes its apply mode,
+which creates commits, pushes branches, and may open pull requests.
 
 ## Report
 
-Tell the user:
+Report:
 
-1. Which upstream-managed skills and templates changed.
-2. That active project documents and legacy context were left untouched.
-3. Which local-only skill paths were reported, asking whether they are intentional
-   custom extensions or obsolete upstream remnants.
-4. Whether `.agents/templates/` now differs from the last committed baseline and
-   therefore needs an `onboard-project` reconciliation.
+- target, selected channel, source path, and resolved commit;
+- changed and retired managed files, plus any v1-to-v2 state migration;
+- preserved local extensions and unchanged active or legacy project context;
+- adapter changes, inactive template candidates, and whether reconciliation is
+  still pending;
+- conflicts, incomplete effects, and retained recovery paths.
 
-Do not claim the project is fully updated while template conflicts or legacy
-context remain unresolved.
+Do not describe a retired managed file as a local extension or claim the project
+is fully reconciled merely because its managed distribution is current.

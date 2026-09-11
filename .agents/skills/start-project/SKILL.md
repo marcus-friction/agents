@@ -1,123 +1,132 @@
 ---
 name: start-project
-description: Start a new project by clarifying the smallest valuable product, reconciling project-owned documentation safely, selecting applicable architecture components, and producing an executable plan. Use for new products, empty repositories, or an explicit start-project request.
+description: Start a new project through a focused product interview, the adopted Laravel/Nuxt core stack, a complete project-document baseline, and a persisted executable first-increment plan. Use for new products, empty or scaffold-only repositories, or an explicit start-project request; use onboard-project once meaningful product behavior exists.
 ---
 
 # Start Project
 
-Turn an idea into an evidence-backed project baseline and an executable first
-increment. Be opinionated about specificity, but ask only unresolved material
-questions.
+Turn an idea into the smallest valuable, testable first increment without
+reopening the approved technical foundation or exhausting the owner with
+low-value questions.
 
-## 1. Inspect before interviewing
+## 1. Qualify and inspect
 
-- Confirm `.agents/skills` is the canonical skill source; tool registration
-  belongs to installation, not onboarding.
-- Read an existing `README.md` before asking questions. Record whether it is
-  absent, regular, generated, dirty, or a symlink. Preserve its badges, links,
-  commands, license, decisions, frontmatter, and structure.
-- Treat every active document as project-owned, even when it looks like a
-  placeholder or upstream copy.
-- Read `AGENTS.md` for governing rules and enough repository evidence to
-  distinguish an empty project from an existing implementation.
-- If a current hash-bound project summary is handed in by another workflow,
-  reuse its classification and evidence while scope and hashes still match.
-  Reclassify only changed or newly relevant facts.
+Treat an empty repository or one containing only generated scaffolding and no
+meaningful product behavior as a new project. If meaningful behavior already
+exists, use `onboard-project` instead.
 
-If context exists, ask whether the user wants to update/pivot it, explore a
-start-fresh proposal, or brainstorm. “Start fresh” authorizes a proposal, never
-an overwrite.
+Read applicable `AGENTS.md`, active project documents, manifests, repository
+status, and enough implementation evidence to make that distinction. Inspect
+the five candidates under `.agents/templates/` by path and type without reading
+secret values. Treat active documents as project-owned and surface conflicts
+instead of overwriting them. Never write through a symlink or non-regular
+target.
 
-## 2. Define the smallest valuable product
+## 2. Run a focused product interview
 
-First ask for the idea in the user's own words. Fill known answers from existing
-context, then resolve only material gaps:
+Answer from supplied context first. Ask one question at a time and drive quickly
+toward what to build and for whom. Target a 15–20 minute interview and normally
+ask no more than eight questions. Exceed that cap only for a decision that
+blocks a safe or accurate first increment.
+
+Resolve only material gaps, in this order:
 
 - the specific user and painful current workaround;
-- the valuable outcome and measurable first success;
+- the valuable outcome and observable first success;
 - the narrowest complete wedge and explicit non-goals;
-- material timing, budget, legal, compatibility, or operational constraints;
-- why the proposed advantage is meaningful rather than a feature list.
+- material timing, budget, legal, compatibility, and operational constraints;
+- why the proposed advantage matters to the user.
 
-Group related questions when that is clearer. Do not force one-question ceremony
-or repeat an answered question. Challenge vague claims once or twice with
-concrete evidence, then record the owner's decision and proceed.
+Do not over-index on naming, speculative scale, exhaustive personas, distant
+features, or implementation detail that cannot change the first increment.
+Challenge a vague material assumption concretely, then respect and record the
+owner's decision. Keep success evidence lightweight and observable; do not
+force a numeric target or fixed statement format.
 
-Read the staged `ARCHITECTURE.md` candidate when present. Classify each
-component **Adopted**, **Optional**, **Not applicable**, or **Unresolved**, citing
-the product need, repository evidence, or owner decision. Record affected
-boundary assurance facts: exposure, data impact, privilege, reversibility,
-control owner, and evidence. Deployment starts **Unresolved / TBD** and does not
-block a local first increment.
+## 3. Apply the adopted technical foundation
 
-## 3. Confirm the product synthesis
+The default core stack is already approved and **Adopted**:
 
-Present a concise synthesis covering users, problem, outcome, first increment,
-success measures, constraints, non-goals, component applicability, boundary
-facts, and unresolved material decisions. Ask for one decision on this
-synthesis. Keep it outside active files.
+- Nuxt 4, Vue 3, TypeScript, and Tailwind CSS 4 for the web interface;
+- Laravel 13 and PHP 8.4 for the application API;
+- PostgreSQL 17 for primary data; and
+- Redis for adopted cache, session, queue, and application workloads, kept as
+  separate failure domains.
 
-Approval confirms product intent; it is not file-write approval.
+Build on this core without asking the owner to accept it, comparing alternatives,
+or proposing replacements. A core component that is unnecessary for the first
+increment remains **Adopted but deferred**; do not reclassify it or scaffold it
+merely to prove adoption. Only an explicit owner decision may replace or remove
+a core component, and that decision must be recorded in active project context
+before planning.
 
-## 4. Delegate documentation to onboarding
+Classify additional capabilities **Adopted**, **Optional**, **Not applicable**,
+or **Unresolved** from product need and owner decisions. Record material
+exposure, data, privilege, reversibility, and control ownership. Deployment
+remains **Unresolved / TBD** until separately decided.
 
-Run the `onboard-project` skill with the approved synthesis, component matrix,
-boundary facts, change-rigor classification, and their scope/evidence hashes.
-Do not duplicate its inventory, ledger, approval, revalidation, or patch logic.
+Present a concise synthesis of user, problem, first increment, success measure,
+non-goals, constraints, adopted and deferred components, explicit stack
+overrides, and material unknowns. Do not require a separate synthesis approval.
+If a missing choice would substantially change the product or architecture,
+ask the next focused question before continuing.
 
-Onboarding must reconcile an existing `README.md` and the applicable staged
-candidates for `AGENTS.md`, `ARCHITECTURE.md`, and `CONTRIBUTING.md`. Existing
-meanings receive explicit dispositions. R1/R2 changes use one combined semantic
-and exact-patch approval; R3 retains separate gates, its
-durable ledger, and strict revalidation. A missing template-backed baseline
-candidate, blocking conflict, or declined required patch stops planning until
-the owner decides how to proceed.
+## 4. Establish the complete baseline
 
-`README.md` is required product context when present, but it is not one of the
-three template-backed baseline documents below. When it is absent, record that
-fact and use the approved product synthesis if a README proposal is needed; its
-absence alone does not block local planning.
+An explicit request to start the project authorizes ordinary creation or
+reconciliation of all five active baseline documents:
 
-The baseline candidate mapping is:
+- `.agents/templates/README.md` to `README.md`;
+- `.agents/templates/AGENTS.md` to `AGENTS.md`;
+- `.agents/templates/ARCHITECTURE.md` to `ARCHITECTURE.md`;
+- `.agents/templates/CONTRIBUTING.md` to `CONTRIBUTING.md`; and
+- `.agents/templates/DESIGN.md` to `DESIGN.md`.
 
-- `.agents/templates/AGENTS.md` → `AGENTS.md`
-- `.agents/templates/ARCHITECTURE.md` → `ARCHITECTURE.md`
-- `.agents/templates/CONTRIBUTING.md` → `CONTRIBUTING.md`
+Adapt every candidate to the accepted product; do not activate placeholder text
+or copy the candidate mechanically. Record the core as Adopted and mark unused
+core layers deferred in the active `ARCHITECTURE.md`. Use `onboard-project` to
+reconcile any existing active document while preserving its meaning. Verify
+that the complete active baseline exists and is internally consistent before
+planning.
 
-Only adopted component rules become active. Optional and unresolved components
-are not implementation authorization.
+If any required candidate is missing, stop and report that the agent
+distribution is incomplete. Do not invent or reconstruct the candidate. Ask
+for authority to run `update-agents`, disclosing that it refreshes all managed
+agent assets and adapters as well as templates. Resume only after that workflow
+succeeds and all five candidates pass the path and type checks. A start-project
+request alone does not authorize the broader distribution refresh.
 
-## 5. Handle design only when applicable
+An exploratory or explicitly no-write request remains read-only and receives
+the product synthesis only; explain that creating the baseline requires an
+explicit start-project request.
 
-If no user interface is adopted, skip design consultation and record why.
+## 5. Plan the first increment
 
-If an interface is adopted and design decisions are unresolved, recommend the
-`design-consultation` skill with the appropriate mode:
+Use `plan` for every start-project result. It must persist and review these
+paired artifacts:
 
-- focused documentation for wording or rationale;
-- focused visual for bounded token/component/state changes;
-- foundation or rebrand for a new or replaced visual system.
+```text
+docs/plans/<YYYY-MM-DD>-<slug>/
+├── implementation-plan.md
+└── tasks.md
+```
 
-Reuse the onboarding snapshot and classification while its scope and hashes
-match. Do not ask design questions already resolved by project evidence.
+For a new increment, choose a concise kebab-case slug. If its folder exists,
+select the next available numeric suffix such as `-2`; never overwrite it.
+When the user explicitly asks to revise an existing plan, update that plan and
+its sibling tracker in place without duplication.
 
-## 6. Produce the implementation plan
+Plan the complete first increment, not the imagined full product. Include file
+scope, exact dependencies and purpose, observable tests, failure handling,
+compatibility, and completion criteria. Keep deferred core components out of
+the implementation sequence until needed. Keep optional components and
+deployment out unless the increment requires and explicitly adopts or resolves
+them.
 
-Load `CONTRIBUTING.md` for change policy, `ARCHITECTURE.md` for adopted
-boundaries, and `DESIGN.md` only for adopted UI scope. Search
-`docs/solutions/` when it exists and use applicable project skills.
-
-Plan the complete accepted first increment, not the whole imagined product.
-State exclusions and why they do not leave that increment unusable. Use only
-adopted components. Verify unstable versions and scaffolding commands before
-including them. If the accepted increment requires deployment, stop for the
-missing deployment decision.
-
-Follow the `plan` and `review-plan` workflows. Create
-`implementation_plan.md` and `task.md` only when the work is genuinely
-multi-step, cross-boundary, or high-risk.
-
-If the original request included implementation, acceptance of the final plan
-also authorizes ordinary in-scope implementation. Do not ask a redundant
-execution-kickoff question. Destructive, privileged, or external R3 effects
-still require approval immediately before execution.
+Always apply `review-plan`, revise material issues to convergence, and keep
+`tasks.md` synchronized with the reviewed plan. Present the plan paths and ask
+the owner to approve or revise the plan. If the original request includes
+implementation, plan approval authorizes ordinary in-scope work. Follow the
+plan and update `tasks.md` throughout execution. Confirm elevated destructive,
+privileged, production, publication, secret/permission, or irreversible effects
+immediately before they occur.

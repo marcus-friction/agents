@@ -1,70 +1,112 @@
 ---
 name: wrap
-description: Prepare bounded commits or pushes only when the user explicitly asks to commit, "wrap", or push. Keep commit and push authority separate; a status or completion request alone does not trigger this skill.
+description: Complete a clean, documented, knowledge-preserving handoff when the user explicitly asks to wrap, commit, or push. A wrap may finish accepted local work but never implies commit or push; those permissions remain separate.
 ---
 
 # Wrap
 
-Prepare a precise, reviewable Git handoff without expanding the user's authority.
+Close the accepted increment before handing it off to Git. A handoff is ready
+only when the workspace is accounted for, reusable knowledge and affected
+documentation are resolved, and relevant quality evidence is known.
 
-## When to Use
+## Trigger
 
-Use only for an explicit commit, wrap, or push request. Finishing implementation,
-asking for status, or switching context does not trigger this skill. Route a
-valid request directly; do not ask whether to use the skill. An explicit denial
-such as "do not commit or push" is not a request and does not trigger wrap.
+Use only for an explicit wrap, commit, or push request. A status request,
+implementation completion, context switch, or bare "do not commit or push" does
+not trigger this skill. "Wrap this up, but do not commit or push" does trigger
+the completion workflow without authorizing either Git effect.
 
-## Resolve the requested effects
+## Authority by request
 
-- A commit request authorizes only the named local commit scope. It does not
-  authorize a push or other publication.
-- A push request authorizes only the named push scope. It does not authorize
-  creating or amending commits.
-- A generic "wrap it up" request authorizes a read-only survey and an exact
-  effect-batch preview, not immediate mutation. Show the proposed commit groups,
-  exact files, commit messages, and any remote and branch that would be pushed;
-  ask once which effects to execute.
-- If an explicit request already identifies an exact commit-only batch, proceed
-  through revalidation and execute the authorized commit without a redundant
-  kickoff. Before an authorized push, follow the canonical just-in-time external
-  effect decision using its exact remote, ref, exposure, credentials, and recovery
-  facts; reuse an unchanged exact approval rather than asking twice.
+| Request | Authorized | Still requires authority |
+|---|---|---|
+| Explicit wrap | Audit the handoff; finish bounded cleanup, knowledge, and documentation for accepted work completed in this task | Any commit or push |
+| Exact commit | Audit, then commit only the named files or hunks once every gate is resolved | Push; missing cleanup, knowledge, or documentation outside the named scope |
+| Exact push | Audit, then push only the named local ref to the named remote/ref | Creating or amending commits; missing local completion work |
 
-## Inspect and preview
+Treat unknown pre-existing work as read-only. Preview any proposed mutation and
+obtain approval before changing it. Skills change method, never authority.
+If a commit or push request lacks exact scope or destination, inspect and
+preview the missing facts instead of guessing them.
 
-1. Read applicable repository instructions, then inspect status, relevant diffs,
-   branch, and remotes without exposing secret values. Preserve unrelated work.
-2. Confirm relevant verification results. Offer needed tests or linting rather
-   than silently widening the request.
-3. Group only the accepted changes into atomic commits that each leave the
-   repository coherent. Stage exact physical files or reviewed patch hunks; never
-   use `git add .` or `git add -A`.
-4. When a non-trivial solved problem would benefit future work, offer `compound`.
-   Do not invoke it or persist a solution unless the user accepts that separate
-   artifact.
-5. Surface possible scratch cleanup, README changes, or release notes as separate
-   follow-ups. Do not delete files, edit README, or create a release document as
-   part of wrap unless each action was separately requested and scoped.
+## Workflow
 
-## Execute the authorized batch
+### 1. Inventory the handoff
 
-1. Immediately before mutation, revalidate the exact files or hunks, branch,
-   remote, and relevant worktree state. Stop on a relevant change; preserve and
-   ignore unrelated dirty work.
-2. Create only authorized commits, in dependency order, using concise
-   Conventional Commit messages. Report their hashes and subjects.
-3. Push only after push authority and the exact external-effect decision are both
-   established. Use the approved remote and ref without force.
-4. If a push is rejected, report the rejection and options. Do not automatically
-   pull, rebase, merge, amend, force-push, or retry.
-5. Report the effects actually completed and anything deliberately left
-   unchanged.
+Read repository instructions and inspect status, relevant diffs, branch, and
+remotes without exposing secrets. Classify every changed or untracked path as:
 
-## Boundaries
+- accepted work;
+- an intentional retained artifact;
+- unrelated work to preserve; or
+- a cleanup candidate.
 
-- Wrap never automatically rebases, merges, deletes files or branches, publishes a
-  pull request or release, creates a release document, or edits README.
-- Destructive cleanup, force-push, history rewriting, branch deletion, tags,
-  releases, and other publication remain separate exact R3 effects.
-- A commit and a push are two independent effects even when both appear in one
-  preview. Approval for one never implies the other.
+Scan accepted work for scratch scripts, debugging statements, temporary
+fixtures, stale generated output, and undocumented environment variables. An
+explicit wrap may remove an artifact created in this task and known to be
+disposable. Deleting any other uncommitted data requires exact approval. A
+worktree may remain intentionally dirty, but no path may remain unexplained.
+
+### 2. Resolve the completion gates
+
+`required` and `update required` are pending states, not final dispositions.
+Resolve every applicable gate before previewing or executing a commit or push.
+
+| Gate | Resolved dispositions | Pending when |
+|---|---|---|
+| Workspace | Every path is accepted, deliberately retained, preserved as unrelated, or approved cleanup is complete | A path is unexplained or cleanup has no owner decision |
+| Knowledge | `already captured`, `not applicable`, or `declined by user` with a reason | A reusable lesson is `required` but not captured or declined |
+| Documentation | `current` or `no impact` with a reason; list any updates separately | An affected source of truth is `update required` |
+| Quality | Relevant verification and review are confirmed; unavailable evidence is explicit | A required check has not run or an applicable finding is unresolved |
+
+For the knowledge gate, invoke `compound` to assess candidates from the accepted
+work. `compound` owns the relevance rating; do not duplicate its eligibility
+rule here. A High-rated learning is `required` until captured, found already
+captured, or explicitly declined. Medium- and Low-rated candidates resolve as
+`not applicable` with the rating rationale. During an explicit wrap, capture or
+update an authorized High-rated learning and verify it. An explicit decline
+resolves the gate as a waiver; never report the knowledge as captured.
+After a successful capture or update, report the gate as `already captured` and
+include the artifact path.
+
+Report the final knowledge-gate disposition, not the operation that led to it:
+
+- a successful `captured` or `updated` operation resolves to `already captured`;
+- an explicit waiver resolves to `declined by user`, never `proposed`; and
+- an uncaptured High learning outside an exact commit-only or push-only write
+  scope is `required`, not `proposed`, because it still blocks that Git effect.
+
+For the documentation gate, check every affected source of truth: README,
+setup/configuration and environment examples, architecture or design decisions,
+runbooks, public interfaces, and useful code comments. During an explicit wrap,
+complete bounded updates for the accepted increment. Do not create a changelog
+or release document unless separately requested.
+
+Run missing tests or review when they are normal in-scope completion work. Do
+not claim evidence that did not run. For commit-only, push-only, or unknown
+pre-existing work, consolidate all missing-mutation decisions into one preview
+with exact paths, effects, and reasons.
+
+### 3. Prepare or execute Git effects when applicable
+
+If the request includes or may lead to a commit or push, read
+`references/git-handoff.md` completely and follow it after every completion gate
+is resolved. If the user explicitly excluded both effects, skip that reference
+and report the completed local handoff.
+
+### 4. Report the handoff
+
+Lead with completed effects and use this compact shape:
+
+```text
+Workspace: <accounted paths and cleanup>
+Knowledge: <disposition and artifact, if any>
+Documentation: <disposition and changed sources>
+Quality: <tests, review, and unavailable evidence>
+Git: <commit hashes/subjects and push destination, or explicitly not done>
+Preserved: <unrelated or intentionally retained work>
+```
+
+If work remains blocked, replace the Git line with one consolidated decision
+that names the exact unresolved effects. Never hide incomplete gates in a
+generic follow-up list.

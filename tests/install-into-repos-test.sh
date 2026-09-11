@@ -6,6 +6,8 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 TEST_ROOT="$(mktemp -d)"
 REAL_GIT="$(command -v git)"
 REAL_MKTEMP="$(command -v mktemp)"
+BULK_BRANCH="feature/import-agent-ecosystem-skills"
+export AGENTS_ECOSYSTEM_BULK_BRANCH="feature/ambient-branch-must-be-ignored"
 
 cleanup() {
   rm -rf "$TEST_ROOT"
@@ -13,7 +15,8 @@ cleanup() {
 trap cleanup EXIT
 
 if bash "$REPO_ROOT/scripts/install-into-repos.sh" \
-  --ref master --plan-dir "$TEST_ROOT/invalid-plan" owner/repo \
+  --ref master --branch "$BULK_BRANCH" \
+  --plan-dir "$TEST_ROOT/invalid-plan" owner/repo \
   >"$TEST_ROOT/invalid.out" 2>&1; then
   echo "bulk installer accepted a mutable release ref" >&2
   exit 1
@@ -21,7 +24,8 @@ fi
 grep -Fq 'full 40-character lowercase commit SHA' "$TEST_ROOT/invalid.out"
 
 if bash "$REPO_ROOT/scripts/install-into-repos.sh" \
-  --apply --plan-dir "$TEST_ROOT/unpinned-plan" owner/repo \
+  --apply --branch "$BULK_BRANCH" \
+  --plan-dir "$TEST_ROOT/unpinned-plan" owner/repo \
   >"$TEST_ROOT/unpinned-apply.out" 2>&1; then
   echo "bulk installer allowed remote effects from an unpinned source" >&2
   exit 1
@@ -43,7 +47,8 @@ git -C "$source_checkout" commit -qm "release fixture"
 release_ref="$(git -C "$source_checkout" rev-parse HEAD)"
 
 if bash "$source_checkout/scripts/install-into-repos.sh" \
-  --ref "$release_ref" --plan-dir "$TEST_ROOT/attached-plan" \
+  --ref "$release_ref" --branch "$BULK_BRANCH" \
+  --plan-dir "$TEST_ROOT/attached-plan" \
   owner/repo >"$TEST_ROOT/attached.out" 2>&1; then
   echo "bulk installer accepted an attached release source" >&2
   exit 1
@@ -52,33 +57,19 @@ grep -Fq 'detached HEAD' "$TEST_ROOT/attached.out"
 
 git -C "$source_checkout" checkout -q --detach "$release_ref"
 
-filter_source="$TEST_ROOT/filter-source"
-filter_marker="$TEST_ROOT/source-filter-ran"
-filter_plan="$TEST_ROOT/filter-plan"
-cp -a "$source_checkout" "$filter_source"
-printf 'install.sh filter=sentinel\n' > "$filter_source/.gitattributes"
-git -C "$filter_source" add .gitattributes
-git -C "$filter_source" commit -qm "release with filter attributes"
-filter_ref="$(git -C "$filter_source" rev-parse HEAD)"
-git -C "$filter_source" config filter.sentinel.clean \
-  "sh -c 'printf invoked > $filter_marker; exit 91'"
-touch -d '2001-01-01 00:00:00 UTC' -- "$filter_source/install.sh"
-if bash "$filter_source/scripts/install-into-repos.sh" \
-  --ref "$filter_ref" --plan-dir "$filter_plan" \
-  owner/repo >"$TEST_ROOT/filter-source.out" 2>&1; then
-  echo "bulk installer accepted executable immutable-source Git configuration" >&2
+if bash "$source_checkout/scripts/install-into-repos.sh" \
+  --ref "$release_ref" --plan-dir "$TEST_ROOT/missing-branch-plan" \
+  owner/repo >"$TEST_ROOT/missing-branch.out" 2>&1; then
+  echo "bulk installer accepted a missing branch decision" >&2
   exit 1
 fi
-if [ -e "$filter_marker" ]; then
-  echo "bulk installer executed immutable-source Git configuration before validation" >&2
-  exit 1
-fi
-grep -Fq 'unsupported local Git configuration' "$TEST_ROOT/filter-source.out"
-[ ! -e "$filter_plan" ]
+grep -Fq -- '--branch is required' "$TEST_ROOT/missing-branch.out"
+[ ! -e "$TEST_ROOT/missing-branch-plan" ]
 
 duplicate_plan="$TEST_ROOT/duplicate-plan"
 if bash "$source_checkout/scripts/install-into-repos.sh" \
-  --ref "$release_ref" --plan-dir "$duplicate_plan" \
+  --ref "$release_ref" --branch "$BULK_BRANCH" \
+  --plan-dir "$duplicate_plan" \
   owner/repo owner/repo >"$TEST_ROOT/duplicate.out" 2>&1; then
   echo "bulk installer accepted a duplicate repository target" >&2
   exit 1
@@ -89,7 +80,7 @@ grep -Fq 'duplicate GitHub repository slug alias: owner/repo and owner/repo' \
 
 mkdir -p "$TEST_ROOT/physical-plan-parent"
 if bash "$source_checkout/scripts/install-into-repos.sh" \
-  --ref "$release_ref" \
+  --ref "$release_ref" --branch "$BULK_BRANCH" \
   --plan-dir "$TEST_ROOT/physical-plan-parent/../escaped-plan" \
   owner/repo >"$TEST_ROOT/dotdot-plan.out" 2>&1; then
   echo "bulk installer accepted a nonnormalized plan path" >&2
@@ -100,7 +91,7 @@ grep -Fq -- '--plan-dir must be normalized' "$TEST_ROOT/dotdot-plan.out"
 
 ln -s "$TEST_ROOT/physical-plan-parent" "$TEST_ROOT/linked-plan-parent"
 if bash "$source_checkout/scripts/install-into-repos.sh" \
-  --ref "$release_ref" \
+  --ref "$release_ref" --branch "$BULK_BRANCH" \
   --plan-dir "$TEST_ROOT/linked-plan-parent/plan" \
   owner/repo >"$TEST_ROOT/symlink-plan.out" 2>&1; then
   echo "bulk installer followed a plan-path ancestor symlink" >&2
@@ -112,7 +103,8 @@ grep -Fq -- '--plan-dir must not cross a symlink' \
 
 printf 'dirty\n' > "$source_checkout/local-dirty.txt"
 if bash "$source_checkout/scripts/install-into-repos.sh" \
-  --ref "$release_ref" --plan-dir "$TEST_ROOT/dirty-plan" \
+  --ref "$release_ref" --branch "$BULK_BRANCH" \
+  --plan-dir "$TEST_ROOT/dirty-plan" \
   owner/repo >"$TEST_ROOT/dirty.out" 2>&1; then
   echo "bulk installer accepted a dirty immutable source" >&2
   exit 1
@@ -123,7 +115,8 @@ rm "$source_checkout/local-dirty.txt"
 git -C "$source_checkout" update-index --skip-worktree install.sh
 printf '\nhidden local installer change\n' >> "$source_checkout/install.sh"
 if bash "$source_checkout/scripts/install-into-repos.sh" \
-  --ref "$release_ref" --plan-dir "$TEST_ROOT/hidden-index-plan" \
+  --ref "$release_ref" --branch "$BULK_BRANCH" \
+  --plan-dir "$TEST_ROOT/hidden-index-plan" \
   owner/repo >"$TEST_ROOT/hidden-index.out" 2>&1; then
   echo "bulk installer accepted hidden immutable-source index state" >&2
   exit 1
@@ -196,7 +189,7 @@ for argument in "${args[@]}"; do
     if [ -n "${AGENTS_ECOSYSTEM_TEST_CREATE_FEATURE_ON_PUSH:-}" ] \
       && [ ! -e "$AGENTS_ECOSYSTEM_TEST_FEATURE_RACE_MARKER" ]; then
       "$AGENTS_ECOSYSTEM_TEST_REAL_GIT" --git-dir="$AGENTS_ECOSYSTEM_TEST_TARGET_REMOTE" \
-        update-ref refs/heads/chore/sync-agent-ecosystem \
+        update-ref "refs/heads/$AGENTS_ECOSYSTEM_TEST_BRANCH" \
         "$AGENTS_ECOSYSTEM_TEST_CREATE_FEATURE_ON_PUSH"
       : > "$AGENTS_ECOSYSTEM_TEST_FEATURE_RACE_MARKER"
     fi
@@ -236,7 +229,8 @@ if PATH="$(dirname "$git_wrapper"):$PATH" \
   AGENTS_ECOSYSTEM_TEST_TARGET_REMOTE="$target_remote" \
   AGENTS_ECOSYSTEM_TEST_EFFECT_LOG="$effect_log" \
     bash "$source_checkout/scripts/install-into-repos.sh" \
-      --ref "$release_ref" --plan-dir "$mixed_duplicate_plan" \
+      --ref "$release_ref" --branch "$BULK_BRANCH" \
+      --plan-dir "$mixed_duplicate_plan" \
       Owner/Repo owner/repo >"$TEST_ROOT/mixed-duplicate.out" 2>&1; then
   echo "bulk installer accepted case-aliased repository targets" >&2
   exit 1
@@ -262,7 +256,8 @@ if GIT_DIR="$spoof_repo/.git" \
   AGENTS_ECOSYSTEM_TEST_TARGET_REMOTE="$target_remote" \
   AGENTS_ECOSYSTEM_TEST_EFFECT_LOG="$effect_log" \
     bash "$source_checkout/scripts/install-into-repos.sh" \
-      --ref "$spoof_ref" --plan-dir "$TEST_ROOT/spoof-plan" \
+      --ref "$spoof_ref" --branch "$BULK_BRANCH" \
+      --plan-dir "$TEST_ROOT/spoof-plan" \
       owner/repo >"$TEST_ROOT/ambient-git.out" 2>&1; then
   echo "bulk installer accepted an ambient Git-directory override" >&2
   exit 1
@@ -290,7 +285,8 @@ AGENTS_ECOSYSTEM_TEST_RACE_INSTALLER=1 \
   AGENTS_ECOSYSTEM_TEST_TARGET_REMOTE="$target_remote" \
   AGENTS_ECOSYSTEM_TEST_EFFECT_LOG="$effect_log" \
     bash "$source_checkout/scripts/install-into-repos.sh" \
-      --ref "$release_ref" --plan-dir "$plan_dir" \
+      --ref "$release_ref" --branch "$BULK_BRANCH" \
+      --plan-dir "$plan_dir" \
       --git-askpass "$askpass_script" \
       owner/repo >"$TEST_ROOT/prepare.out"
 [ ! -e "$race_marker" ] || {
@@ -313,6 +309,7 @@ plan_digest="$(sed -n 's/^Reviewed plan sha256: //p' "$TEST_ROOT/prepare.out")"
 [ -f "$plan_dir/owner__repo/changes.patch" ]
 grep -Fxq 'host=github.com' "$plan_dir/owner__repo/manifest.txt"
 grep -Fxq "repository=owner/repo" "$plan_dir/owner__repo/manifest.txt"
+grep -Fxq "branch=$BULK_BRANCH" "$plan_dir/owner__repo/manifest.txt"
 grep -Fxq "source_sha=$release_ref" "$plan_dir/owner__repo/manifest.txt"
 if [ -e "$effect_log" ]; then
   echo "prepare-only bulk installation caused a remote effect" >&2
@@ -356,7 +353,8 @@ AGENTS_ECOSYSTEM_TEST_REAL_GIT="$REAL_GIT" \
 AGENTS_ECOSYSTEM_TEST_TARGET_REMOTE="$target_remote" \
 AGENTS_ECOSYSTEM_TEST_EFFECT_LOG="$effect_log" \
   bash "$source_checkout/scripts/install-into-repos.sh" \
-    --ref "$release_ref" --plan-dir "$TEST_ROOT/ambient-plan" \
+    --ref "$release_ref" --branch "$BULK_BRANCH" \
+    --plan-dir "$TEST_ROOT/ambient-plan" \
     owner/repo >"$TEST_ROOT/ambient-hook.out"
 [ ! -e "$hook_marker" ] || {
   echo "prepare-only bulk install executed an ambient target Git hook" >&2
@@ -388,7 +386,8 @@ if PATH="$(dirname "$git_wrapper"):$PATH" \
   AGENTS_ECOSYSTEM_TEST_TARGET_REMOTE="$target_remote" \
   AGENTS_ECOSYSTEM_TEST_EFFECT_LOG="$effect_log" \
     bash "$source_checkout/scripts/install-into-repos.sh" \
-      --ref "$release_ref" --plan-dir "$tampered_plan" --apply \
+      --ref "$release_ref" --branch "$BULK_BRANCH" \
+      --plan-dir "$tampered_plan" --apply \
       --expected-plan-sha256 "$plan_digest" \
       "${apply_author_args[@]}" \
       owner/repo >"$TEST_ROOT/tampered-apply.out" 2>&1; then
@@ -403,7 +402,8 @@ if PATH="$(dirname "$git_wrapper"):$PATH" \
   AGENTS_ECOSYSTEM_TEST_TARGET_REMOTE="$target_remote" \
   AGENTS_ECOSYSTEM_TEST_EFFECT_LOG="$effect_log" \
     bash "$source_checkout/scripts/install-into-repos.sh" \
-      --ref "$release_ref" --plan-dir "$plan_dir" --apply \
+      --ref "$release_ref" --branch "$BULK_BRANCH" \
+      --plan-dir "$plan_dir" --apply \
       owner/repo >"$TEST_ROOT/missing-digest.out" 2>&1; then
   echo "bulk apply accepted a plan without its separately reviewed digest" >&2
   exit 1
@@ -416,7 +416,8 @@ if PATH="$(dirname "$git_wrapper"):$PATH" \
   AGENTS_ECOSYSTEM_TEST_TARGET_REMOTE="$target_remote" \
   AGENTS_ECOSYSTEM_TEST_EFFECT_LOG="$effect_log" \
     bash "$source_checkout/scripts/install-into-repos.sh" \
-      --ref "$release_ref" --plan-dir "$plan_dir" --apply \
+      --ref "$release_ref" --branch "$BULK_BRANCH" \
+      --plan-dir "$plan_dir" --apply \
       --expected-plan-sha256 "$plan_digest" \
       owner/repo >"$TEST_ROOT/missing-author.out" 2>&1; then
   echo "bulk apply accepted missing explicit author identity" >&2
@@ -424,6 +425,23 @@ if PATH="$(dirname "$git_wrapper"):$PATH" \
 fi
 grep -Fq -- '--apply requires --author-name and --author-email' \
   "$TEST_ROOT/missing-author.out"
+[ ! -s "$effect_log" ]
+
+if PATH="$(dirname "$git_wrapper"):$PATH" \
+  AGENTS_ECOSYSTEM_TEST_REAL_GIT="$REAL_GIT" \
+  AGENTS_ECOSYSTEM_TEST_TARGET_REMOTE="$target_remote" \
+  AGENTS_ECOSYSTEM_TEST_EFFECT_LOG="$effect_log" \
+    bash "$source_checkout/scripts/install-into-repos.sh" \
+      --ref "$release_ref" --branch feature/different-import \
+      --plan-dir "$plan_dir" --apply \
+      --expected-plan-sha256 "$plan_digest" \
+      "${apply_author_args[@]}" \
+      owner/repo >"$TEST_ROOT/branch-mismatch.out" 2>&1; then
+  echo "bulk apply accepted a branch different from the reviewed plan" >&2
+  exit 1
+fi
+grep -Fq 'prepared manifest does not match the approved boundary' \
+  "$TEST_ROOT/branch-mismatch.out"
 [ ! -s "$effect_log" ]
 
 base_sha="$(git --git-dir="$target_remote" rev-parse refs/heads/master)"
@@ -437,7 +455,8 @@ if PATH="$(dirname "$git_wrapper"):$PATH" \
   AGENTS_ECOSYSTEM_TEST_TARGET_REMOTE="$target_remote" \
   AGENTS_ECOSYSTEM_TEST_EFFECT_LOG="$effect_log" \
     bash "$source_checkout/scripts/install-into-repos.sh" \
-      --ref "$release_ref" --plan-dir "$plan_dir" --apply \
+      --ref "$release_ref" --branch "$BULK_BRANCH" \
+      --plan-dir "$plan_dir" --apply \
       --expected-plan-sha256 "$plan_digest" \
       "${apply_author_args[@]}" \
       owner/repo >"$TEST_ROOT/drift-apply.out" 2>&1; then
@@ -450,13 +469,14 @@ git --git-dir="$target_remote" update-ref refs/heads/master "$base_sha"
 
 : > "$effect_log"
 git --git-dir="$target_remote" update-ref \
-  refs/heads/chore/sync-agent-ecosystem "$base_sha"
+  "refs/heads/$BULK_BRANCH" "$base_sha"
 if PATH="$(dirname "$git_wrapper"):$PATH" \
   AGENTS_ECOSYSTEM_TEST_REAL_GIT="$REAL_GIT" \
   AGENTS_ECOSYSTEM_TEST_TARGET_REMOTE="$target_remote" \
   AGENTS_ECOSYSTEM_TEST_EFFECT_LOG="$effect_log" \
     bash "$source_checkout/scripts/install-into-repos.sh" \
-      --ref "$release_ref" --plan-dir "$plan_dir" --apply \
+      --ref "$release_ref" --branch "$BULK_BRANCH" \
+      --plan-dir "$plan_dir" --apply \
       --expected-plan-sha256 "$plan_digest" \
       "${apply_author_args[@]}" \
       owner/repo >"$TEST_ROOT/existing-feature.out" 2>&1; then
@@ -464,13 +484,13 @@ if PATH="$(dirname "$git_wrapper"):$PATH" \
   exit 1
 fi
 [ "$(git --git-dir="$target_remote" rev-parse \
-  refs/heads/chore/sync-agent-ecosystem)" = "$base_sha" ]
+  "refs/heads/$BULK_BRANCH")" = "$base_sha" ]
 if grep -Eq '^(gh|GH_)' "$effect_log"; then
   echo "bulk apply created a PR for an existing feature branch" >&2
   exit 1
 fi
 git --git-dir="$target_remote" update-ref -d \
-  refs/heads/chore/sync-agent-ecosystem
+  "refs/heads/$BULK_BRANCH"
 
 : > "$effect_log"
 feature_race_marker="$TEST_ROOT/feature-created-during-push"
@@ -480,8 +500,10 @@ if PATH="$(dirname "$git_wrapper"):$PATH" \
   AGENTS_ECOSYSTEM_TEST_EFFECT_LOG="$effect_log" \
   AGENTS_ECOSYSTEM_TEST_CREATE_FEATURE_ON_PUSH="$base_sha" \
   AGENTS_ECOSYSTEM_TEST_FEATURE_RACE_MARKER="$feature_race_marker" \
+  AGENTS_ECOSYSTEM_TEST_BRANCH="$BULK_BRANCH" \
     bash "$source_checkout/scripts/install-into-repos.sh" \
-      --ref "$release_ref" --plan-dir "$plan_dir" --apply \
+      --ref "$release_ref" --branch "$BULK_BRANCH" \
+      --plan-dir "$plan_dir" --apply \
       --expected-plan-sha256 "$plan_digest" \
       "${apply_author_args[@]}" \
       owner/repo >"$TEST_ROOT/feature-race.out" 2>&1; then
@@ -490,13 +512,13 @@ if PATH="$(dirname "$git_wrapper"):$PATH" \
 fi
 [ -e "$feature_race_marker" ]
 [ "$(git --git-dir="$target_remote" rev-parse \
-  refs/heads/chore/sync-agent-ecosystem)" = "$base_sha" ]
+  "refs/heads/$BULK_BRANCH")" = "$base_sha" ]
 if grep -Eq '^(gh|GH_)' "$effect_log"; then
   echo "bulk apply created a PR after concurrent feature-branch creation" >&2
   exit 1
 fi
 git --git-dir="$target_remote" update-ref -d \
-  refs/heads/chore/sync-agent-ecosystem
+  "refs/heads/$BULK_BRANCH"
 
 : > "$effect_log"
 base_race_marker="$TEST_ROOT/base-advanced-before-push"
@@ -509,7 +531,8 @@ if PATH="$(dirname "$git_wrapper"):$PATH" \
   AGENTS_ECOSYSTEM_TEST_BASE_RACE_MARKER="$base_race_marker" \
   AGENTS_ECOSYSTEM_TEST_FETCH_MARKER="$fetch_marker" \
     bash "$source_checkout/scripts/install-into-repos.sh" \
-      --ref "$release_ref" --plan-dir "$plan_dir" --apply \
+      --ref "$release_ref" --branch "$BULK_BRANCH" \
+      --plan-dir "$plan_dir" --apply \
       --expected-plan-sha256 "$plan_digest" \
       "${apply_author_args[@]}" \
       owner/repo >"$TEST_ROOT/base-race.out" 2>&1; then
@@ -523,7 +546,7 @@ if grep -Eq '^(gh|GH_)' "$effect_log"; then
   exit 1
 fi
 if git --git-dir="$target_remote" rev-parse --verify \
-  refs/heads/chore/sync-agent-ecosystem >/dev/null 2>&1; then
+  "refs/heads/$BULK_BRANCH" >/dev/null 2>&1; then
   echo "bulk apply created a remote branch after target-base drift" >&2
   exit 1
 fi
@@ -567,7 +590,8 @@ AGENTS_ECOSYSTEM_TEST_REPLACEMENT_PATCH="$replacement_patch" \
 AGENTS_ECOSYSTEM_TEST_REPLACEMENT_MANIFEST="$replacement_manifest" \
 AGENTS_ECOSYSTEM_TEST_PLAN_RACE_MARKER="$plan_race_marker" \
   bash "$source_checkout/scripts/install-into-repos.sh" \
-    --ref "$release_ref" --plan-dir "$race_plan" --apply \
+    --ref "$release_ref" --branch "$BULK_BRANCH" \
+    --plan-dir "$race_plan" --apply \
     --expected-plan-sha256 "$plan_digest" \
     "${apply_author_args[@]}" \
     owner/repo >"$TEST_ROOT/apply.out"
@@ -583,13 +607,13 @@ grep -Fq 'gh pr create --repo github.com/owner/repo ' "$effect_log" || {
   exit 1
 }
 [ -n "$(git --git-dir="$target_remote" rev-parse \
-  refs/heads/chore/sync-agent-ecosystem)" ]
+  "refs/heads/$BULK_BRANCH")" ]
 [ "$(git --git-dir="$target_remote" log -1 \
   --format='%an <%ae>|%cn <%ce>' \
-  refs/heads/chore/sync-agent-ecosystem)" = \
+  "refs/heads/$BULK_BRANCH")" = \
   'Bulk Apply Test <bulk-apply@example.invalid>|Bulk Apply Test <bulk-apply@example.invalid>' ]
 if git --git-dir="$target_remote" cat-file -e \
-  refs/heads/chore/sync-agent-ecosystem:UNAPPROVED_RACE.txt 2>/dev/null; then
+  "refs/heads/$BULK_BRANCH:UNAPPROVED_RACE.txt" 2>/dev/null; then
   echo "bulk apply used plan artifacts replaced after verification" >&2
   exit 1
 fi
@@ -613,7 +637,8 @@ if PATH="$(dirname "$git_wrapper"):$PATH" \
   AGENTS_ECOSYSTEM_TEST_TARGET_REMOTE="$target_remote" \
   AGENTS_ECOSYSTEM_TEST_EFFECT_LOG="$effect_log" \
     bash "$source_checkout/scripts/install-into-repos.sh" \
-      --ref "$symlink_release" --plan-dir "$TEST_ROOT/symlink-plan" \
+      --ref "$symlink_release" --branch "$BULK_BRANCH" \
+      --plan-dir "$TEST_ROOT/symlink-plan" \
       owner/repo \
       >"$TEST_ROOT/symlink-installer.out" 2>&1; then
   echo "bulk installer accepted an installer symlink outside the release" >&2

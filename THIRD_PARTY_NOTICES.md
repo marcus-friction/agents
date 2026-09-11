@@ -16,14 +16,15 @@ material does not claim that TomFit AG authored the entire repository.
 ### TomFit Agent Ecosystem
 
 - Source: <https://github.com/TomFitAG/tomfit-agents>
-- Revision: `00c3885b4a456fb1317e6ec2faf5f73d0d0ddf77`
+- Release: `v0.2.0`
+- Revision: `037860a575a41ca36db2569ba1eb957832d0d515`
 - License: MIT; Copyright (c) 2026 TomFit AG
 - Scope: adapted installer hardening, managed-tree and template-staging
   architecture, provider adapters, deterministic tests, release channel
   contracts, provenance documentation, and proportional workflow/skill work
-  incorporated into release 1.7.0. The skill scope includes the Playwright and
-  migration workflows plus adapted onboarding, planning, review, debugging,
-  and TDD contracts. Project-specific TomFit branding, private-repository
+  incorporated into release 1.7.0. The skill scope includes Playwright,
+  migration, onboarding, planning, review, debugging, TDD, handoff, and
+  evaluation contracts. Project-specific TomFit branding, private-repository
   authentication, and the Java/Gradle dependency baseline were not retained.
 
 ### gstack
@@ -31,25 +32,25 @@ material does not claim that TomFit AG authored the entire repository.
 - Source: <https://github.com/garrytan/gstack>
 - Revision: `1211b6b40becb684eaf29b0f30a650a8a9b222a5`
 - License: MIT; Copyright (c) 2026 Garry Tan
-- Scope: adapted material in `review-gstack`, `review-plan`,
-  `adversarial-review`, `plan`, `office-hours`, and `design-consultation`.
+- Scope: adapted material in `review-plan`, `adversarial-review`, and `plan`.
 
 ### Compound Engineering
 
 - Source: <https://github.com/EveryInc/compound-engineering-plugin>
-- Revision: `59dbaef37607354d103113f05c13b731eecbb690`
+- Revision: `b36047e1b4b2123df2f3529bf04b5f2a7c5f84e4`
 - License: MIT; Copyright (c) 2025 Every and Copyright (c) 2025 Kieran
   Klaassen
 - Scope: adapted material in `architecture-review`, `performance-review`,
-  `security-review`, `changelog`, `compound`, `review`, and `brainstorm`.
+  `security-review`, `compound`, and `review`.
 
 ### Superpowers
 
 - Source: <https://github.com/obra/superpowers>
 - Revision: `b36e0829c6d0140e93cfef2ca599b1b07d4a7797`
 - License: MIT; Copyright (c) 2025 Jesse Vincent
-- Scope: adapted `systematic-debugging` and `test-driven-development` skills;
-  four referenced technique files are retained from upstream.
+- Scope: adapted `systematic-debugging` and `test-driven-development` skills
+  and the TDD `writing-good-tests` reference; three systematic-debugging
+  technique files are retained from upstream.
 
 ### Jezweb Claude Skills
 
@@ -113,7 +114,7 @@ material does not claim that TomFit AG authored the entire repository.
 ### VueUse Skills
 
 - Source: `vendor/vueuse` distribution recorded by the skill's `SYNC.md`
-- Revision: `b6bb79b99fb1f1dba1f907829676a651735bbc10`
+- Revision: `5706f866118f04a6238bf77368dafa4a2c34b96b`
 - License: MIT; Copyright (c) 2026 SerKo
 - Scope: retained and adapted `vueuse-functions`; its license copy is
   distributed with the skill.

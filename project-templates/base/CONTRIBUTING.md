@@ -2,12 +2,12 @@
 
 > [!WARNING]
 > This inactive candidate becomes policy only through evidence-backed
-> reconciliation and an approved exact patch.
+> reconciliation.
 
 ## Git and Pull Requests
 
-- Use the confirmed delivery flow. This ecosystem defaults to `staging` as
-  pre-production and `master` as production, but repository evidence wins.
+- Use the confirmed default branch as PR target; do not assume `staging` unless
+  project documentation adopts it.
 - Name branches `feature/*`, `fix/*`, or `hotfix/*`. Use imperative commit
   subjects within 72 characters and keep WIP commits off shared branches.
 - Merge after applicable checks and human review. Preserve unrelated work and
@@ -20,15 +20,13 @@
 
 Use `.agents/skills/review/references/change-rigor.md`:
 
-- **R0:** read-only; make no repository or external writes.
-- **R1:** clean additive; implement directly. Combine a project-document
-  summary and exact diff into one approval.
-- **R2:** bounded semantic or contract work; plan, test, and review in proportion
-  to impact. Only project documents require a relevant ledger; ordinary R2
-  implementation does not.
-- **R3:** deletion, constraint weakening, dirty or special targets, conflict,
-  auth/privacy/secret/permission boundaries, destructive migrations, production effects,
-  and irreversible actions require explicit decisions and revalidation.
+- **R0 — read-only:** inspect and report with no repository or external writes.
+- **R1 — ordinary:** make reversible, in-scope repository changes under the
+  user's implementation request, including tracked edits and deletions. Preserve
+  unrelated work and verify; no second kickoff or document gate.
+- **R2 — elevated:** before destructive, privileged, auth/privacy/secret/
+  permission, production/shared-state, publication, or irreversible effects,
+  confirm the exact target, scope, exposure, credentials, and recovery path.
 
 The highest applicable trigger wins. Skills change method, never authority.
 Approved implementation scope needs no second kickoff or pre-edit patch. Exact
@@ -49,8 +47,8 @@ and meaningful failures, test-first by default. Characterize valid existing
 behavior before changing it. Do not invent tests for prose, generated artifacts,
 declarative configuration, or trivial forwarding without an executable contract.
 
-Use `review` normally. Use `ma-review` for applicable parallel specialties.
-Reserve mega and independent adversarial review for R3, significant
+Use `review` normally; it selects applicable specialist passes.
+Reserve deep and independent adversarial review for R2 or significant
 architecture/security/data/production work, or explicit requests.
 
 ## Data and Delivery

@@ -14,3 +14,9 @@ Adapters may also define:
 - `skill_adapter_configure scope project_root skills_source distribution_root` to stage provider-specific router candidates or maintain adapter-owned metadata after its link is registered.
 
 Keep adapters small and provider-specific. Required path functions must print only their result, preflight functions must not mutate state, and adapters must never copy the skill tree or overwrite an existing discovery path. Registration is idempotent only when an existing symlink already has the exact expected value; a different symlink is a collision that requires an explicit user decision. Active provider instruction files are project-owned: adapters may stage candidates below `.agents/templates/adapters/`, but must not create, append to, or replace active project documentation.
+
+The optional `--journal-output` integration writes a readable target/source list
+for links created by that invocation. Registration assumes cooperative local
+processes: it preflights all targets and rolls back a link only while it remains
+the exact symlink value the registrar created. It does not claim protection
+against a hostile process running as the same user.

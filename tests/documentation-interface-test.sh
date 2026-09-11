@@ -112,7 +112,6 @@ output="$TEST_ROOT/stable-quickstart.out"
 [ -d "$TEST_ROOT/project/.agents/templates" ]
 grep -Fq '=> Verified immutable source at ' "$output"
 grep -Fq '(detached HEAD).' "$output"
-grep -Fq '=> [Skipped] Host dependency changes are opt-in.' "$output"
 [ ! -e "$TEST_ROOT/project/README.md" ]
 
 echo "Documentation interface tests passed"

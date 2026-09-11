@@ -28,7 +28,6 @@ cp "$project/CLAUDE.md" "$TEST_ROOT/original-CLAUDE.md"
 (
   cd "$project"
   HOME="$TEST_ROOT/home" bash "$REPO_ROOT/install.sh" \
-    --skip-deps \
     --from-local "$REPO_ROOT" >/dev/null
 )
 
@@ -65,7 +64,6 @@ ln -s AGENTS.md "$symlink_project/CLAUDE.md"
 (
   cd "$symlink_project"
   HOME="$TEST_ROOT/home" bash "$REPO_ROOT/install.sh" \
-    --skip-deps \
     --from-local "$REPO_ROOT" >/dev/null
 )
 
@@ -90,7 +88,6 @@ ln -s "$external_guidance" "$agents_symlink_project/AGENTS.md"
 (
   cd "$agents_symlink_project"
   HOME="$TEST_ROOT/home" bash "$REPO_ROOT/install.sh" \
-    --skip-deps \
     --from-local "$REPO_ROOT" >/dev/null
 )
 

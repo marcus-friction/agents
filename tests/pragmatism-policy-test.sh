@@ -65,7 +65,6 @@ active_files=(
   "$REPO_ROOT/project-templates/base/AGENTS.md"
   "$REPO_ROOT/project-templates/base/ARCHITECTURE.md"
   "$REPO_ROOT/.agents/skills/architecture-review/SKILL.md"
-  "$REPO_ROOT/.agents/skills/ui-accessibility-review/SKILL.md"
   "$REPO_ROOT/.agents/skills/migrate-project/SKILL.md"
 )
 

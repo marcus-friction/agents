@@ -1,0 +1,8 @@
+{
+  "name": "status-page",
+  "type": "module",
+  "scripts": {
+    "test": "node --test",
+    "docs": "node scripts/render-readme.js"
+  }
+}

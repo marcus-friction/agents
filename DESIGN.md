@@ -25,7 +25,8 @@
 *Describe the database schema, caching strategies, state management, and data lifecycles.*
 
 ## 6. Visual Design & UI System
-*Tokens and constraints populated by design-consultation skills.*
+*Record the adopted visual tokens, component constraints, responsive rules, and
+accessibility decisions. Keep unresolved choices explicit until approved.*
 
 ### Typography
 - **Headings:**

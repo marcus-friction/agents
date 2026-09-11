@@ -10,9 +10,9 @@ project's policy.
 
 ## Changes
 
-- Added the R0–R3 change-rigor model. Read-only work stays non-mutating, routine
-  additive work remains direct, semantic changes receive proportionate review,
-  and hazardous effects retain explicit decisions and revalidation.
+- Added the R0–R2 change-rigor model. R0 is read-only, R1 covers ordinary
+  reversible repository work, and R2 effects require exact authorization and
+  revalidation.
 - Separated component applicability, boundary assurance, and change rigor.
   Projects activate guidance only for adopted components and record evidence for
   security and operational controls.

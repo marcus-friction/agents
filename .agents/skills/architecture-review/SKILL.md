@@ -1,6 +1,6 @@
 ---
 name: architecture-review
-description: Review code for compliance with the project's adopted architecture and evidence-backed boundaries.
+description: Review code or plans when a change affects component boundaries, dependencies, contracts, data ownership, layering, or adopted project architecture decisions.
 ---
 
 # Architecture Review
@@ -27,7 +27,8 @@ applicable with a reason when no architecture boundary changes.
 
 - Controllers translate HTTP and delegate business behavior. Extract controller
   logic beyond the project's small transport boundary into `app/Actions/`.
-- Use constructor injection exclusively. Do not hide dependencies behind
+- Prefer constructor injection for lifetime dependencies; allow method injection
+  for a single container-invoked action or handler. Do not hide dependencies behind
   `app()`, `resolve()`, or ad hoc construction.
 - Actions own use cases and atomic mutation boundaries. Models own persistence
   relationships, scopes, casts, and accessors rather than domain orchestration.
@@ -95,3 +96,11 @@ renames solely to match another ecosystem's convention.
 
 Report each issue with the violated project decision, evidence, consequence,
 smallest correction, and a concrete verification step.
+
+## Parent review handoff
+
+When invoked by the parent review, use its supplied finding contract and review
+packet. Do not widen the accepted file set. Return either an evidence-backed
+not-applicable reason or normalized findings with classification, severity,
+confidence, exact location, violated decision, consequence, smallest
+correction, verification, and pre-existing status.

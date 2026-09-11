@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Prepare or apply an exact agent ecosystem update for one or more GitHub repositories.
+# Prepare or apply an exact Agents Ecosystem import for one or more GitHub repositories.
 # Preparation writes reviewable local artifacts. Applying requires those artifacts
 # and validates the source, target base, host, and patch before each push.
 
@@ -7,7 +7,8 @@ set -euo pipefail
 umask 077
 
 SRC="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-BRANCH="chore/sync-agent-ecosystem"
+source "$SRC/scripts/trusted-path.sh"
+BRANCH=""
 RELEASE_REF=""
 PLAN_DIR=""
 APPLY=0
@@ -45,7 +46,7 @@ cleanup_work() {
 }
 
 usage() {
-  echo "Usage: $0 --ref COMMIT --plan-dir ABSOLUTE-PATH [--apply --expected-plan-sha256 DIGEST --author-name NAME --author-email EMAIL] owner/repo [...]"
+  echo "Usage: $0 --ref COMMIT --branch NAME --plan-dir ABSOLUTE-PATH [--apply --expected-plan-sha256 DIGEST --author-name NAME --author-email EMAIL] owner/repo [...]"
 }
 
 while [ "$#" -gt 0 ]; do
@@ -62,6 +63,14 @@ while [ "$#" -gt 0 ]; do
       PLAN_DIR="${2:-}"
       [ -n "$PLAN_DIR" ] || {
         echo "Error: --plan-dir requires an absolute path." >&2
+        exit 1
+      }
+      shift 2
+      ;;
+    --branch)
+      BRANCH="${2:-}"
+      [ -n "$BRANCH" ] || {
+        echo "Error: --branch requires a target-policy-compliant branch name." >&2
         exit 1
       }
       shift 2
@@ -137,6 +146,10 @@ if [ "${#REPOSITORIES[@]}" -eq 0 ]; then
   usage >&2
   exit 1
 fi
+if [ -z "$BRANCH" ]; then
+  echo "Error: --branch is required and must comply with every target repository policy." >&2
+  exit 1
+fi
 if [ "$APPLY" -eq 1 ] && ! [[ "$EXPECTED_PLAN_SHA256" =~ ^[0-9a-f]{64}$ ]]; then
   echo "Error: --apply requires the reviewed --expected-plan-sha256 digest." >&2
   exit 1
@@ -190,6 +203,10 @@ if ! command -v git >/dev/null 2>&1; then
   echo "Error: git is required." >&2
   exit 1
 fi
+if ! git check-ref-format --branch "$BRANCH" >/dev/null 2>&1; then
+  echo "Error: --branch is not a valid Git branch name: $BRANCH" >&2
+  exit 1
+fi
 
 source_git() (
   local git_variable
@@ -205,49 +222,6 @@ source_git() (
     -c core.fsmonitor=false \
     "$@"
 )
-
-validate_source_git_config() {
-  local config="$SRC/.git/config"
-  local config_keys
-  local key
-  local link_count
-
-  if [ -L "$config" ] || [ ! -f "$config" ]; then
-    echo "Error: immutable bulk source local Git configuration must be a physical file." >&2
-    return 1
-  fi
-  if link_count="$(command -p stat -c '%h' -- "$config" 2>/dev/null)"; then
-    :
-  elif link_count="$(command -p stat -f '%l' -- "$config" 2>/dev/null)"; then
-    :
-  else
-    echo "Error: immutable bulk source local Git configuration identity could not be verified." >&2
-    return 1
-  fi
-  if [ "$link_count" != "1" ]; then
-    echo "Error: immutable bulk source local Git configuration must have one physical link." >&2
-    return 1
-  fi
-  config_keys="$(source_git config --file "$config" \
-    --no-includes --name-only --list)" || {
-    echo "Error: immutable bulk source local Git configuration could not be parsed safely." >&2
-    return 1
-  }
-  while IFS= read -r key; do
-    [ -n "$key" ] || continue
-    case "$key" in
-      core.repositoryformatversion|core.filemode|core.bare|core.logallrefupdates|\
-      core.ignorecase|core.precomposeunicode|core.symlinks|extensions.objectformat|\
-      user.name|user.email|remote.origin.url|remote.origin.fetch|\
-      branch.*.remote|branch.*.merge)
-        ;;
-      *)
-        echo "Error: immutable bulk source has unsupported local Git configuration: $key" >&2
-        return 1
-        ;;
-    esac
-  done <<< "$config_keys"
-}
 
 target_git() (
   local git_variable
@@ -300,7 +274,6 @@ verify_release_source() {
     echo "Error: immutable bulk source must have a physical .git directory." >&2
     return 1
   fi
-  validate_source_git_config
   actual="$(source_git -C "$SRC" rev-parse --verify 'HEAD^{commit}' 2>/dev/null || true)"
   if [ "$actual" != "$RELEASE_REF" ]; then
     echo "Error: bulk source HEAD $actual does not match expected release commit $RELEASE_REF." >&2
@@ -326,7 +299,8 @@ verify_release_source() {
 
 materialize_release_source() {
   SOURCE_SNAPSHOT="$(mktemp -d /tmp/agents-ecosystem-bulk-source.XXXXXX)"
-  rmdir "$SOURCE_SNAPSHOT"
+  # Clone into the existing private directory; releasing its name would let a
+  # different user recreate and own the executable source snapshot in /tmp.
   source_git clone --quiet --no-hardlinks --no-checkout "$SRC" "$SOURCE_SNAPSHOT"
   source_git -C "$SOURCE_SNAPSHOT" checkout --quiet --detach "$RELEASE_REF"
   if [ -L "$SOURCE_SNAPSHOT/install.sh" ] \
@@ -363,6 +337,7 @@ ensure_plan_boundary() {
     fi
   done
   parent="$(dirname "$PLAN_DIR")"
+  require_trusted_parent "$parent"
   if [ -L "$parent" ] || [ ! -d "$parent" ]; then
     echo "Error: --plan-dir parent must be a physical existing directory: $parent" >&2
     return 1
@@ -394,11 +369,12 @@ write_manifest() {
   local patch_sha="$5"
 
   printf '%s\n' \
-    'format=agents-ecosystem-bulk-plan-v1' \
+    'format=agents-ecosystem-bulk-plan-v2' \
     'host=github.com' \
     "repository=$slug" \
     "base=$base" \
     "base_sha=$base_sha" \
+    "branch=$BRANCH" \
     "source_sha=$RELEASE_REF" \
     "patch_sha256=$patch_sha" \
     'patch=changes.patch' > "$file"
@@ -430,25 +406,28 @@ load_and_validate_manifest() {
   PLAN_SLUG="$(manifest_value "$manifest" repository)"
   PLAN_BASE="$(manifest_value "$manifest" base)"
   PLAN_BASE_SHA="$(manifest_value "$manifest" base_sha)"
+  PLAN_BRANCH="$(manifest_value "$manifest" branch)"
   PLAN_SOURCE_SHA="$(manifest_value "$manifest" source_sha)"
   PLAN_PATCH_SHA="$(manifest_value "$manifest" patch_sha256)"
   if [ "$PLAN_HOST" != "github.com" ] \
     || [ "$PLAN_SLUG" != "$requested_slug" ] \
     || ! [[ "$PLAN_BASE" =~ ^[A-Za-z0-9._/-]+$ ]] \
     || ! [[ "$PLAN_BASE_SHA" =~ ^[0-9a-f]{40}$ ]] \
+    || [ "$PLAN_BRANCH" != "$BRANCH" ] \
     || [ "$PLAN_SOURCE_SHA" != "$RELEASE_REF" ] \
     || ! [[ "$PLAN_PATCH_SHA" =~ ^[0-9a-f]{64}$ ]] \
-    || [ "$(manifest_value "$manifest" format)" != "agents-ecosystem-bulk-plan-v1" ] \
+    || [ "$(manifest_value "$manifest" format)" != "agents-ecosystem-bulk-plan-v2" ] \
     || [ "$(manifest_value "$manifest" patch)" != "changes.patch" ]; then
     echo "Error: prepared manifest does not match the approved boundary for $requested_slug." >&2
     return 1
   fi
   expected="$(printf '%s\n' \
-    'format=agents-ecosystem-bulk-plan-v1' \
+    'format=agents-ecosystem-bulk-plan-v2' \
     'host=github.com' \
     "repository=$PLAN_SLUG" \
     "base=$PLAN_BASE" \
     "base_sha=$PLAN_BASE_SHA" \
+    "branch=$PLAN_BRANCH" \
     "source_sha=$RELEASE_REF" \
     "patch_sha256=$PLAN_PATCH_SHA" \
     'patch=changes.patch')"
@@ -521,7 +500,7 @@ snapshot_and_verify_apply_plan() {
     return 1
   fi
   PLAN_ROOT="$APPLY_PLAN_SNAPSHOT"
-  echo "=> Verified isolated plan snapshot at $EXPECTED_PLAN_SHA256."
+  echo "=> Verified private plan snapshot at $EXPECTED_PLAN_SHA256."
 }
 
 prepare_one() {
@@ -553,7 +532,7 @@ prepare_one() {
     return 1
   fi
   bash "$SOURCE_SNAPSHOT/install.sh" \
-    --skip-deps --from-local "$SOURCE_SNAPSHOT" --ref "$RELEASE_REF"
+    --from-local "$SOURCE_SNAPSHOT" --ref "$RELEASE_REF"
   target_git add -A
   if target_git diff --cached --quiet; then
     echo "No changes for $slug (already installed?)."
@@ -603,7 +582,7 @@ apply_one() {
     echo "No prepared changes to apply for $slug."
     return 0
   fi
-  target_git commit -m "chore(agents): sync agent ecosystem
+  target_git commit -m "chore(agents): import Agents Ecosystem skills
 
 Install the canonical .agents/skills source and register the available
 tool adapters for this repository."
@@ -635,8 +614,8 @@ tool adapters for this repository."
       --repo "github.com/$slug" \
       --base "$PLAN_BASE" \
       --head "$BRANCH" \
-      --title "chore(agents): sync agent ecosystem" \
-      --body "Applies the prepared agent ecosystem update from source $RELEASE_REF with patch digest $PLAN_PATCH_SHA."; then
+      --title "chore(agents): import Agents Ecosystem skills" \
+      --body "Applies the prepared Agents Ecosystem import from source $RELEASE_REF with patch digest $PLAN_PATCH_SHA."; then
       echo "Error: $BRANCH was pushed to $slug, but PR creation failed; the remote branch was retained for manual retry or cleanup." >&2
       return 1
     fi
@@ -659,11 +638,16 @@ for slug in "${REPOSITORIES[@]}"; do
   work="$(mktemp -d /tmp/agents-ecosystem-bulk-work.XXXXXX)"
   echo ""
   echo "======== $slug ========"
+  set +e
   if [ "$APPLY" -eq 1 ]; then
-    if ! (apply_one "$slug" "$work"); then
-      failures=$((failures + 1))
-    fi
-  elif ! (prepare_one "$slug" "$work"); then
+    (set -e; apply_one "$slug" "$work")
+    operation_status="$?"
+  else
+    (set -e; prepare_one "$slug" "$work")
+    operation_status="$?"
+  fi
+  set -e
+  if [ "$operation_status" -ne 0 ]; then
     failures=$((failures + 1))
   fi
   cleanup_work "$work"

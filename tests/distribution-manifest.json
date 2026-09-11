@@ -4,14 +4,12 @@
   "managed_roots": [
     ".agents/legal",
     ".agents/skills",
-    ".agents/tools",
     ".agents/.claude-plugin",
     "project-templates"
   ],
   "root_interfaces": [
     "install.sh",
     "install-global.sh",
-    "install-dependencies.sh",
     "CLAUDE.md",
     "README.md",
     "docs/ecosystem-reference.md",
@@ -20,8 +18,7 @@
   "executable_graph": {
     "entrypoints": [
       "install.sh",
-      "install-global.sh",
-      "install-dependencies.sh"
+      "install-global.sh"
     ],
     "script_roots": [
       {
@@ -124,38 +121,6 @@
       "reason": "The imported optional loop coordinates the two Claude CLI adapter scripts.",
       "owner": "upstream Anthropic skill import",
       "provider_neutral_path": ".agents/skills/skill-creator/SKILL.md"
-    },
-    {
-      "path": ".agents/skills/tailwind-v4-shadcn/.claude-plugin",
-      "path_kind": "root",
-      "classification": "provider-adapter",
-      "reason": "The imported nested plugin metadata is retained for Claude compatibility.",
-      "owner": "upstream jezweb skill import",
-      "provider_neutral_path": ".agents/skills/tailwind-v4-shadcn/SKILL.md"
-    },
-    {
-      "path": ".agents/skills/onboard-project/evals/fixtures",
-      "path_kind": "root",
-      "classification": "fixture",
-      "reason": "Synthetic repositories exercise onboarding behavior and are not active agent instructions.",
-      "owner": "agents ecosystem maintainers",
-      "provider_neutral_path": ".agents/skills/onboard-project/SKILL.md"
-    },
-    {
-      "path": ".agents/skills/whats-next/evals",
-      "path_kind": "root",
-      "classification": "fixture",
-      "reason": "Triggering examples exercise the skill name and are not active agent instructions.",
-      "owner": "agents ecosystem maintainers",
-      "provider_neutral_path": ".agents/skills/whats-next/SKILL.md"
-    },
-    {
-      "path": ".agents/skills/office-hours/SKILL.md.tmpl",
-      "path_kind": "exact",
-      "classification": "dormant-adapted-artifact",
-      "reason": "This adapted gstack template is dormant and is not executed or installed as a skill entrypoint.",
-      "owner": "Agents Ecosystem-maintained gstack adaptation",
-      "provider_neutral_path": ".agents/skills/office-hours/SKILL.md"
     }
   ]
 }

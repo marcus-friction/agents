@@ -26,6 +26,12 @@ Behavior:
 - Responses with status `>= 400` or undefined body are **not** cached.
 - Request headers are dropped on cache hits — use `varies` to keep specific ones.
 
+Do not shared-cache authenticated or user-specific responses unless the cache
+key safely varies by the authoritative identity and every relevant permission
+dimension. Default those routes to `cache: false`; varying only on a cookie or
+authorization header can still leak data when that value is not a complete and
+stable authorization boundary.
+
 ## Cached functions
 
 Cache any async function (e.g. an upstream API call) and reuse it across handlers.

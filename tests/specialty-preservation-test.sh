@@ -79,18 +79,19 @@ if python3 "$VALIDATOR" "$candidate" >/dev/null 2>&1; then
 fi
 mv "$TEST_ROOT/AGENTS.md" "$candidate/AGENTS.md"
 
-cp "$candidate/.agents/skills/ma-review/SKILL.md" "$TEST_ROOT/ma-review-SKILL.md"
-awk 'index($0, ".agents/skills/ma-security-review/SKILL.md") == 0' \
-  "$candidate/.agents/skills/ma-review/SKILL.md" \
-  > "$TEST_ROOT/mutated-ma-review-SKILL.md"
-mv "$TEST_ROOT/mutated-ma-review-SKILL.md" \
-  "$candidate/.agents/skills/ma-review/SKILL.md"
+cp "$candidate/.agents/skills/stack-security-review/SKILL.md" \
+  "$TEST_ROOT/stack-security-review-SKILL.md"
+awk 'index($0, "Laravel/Nuxt") == 0' \
+  "$candidate/.agents/skills/stack-security-review/SKILL.md" \
+  > "$TEST_ROOT/mutated-stack-security-review-SKILL.md"
+mv "$TEST_ROOT/mutated-stack-security-review-SKILL.md" \
+  "$candidate/.agents/skills/stack-security-review/SKILL.md"
 if python3 "$VALIDATOR" "$candidate" >/dev/null 2>&1; then
-  echo "Specialty validator accepted an incomplete review persona router" >&2
+  echo "Specialty validator accepted a changed stack review persona" >&2
   exit 1
 fi
-mv "$TEST_ROOT/ma-review-SKILL.md" \
-  "$candidate/.agents/skills/ma-review/SKILL.md"
+mv "$TEST_ROOT/stack-security-review-SKILL.md" \
+  "$candidate/.agents/skills/stack-security-review/SKILL.md"
 
 nuxt_reference="$candidate/.agents/skills/nuxt/references/core-config.md"
 cp "$nuxt_reference" "$TEST_ROOT/nuxt-core-config.md"

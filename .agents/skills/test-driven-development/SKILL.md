@@ -28,8 +28,8 @@ changing tests, mocks, fixtures, or test helpers.
 ## Red
 
 Write the smallest test that expresses one intended outcome. Exercise real code
-and boundaries; mock only the slow or external layer after understanding its
-side effects.
+and boundaries; mock the narrowest slow, external, nondeterministic, or
+otherwise impractical dependency after understanding its side effects.
 
 Run the narrow test and confirm it fails because the intended behavior is
 missing or wrong. A syntax error, broken fixture, or unrelated failure is not a

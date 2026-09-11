@@ -9,8 +9,6 @@ TEST_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 bash "$TEST_DIR/authority-policy-test.sh"
 bash "$TEST_DIR/contribution-policy-consistency-test.sh"
-bash "$TEST_DIR/design-consultation-workflow-test.sh"
-bash "$TEST_DIR/onboard-project-fast-path-test.sh"
 bash "$TEST_DIR/pragmatism-policy-test.sh"
 bash "$TEST_DIR/specialty-guidance-contract-test.sh"
 bash "$TEST_DIR/specialty-preservation-test.sh"

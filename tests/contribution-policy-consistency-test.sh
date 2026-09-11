@@ -19,7 +19,7 @@ public_docs=(
 
 contains_unqualified_ci_or_staging_claim() {
   grep -Eqi \
-    'CI covers its required|CI (is|are) (enabled|enforced|required|active)|required checks? (is|are) (enabled|enforced|required|active)|branch protection (is|are) (enabled|enforced|required|active)'
+    'open (a )?(pull request|PR) to .?staging|promote .?staging|CI covers its required|CI (is|are) (enabled|enforced|required|active)|required checks? (is|are) (enabled|enforced|required|active)|branch protection (is|are) (enabled|enforced|required|active)'
 }
 
 contains_active_license_claim() {
@@ -37,16 +37,24 @@ for file in "${governance[@]}"; do
     echo "$(basename "$file") does not distinguish the CI contract from host enforcement" >&2
     exit 1
   }
-  grep -Eqi 'R2.*project[[:space:]]+documents.*ledger' <<< "$document_text" || {
-    echo "$(basename "$file") does not limit the R2 ledger summary to project documents" >&2
+  grep -Eqi 'staging.*(do not|unless|only).*adopt|do not.*staging.*unless.*adopt' <<< "$document_text" || {
+    echo "$(basename "$file") does not reject an unadopted staging flow" >&2
     exit 1
   }
-  grep -Eqi 'R3.*(security/permission|auth/privacy/secret/permission) boundaries' <<< "$document_text" || {
-    echo "$(basename "$file") drops security-sensitive R3 triggers" >&2
+  grep -Eqi 'R1.*ordinary|ordinary.*R1' <<< "$document_text" || {
+    echo "$(basename "$file") omits ordinary reversible work" >&2
     exit 1
   }
+  grep -Eqi 'R2.*elevated|elevated.*R2' <<< "$document_text" || {
+    echo "$(basename "$file") omits elevated effects" >&2
+    exit 1
+  }
+  if grep -Eq 'R3' <<< "$document_text"; then
+    echo "$(basename "$file") still exposes the removed fourth rigor tier" >&2
+    exit 1
+  fi
   if contains_unqualified_ci_or_staging_claim <<< "$document_text"; then
-    echo "$(basename "$file") still makes an unverified affirmative CI claim" >&2
+    echo "$(basename "$file") still makes an affirmative CI or staging claim" >&2
     exit 1
   fi
 done
@@ -67,6 +75,14 @@ for file in "${agent_guidance[@]}"; do
   }
   grep -Eqi 'testing alone never authorizes production mutation' <<< "$document_text" || {
     echo "$(basename "$file") lets test authority imply production mutation" >&2
+    exit 1
+  }
+  grep -Fq 'docs/plans/<YYYY-MM-DD>-<slug>/implementation-plan.md' <<< "$document_text" || {
+    echo "$(basename "$file") omits the canonical plan location" >&2
+    exit 1
+  }
+  grep -Eqi 'tasks\.md.*tracker|tracker.*tasks\.md' <<< "$document_text" || {
+    echo "$(basename "$file") omits the live task-tracker contract" >&2
     exit 1
   }
 done
@@ -131,9 +147,9 @@ if ! contains_unqualified_ci_or_staging_claim <<< \
   echo "Contradictory affirmative CI fixture was not rejected" >&2
   exit 1
 fi
-if contains_unqualified_ci_or_staging_claim <<< \
-  'Open a PR to staging and deploy the adopted Forge staging environment.'; then
-  echo "Adopted staging/Forge guidance was incorrectly rejected" >&2
+if ! contains_unqualified_ci_or_staging_claim <<< \
+  'Open a PR to staging. The staging flow remains unresolved.'; then
+  echo "Contradictory affirmative staging fixture was not rejected" >&2
   exit 1
 fi
 if ! contains_active_license_claim <<< \

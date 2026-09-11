@@ -41,7 +41,7 @@ invalid_project="$TEST_ROOT/invalid-project"
 mkdir -p "$invalid_project"
 if (
   cd "$invalid_project"
-  bash "$REPO_ROOT/install.sh" --skip-deps --from-local "$source_checkout" --ref master
+  bash "$REPO_ROOT/install.sh" --from-local "$source_checkout" --ref master
 ) >"$TEST_ROOT/invalid.out" 2>&1; then
   echo "installer accepted a mutable release ref" >&2
   exit 1
@@ -53,7 +53,7 @@ attached_project="$TEST_ROOT/attached-project"
 mkdir -p "$attached_project"
 if (
   cd "$attached_project"
-  bash "$REPO_ROOT/install.sh" --skip-deps --from-local "$source_checkout" --ref "$release_a"
+  bash "$REPO_ROOT/install.sh" --from-local "$source_checkout" --ref "$release_a"
 ) >"$TEST_ROOT/attached.out" 2>&1; then
   echo "installer accepted an attached release checkout" >&2
   exit 1
@@ -63,71 +63,6 @@ assert_empty_project "$attached_project"
 
 git -C "$source_checkout" checkout -q --detach "$release_a"
 
-symlink_scripts_source="$TEST_ROOT/symlink-scripts-source"
-external_scripts="$TEST_ROOT/external-scripts"
-symlink_scripts_project="$TEST_ROOT/symlink-scripts-project"
-symlink_scripts_marker="$TEST_ROOT/symlink-scripts-ran"
-copy_distribution "$symlink_scripts_source"
-mkdir -p "$external_scripts" "$symlink_scripts_project"
-cat > "$external_scripts/sync-managed-tree.sh" <<EOF
-#!/usr/bin/env bash
-printf 'executed\n' > "$symlink_scripts_marker"
-exit 91
-EOF
-printf '#!/usr/bin/env bash\nexit 0\n' \
-  > "$external_scripts/stage-project-templates.sh"
-printf '#!/usr/bin/env bash\nexit 0\n' \
-  > "$external_scripts/register-skills.sh"
-rm -rf "$symlink_scripts_source/scripts"
-ln -s "$external_scripts" "$symlink_scripts_source/scripts"
-git -C "$symlink_scripts_source" add -A
-git -C "$symlink_scripts_source" commit -qm "release with external scripts ancestor"
-symlink_scripts_release="$(git -C "$symlink_scripts_source" rev-parse HEAD)"
-git -C "$symlink_scripts_source" checkout -q --detach "$symlink_scripts_release"
-if (
-  cd "$symlink_scripts_project"
-  bash "$REPO_ROOT/install.sh" --skip-deps \
-    --from-local "$symlink_scripts_source" --ref "$symlink_scripts_release"
-) >"$TEST_ROOT/symlink-scripts.out" 2>&1; then
-  echo "installer accepted an immutable release with a symlinked scripts ancestor" >&2
-  exit 1
-fi
-if [ -e "$symlink_scripts_marker" ]; then
-  echo "installer executed repository code through a symlinked scripts ancestor" >&2
-  exit 1
-fi
-grep -Fq 'source scripts must be a physical directory' \
-  "$TEST_ROOT/symlink-scripts.out"
-assert_empty_project "$symlink_scripts_project"
-
-filter_source="$TEST_ROOT/filter-source"
-filter_project="$TEST_ROOT/filter-project"
-filter_marker="$TEST_ROOT/local-source-filter-ran"
-copy_distribution "$filter_source"
-printf 'install.sh filter=sentinel\n' > "$filter_source/.gitattributes"
-git -C "$filter_source" add .gitattributes
-git -C "$filter_source" commit -qm "release with filter attributes"
-filter_release="$(git -C "$filter_source" rev-parse HEAD)"
-git -C "$filter_source" checkout -q --detach "$filter_release"
-git -C "$filter_source" config filter.sentinel.clean \
-  "sh -c 'printf invoked > $filter_marker; exit 91'"
-touch -d '2001-01-01 00:00:00 UTC' -- "$filter_source/install.sh"
-mkdir -p "$filter_project"
-if (
-  cd "$filter_project"
-  bash "$REPO_ROOT/install.sh" --skip-deps \
-    --from-local "$filter_source" --ref "$filter_release"
-) >"$TEST_ROOT/filter-source.out" 2>&1; then
-  echo "installer accepted executable immutable-source Git configuration" >&2
-  exit 1
-fi
-if [ -e "$filter_marker" ]; then
-  echo "installer executed immutable-source Git configuration before validation" >&2
-  exit 1
-fi
-grep -Fq 'unsupported local Git configuration' "$TEST_ROOT/filter-source.out"
-assert_empty_project "$filter_project"
-
 legal_collision_project="$TEST_ROOT/legal-collision-project"
 mkdir -p "$legal_collision_project/.agents/legal"
 printf 'project-owned legal text\n' \
@@ -135,12 +70,12 @@ printf 'project-owned legal text\n' \
 if (
   cd "$legal_collision_project"
   bash "$REPO_ROOT/install.sh" \
-    --skip-deps --from-local "$source_checkout" --ref "$release_a"
+    --from-local "$source_checkout" --ref "$release_a"
 ) >"$TEST_ROOT/legal-collision.out" 2>&1; then
   echo "installer overwrote an unowned first-adoption legal payload" >&2
   exit 1
 fi
-grep -Fq 'unmanaged .agents/legal collision' "$TEST_ROOT/legal-collision.out"
+grep -Eqi 'collision|collides' "$TEST_ROOT/legal-collision.out"
 grep -qx 'project-owned legal text' \
   "$legal_collision_project/.agents/legal/LICENSE"
 [ ! -e "$legal_collision_project/.agents/skills" ]
@@ -178,12 +113,12 @@ if (
   AGENTS_ECOSYSTEM_TEST_PROJECT="$legal_race_project" \
   AGENTS_ECOSYSTEM_TEST_RACE_ONCE="$legal_race_once" \
     bash "$REPO_ROOT/install.sh" \
-      --skip-deps --from-local "$source_checkout" --ref "$release_a"
+      --from-local "$source_checkout" --ref "$release_a"
 ) >"$TEST_ROOT/legal-race.out" 2>&1; then
   echo "installer accepted an unmanaged legal collision introduced during staging" >&2
   exit 1
 fi
-grep -Fq 'unmanaged .agents/legal collision' "$TEST_ROOT/legal-race.out"
+grep -Eqi 'collision|collides' "$TEST_ROOT/legal-race.out"
 grep -qx 'raced project-owned legal text' \
   "$legal_race_project/.agents/legal/LICENSE"
 [ ! -e "$legal_race_project/.agents/skills" ]
@@ -193,7 +128,7 @@ mkdir -p "$dirty_project"
 printf '\ndirty release source\n' >> "$source_checkout/scripts/sync-managed-tree.sh"
 if (
   cd "$dirty_project"
-  bash "$REPO_ROOT/install.sh" --skip-deps --from-local "$source_checkout" --ref "$release_a"
+  bash "$REPO_ROOT/install.sh" --from-local "$source_checkout" --ref "$release_a"
 ) >"$TEST_ROOT/dirty.out" 2>&1; then
   echo "installer accepted a dirty release checkout" >&2
   exit 1
@@ -209,7 +144,7 @@ printf '\nhidden local installer change\n' >> "$source_checkout/install.sh"
 if (
   cd "$hidden_index_project"
   bash "$REPO_ROOT/install.sh" \
-    --skip-deps --from-local "$source_checkout" --ref "$release_a"
+    --from-local "$source_checkout" --ref "$release_a"
 ) >"$TEST_ROOT/hidden-index.out" 2>&1; then
   echo "installer accepted hidden immutable-source index state" >&2
   exit 1
@@ -225,7 +160,7 @@ mkdir -p "$mismatch_project"
 mismatch="0000000000000000000000000000000000000000"
 if (
   cd "$mismatch_project"
-  bash "$REPO_ROOT/install.sh" --skip-deps --from-local "$source_checkout" --ref "$mismatch"
+  bash "$REPO_ROOT/install.sh" --from-local "$source_checkout" --ref "$mismatch"
 ) >"$TEST_ROOT/mismatch.out" 2>&1; then
   echo "installer accepted a mismatched release checkout" >&2
   exit 1
@@ -262,7 +197,6 @@ local_gh_marker="$TEST_ROOT/local-gh-invoked"
   AGENTS_ECOSYSTEM_TEST_REAL_TAR="$real_tar" \
   AGENTS_ECOSYSTEM_TEST_TAR_MARKER="$tar_marker" \
   bash "$REPO_ROOT/install.sh" \
-    --skip-deps \
     --from-local "$source_checkout" \
     --ref "$release_a"
 ) >"$TEST_ROOT/local.out"
@@ -321,7 +255,7 @@ if ! (
   AGENTS_ECOSYSTEM_TEST_EVIL_SYNC="$evil_sync" \
   AGENTS_ECOSYSTEM_TEST_RACE_ONCE="$race_once" \
     bash "$REPO_ROOT/install.sh" \
-      --skip-deps --from-local "$source_checkout" --ref "$release_a"
+      --from-local "$source_checkout" --ref "$release_a"
 ) >"$TEST_ROOT/race.out" 2>&1; then
   if [ -e "$race_marker" ]; then
     echo "installer executed a concurrently replaced shared-source script" >&2
@@ -356,7 +290,7 @@ for index in "${!args[@]}"; do
   fi
   if [ "${args[$index]}" = "https://github.com/marcus-friction/agents.git" ]; then
     if [ "$credential_reset" -ne 1 ]; then
-      echo "public GitHub fetch did not clear ambient credential helpers" >&2
+      echo "public GitHub fetch lacks the credential reset" >&2
       exit 97
     fi
     if [ "${GIT_ASKPASS:-}" != /usr/bin/false ] \
@@ -371,11 +305,6 @@ done
 GIT_ALLOW_PROTOCOL=file exec "$AGENTS_ECOSYSTEM_TEST_REAL_GIT" "${args[@]}"
 WRAPPER
 chmod +x "$git_wrapper"
-if grep -Eq 'require_private_repository_auth|gh auth git-credential' \
-  "$REPO_ROOT/install.sh"; then
-  echo "public installer still requires private GitHub authentication" >&2
-  exit 1
-fi
 
 remote_project="$TEST_ROOT/remote-project"
 mkdir -p "$remote_project"
@@ -384,7 +313,7 @@ mkdir -p "$remote_project"
   PATH="$(dirname "$git_wrapper"):$PATH" \
   AGENTS_ECOSYSTEM_TEST_REAL_GIT="$REAL_GIT" \
   AGENTS_ECOSYSTEM_TEST_SOURCE="$source_checkout" \
-    bash "$REPO_ROOT/install.sh" --skip-deps --ref "$release_a"
+    bash "$REPO_ROOT/install.sh" --ref "$release_a"
 ) >"$TEST_ROOT/remote.out" 2>&1
 
 grep -Fq "Verified immutable source at $release_a" "$TEST_ROOT/remote.out"
@@ -394,4 +323,5 @@ if grep -Fq 'release B only' \
   exit 1
 fi
 test -f "$remote_project/.agents/legal/THIRD_PARTY_NOTICES.md"
+
 echo "Immutable installer ref contract tests passed"

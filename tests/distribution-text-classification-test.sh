@@ -44,20 +44,18 @@ except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
 expected_roots = {
     ".agents/legal",
     ".agents/skills",
-    ".agents/tools",
     ".agents/.claude-plugin",
     "project-templates",
 }
 expected_interfaces = {
     "install.sh",
     "install-global.sh",
-    "install-dependencies.sh",
     "CLAUDE.md",
     "README.md",
     "docs/ecosystem-reference.md",
     ".claude-plugin/marketplace.json",
 }
-expected_entrypoints = {"install.sh", "install-global.sh", "install-dependencies.sh"}
+expected_entrypoints = {"install.sh", "install-global.sh"}
 expected_script_roots = {
     ("scripts", "*.sh", False),
     ("scripts/skill-adapters", "*", True),
@@ -67,7 +65,6 @@ allowed_classifications = {
     "binary-asset",
     "legal-notice",
     "provider-adapter",
-    "retained-historical-evidence",
     "fixture",
     "dormant-imported-artifact",
     "dormant-adapted-artifact",
@@ -97,7 +94,7 @@ if not isinstance(exceptions, list):
 
 entrypoints = graph.get("entrypoints", [])
 if not isinstance(entrypoints, list) or set(entrypoints) != expected_entrypoints:
-    complain("executable graph must contain exactly the three approved root installers")
+    complain("executable graph must contain exactly the two approved root installers")
     entrypoints = []
 
 script_roots = graph.get("script_roots", [])
@@ -328,17 +325,21 @@ for item in validated_exceptions:
 
 try:
     tracked_bytes = subprocess.check_output(
-        ["git", "ls-files", "-z"], cwd=repo
+        ["git", "ls-files", "--cached", "--others", "--exclude-standard", "-z"],
+        cwd=repo,
     )
 except (OSError, subprocess.CalledProcessError) as exc:
     complain(f"cannot enumerate tracked files for executable graph: {exc}")
     tracked: set[str] = set()
 else:
-    tracked = {
-        value.decode("utf-8")
-        for value in tracked_bytes.split(b"\0")
-        if value
-    }
+    tracked = set()
+    for value in tracked_bytes.split(b"\0"):
+        if not value:
+            continue
+        relative = value.decode("utf-8")
+        path = repo / relative
+        if path.exists() or path.is_symlink():
+            tracked.add(relative)
 
 for relative in sorted(tracked):
     declared = (

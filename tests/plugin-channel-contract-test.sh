@@ -20,15 +20,15 @@ if plugin.get("version") != version:
     raise SystemExit("Claude plugin version must match repository VERSION")
 if plugin.get("license") != "MIT AND Apache-2.0":
     raise SystemExit("Claude plugin must identify every license in its shipped payload")
-if plugin.get("name") != "agents" or plugin.get("repository") != "https://github.com/marcus-friction/agents":
-    raise SystemExit("Claude plugin must use the public agents identity")
+if plugin.get("name") != "ma" or plugin.get("repository") != "https://github.com/marcus-friction/agents":
+    raise SystemExit("Claude plugin must use the public ma identity")
 
 marketplace = json.loads((root / ".claude-plugin/marketplace.json").read_text(encoding="utf-8"))
 entries = marketplace.get("plugins", [])
 if len(entries) != 1 or entries[0].get("source") != "./.agents":
     raise SystemExit("edge marketplace must keep its repository-local plugin source")
-if marketplace.get("name") != "marcus-friction-plugins" or entries[0].get("name") != "agents":
-    raise SystemExit("edge marketplace must expose agents via marcus-friction-plugins")
+if marketplace.get("name") != "marcus-friction-plugins" or entries[0].get("name") != "ma":
+    raise SystemExit("edge marketplace must expose ma via marcus-friction-plugins")
 if entries[0].get("version") != version:
     raise SystemExit("marketplace entry must match repository VERSION")
 
@@ -36,6 +36,16 @@ readme = (root / "README.md").read_text(encoding="utf-8")
 reference = (root / "docs/ecosystem-reference.md").read_text(encoding="utf-8")
 combined = readme + "\n" + reference
 normalized_combined = " ".join(combined.split())
+for skill_file in (root / ".agents/skills").glob("*/SKILL.md"):
+    if (skill_file.parent / '.claude-plugin/plugin.json').exists():
+        raise SystemExit(f"nested plugin overrides ma namespace: {skill_file.parent}")
+    declared = re.search(r"(?m)^name:\s*([^\s]+)\s*$", skill_file.read_text(encoding="utf-8"))
+    if declared is None or declared.group(1).startswith("ma-"):
+        raise SystemExit(f"skill must use an unprefixed declared name: {skill_file}")
+    if skill_file.parent.name.startswith("ma-"):
+        raise SystemExit(f"skill directory must not encode the plugin prefix: {skill_file.parent}")
+if "`ma:review`" not in combined or "ma-review" in combined:
+    raise SystemExit("documentation must use the ma: plugin namespace")
 if "bash <(curl" in combined:
     raise SystemExit("downloaded installers must be complete before shell execution")
 for fragment in (

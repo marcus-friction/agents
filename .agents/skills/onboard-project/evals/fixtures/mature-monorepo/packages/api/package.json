@@ -1,7 +1,0 @@
-{
-  "name": "@atlas/api",
-  "private": true,
-  "scripts": {
-    "test": "node --test"
-  }
-}

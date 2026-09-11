@@ -1,88 +1,128 @@
 ---
 name: review
-description: Perform a scoped multi-angle review before merging or when the user asks to review changes. Supports read-only reporting and explicitly selected deterministic autofix.
+description: Perform a scoped multi-angle code review of local changes, an explicit path set, or a branch or pull-request diff before merging or when the user asks for review. Defaults to non-mutating review, records actionable work in an already-authorized plan tracker, and supports only explicitly selected deterministic autofix.
 ---
 
-# Comprehensive Review
+# Scoped Review
 
-Review the approved scope, not the entire dirty worktree. Read
-`code-review-excellence` when available.
+Review the accepted change and its intent, not the repository in general. Read
+`code-review-excellence` when available; this skill's scope, severity, and
+output contracts take precedence.
 
-## Modes
+## Modes and authority
 
-- `mode:report-only` is strictly R0: make zero repository or external writes,
-  including no task, report-file, formatting, or autofix changes.
-- `mode:autofix` explicitly selects deterministic in-scope autofix.
-- Without `mode:autofix`, report findings and wait for a fix request.
-- `base:<ref>` supplies the comparison base.
+- Default and `mode:report-only` make no reviewed-code, configuration, report
+  file, checkout, external, or autofix changes. They are R0 unless an accepted
+  plan already authorizes the bounded `tasks.md` update described below; that
+  tracker-only effect is R1 and does not authorize a fix.
+- `mode:autofix` authorizes only deterministic `safe_auto` corrections inside
+  the reviewed local scope. Without it, report findings and stop.
+- `base:<ref>` supplies a comparison base. Never switch branches or check out a
+  remote review target.
 
-Never auto-fix subjective design or policy decisions, behavior/contract changes,
-permissions, dependencies, destructive work, or anything outside reviewed scope.
+Never infer permission to commit, push, publish, file tickets, change policy or
+contracts, add dependencies, or send code or review data to an external model,
+provider, or service. Those actions need their own authority.
 
-## Scope
+## 1. Establish scope and intent
 
-Build the file set from the approved request, accepted plan, base ref, and
-explicit paths. Use conversation context to distinguish this task's changes.
-Report unrelated dirty work and preserve it; include it only when an explicit
-dependency trace proves relevance.
+Read these references completely:
 
-Read `.agents/skills/review/references/change-rigor.md`. Record change rigor,
-affected components, and boundary assurance. An R0 review never mutates.
-R3 or significant architecture, security, data, or production work may require
-`review-gstack` and an independent adversarial review; routine R1/R2 work does
-not.
+- `.agents/skills/review/references/change-rigor.md`
+- `.agents/skills/review/references/scope-and-orchestration.md`
+- `.agents/skills/review/references/finding-contract.md`
 
-## Finding model
+Resolve the exact target, base and head, file inventory, accepted requirements,
+governing project rules, and the matching accepted implementation plan when one
+exists. Record change rigor, affected components, and material boundary facts.
+Preserve unrelated dirty work. A tracker is eligible only when it is the regular
+`tasks.md` sibling of that plan and its authority covers the reviewed increment;
+never guess between plausible historical plans or create a missing tracker.
 
-For each finding record severity, confidence, evidence, consequence,
-verification, and one action:
+## 2. Select passes
 
-| Action | Meaning |
-|---|---|
-| `safe_auto` | Local deterministic correction eligible only in explicit `mode:autofix`. |
-| `gated_auto` | Concrete change needing owner approval because it affects behavior, contracts, policy, dependencies, or permissions. |
-| `manual` | Actionable work requiring project judgment or external coordination. |
-| `advisory` | Residual risk or observation; no repository action. |
+Declare each pass applicable or not applicable with a reason. Correctness is
+always selected. Select other passes only when evidence makes them relevant:
 
-Suppress findings below 0.60 confidence, except plausible P0 findings at 0.50 or
-higher. Do not turn formatting covered by project automation into review noise.
+- **Standards:** applicable `AGENTS.md`, `CONTRIBUTING.md`, architecture or
+  design decisions, established structure, and reusable project knowledge.
+- **Testing:** changed behavior, failure handling, or an affected test harness.
+- **Security:** use `security-review` for changed trust, data, identity,
+  permission, dependency, or destructive-operation boundaries.
+- **Performance:** use `performance-review` when runtime cost, capacity,
+  latency, or resource use can materially change.
+- **Architecture:** use `architecture-review` for boundaries, dependencies,
+  contracts, ownership, persistence, or structural change.
+- **UI/accessibility/SEO:** load `DESIGN.md` and the relevant skills only for an
+  affected interface or public page.
+- **Operations:** select for material migration, rollout, recovery, logging,
+  health, or production behavior.
 
-## Passes
+Framework-specific rules apply only to components the project marks Adopted.
+All selected passes inspect the complete accepted scope; one finding does not
+end the review.
 
-Declare every pass **applicable** or **not applicable**, with a reason.
+## 3. Execute and synthesize
 
-- **Standards:** Check applicable `AGENTS.md`, `CONTRIBUTING.md`, established
-  structure, and reusable project knowledge.
-- **Correctness:** Trace changed behavior, error paths, boundaries, concurrency,
-  compatibility, and user-visible outcomes.
-- **Security:** Use the `security-review` applicability preflight. Do not apply
-  controls for absent components.
-- **Performance:** Use `performance-review` only where the change can affect
-  runtime cost, capacity, or latency.
-- **Architecture:** Use `architecture-review`; enforce adopted boundaries, not
-  generic class, route, transaction, or directory shapes.
-- **UI/accessibility/SEO:** Load `DESIGN.md` and the relevant review skills only
-  for affected user interfaces or public pages.
-- **Testing:** Confirm changed observable behavior and meaningful failures are
-  protected. Coverage of lines without useful assertions is insufficient.
-- **Operations:** Scale logging, health, recovery, migration, and rollout checks
-  to real exposure, data materiality, and production impact.
+Give every delegated pass the same compact review packet: target and intent,
+base/head, accepted file list and diff, explicit requirements, applicable
+standards, boundary facts, and the finding contract. Follow the dispatch,
+collection, independence, failure, evidence-search, and deduplication rules in
+`scope-and-orchestration.md`.
 
-Run all applicable passes even after finding an issue.
+Normalize every retained issue through `finding-contract.md`. Validate the
+cited line and surrounding behavior before reporting it. Keep primary and
+secondary findings verdict-relevant; list unrelated pre-existing findings
+separately. Do not turn formatter or linter output into review noise.
 
-## Autofix
+Elevated or significant architecture, security, data, migration, permission,
+deployment, or production work may also require `adversarial-review` after the
+selected review passes. A routine ordinary change does not.
 
-In explicit `mode:autofix`, apply only `safe_auto` changes whose expected
-output is deterministic and inside scope. Re-run the narrowest affected check
-after each group, then the relevant suite. Convert any uncertain fix to
+## 4. Autofix, when explicitly selected
+
+Apply only `safe_auto` findings whose result is deterministic, reversible, and
+inside the reviewed local scope. Re-run the narrowest affected check after each
+group and then the relevant suite. Inspect the autofix-only diff before
+finishing. Revert a failed or uncertain correction and report it as
 `gated_auto` or `manual`; do not widen scope.
 
-## Report
+## 5. Update the accepted tracker
 
-Lead with findings ordered P0–P3. Each item names files/lines, confidence,
-action, evidence, impact, smallest correction, and verification. Then list
-pass applicability, tests run, unavailable evidence, and residual risk.
+When the matching accepted plan already authorizes its live tracker, amend only
+that `tasks.md` after synthesis:
 
-In mutating review modes, add only unresolved `manual` and approved workflow
-items to `task.md`. In report-only mode, keep everything in the response.
-If there are no findings, say so directly rather than inventing work.
+- add every retained actionable P0–P3 finding as an unchecked task with its
+  stable finding ID, narrow location, smallest correction, and verification;
+- exclude advisory-only observations and avoid duplicating an existing finding
+  task;
+- keep secrets or sensitive evidence out of task text;
+- mark the review task complete only after all retained findings have been
+  recorded, including when the verdict is Not ready; and
+- leave every finding task unchecked until its correction is implemented and
+  verified.
+
+If the tracker is absent, ambiguous, outside the accepted increment, explicitly
+excluded from writes, or unsafe to edit, make no repository write and report the
+tracking gap. Tracker authority never permits changing reviewed code or any
+other file.
+
+## 6. Report
+
+Lead with stable-numbered findings ordered P0-P3. Each finding includes exact
+location, confidence, action, evidence, consequence, smallest correction, and
+verification. Then report:
+
+- scope and intent;
+- explicit requirements as complete, partial, missing, or equivalently met;
+- every pass as completed, not applicable, or missing coverage;
+- tests and inspections run, unavailable evidence, pre-existing issues, and
+  residual risks;
+- tracker tasks added, deduplicated, or unavailable; and
+- one verdict last: **Ready**, **Not ready**, or **Withheld**.
+
+Use **Not ready** for unresolved P0/P1 findings or an incomplete explicit
+requirement. Use **Withheld** when missing required coverage or unavailable
+material evidence prevents a defensible verdict. Otherwise use **Ready**. If
+there are no findings, say so directly, but never call the change Ready when a
+required pass did not complete.

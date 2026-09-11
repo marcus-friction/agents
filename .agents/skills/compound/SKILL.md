@@ -1,73 +1,78 @@
 ---
 name: compound
-description: >
-  Document a recently solved problem as structured, searchable knowledge so future work
-  benefits from past solutions. Use this skill after solving non-trivial bugs, debugging
-  sessions, or tricky implementations. Proactively suggest this skill when a session
-  involved significant troubleshooting, dead-end investigation, or a fix that others
-  would likely encounter again.
+description: >-
+  Assess solved problems for reusable project knowledge and, when authorized,
+  capture only high-relevance learnings. Use after substantial troubleshooting
+  or tricky implementation, when the user asks to document a solution or
+  accepts a proposed durable handoff, or during an explicit wrap.
 ---
 
 # Compound Knowledge
 
-Capture a recently solved problem as structured documentation so future work benefits from past solutions.
+Rate candidate learnings before turning the strongest ones into concise,
+searchable knowledge. Assessment may be proactive; persistence still requires
+authority.
 
-## When to Use
+## Rate every candidate
 
-After solving a non-trivial bug, debugging session, or tricky implementation. Trivial fixes (typos, obvious errors) don't need compounding.
+After substantial troubleshooting or a tricky implementation, assess the
+learning even when no artifact was requested. Search `docs/solutions/` and the
+active documentation and tests first so existing coverage informs the rating.
+Use evidence-backed ordinal judgment rather than a numeric score:
 
-## The 5-Step Extraction
+| Rating | Evidence required | Persistence |
+|---|---|---|
+| **High** | The root cause and fix are non-obvious and supported; recurrence or wider reuse is credible; and repository search would materially help future work. | Eligible to create or update a solution document. |
+| **Medium** | The learning is plausible, but its evidence, recurrence, wider reuse, or retrieval value remains uncertain. | Keep in chat; do not persist or propose persistence yet. |
+| **Low** | The change is trivial or obvious, one-off environment noise, unsupported, or lacks future retrieval value. | Keep in chat; do not persist. |
 
-Process the information through these 5 analytical steps before writing:
+Report the rating value as `high`, `medium`, or `low`.
+Only High-rated candidates qualify for compounding.
+Authorization never changes qualification. A document request permits a write
+only if the candidate rates High. If a requested candidate rates Medium or Low,
+explain why it is not a solution artifact; offer ordinary documentation only as
+a separate request.
 
-1. **Context Analyzer:** Identify the exact error messages, observable symptoms, and affected components.
-2. **Solution Extractor:** Extract the precise technical solution, including working code snippets and configuration changes.
-3. **Related Docs Finder:** Search `docs/solutions/` for related existing documentation.
-4. **Prevention Strategist:** Determine how to prevent this issue in the future (e.g., tests, linting rules, architectural patterns).
-5. **Category Classifier:** Choose the most appropriate category:
-   - `build-errors/`
-   - `runtime-errors/`
-   - `performance/`
-   - `database/`
-   - `security/`
-   - `deployment/`
-   - `ui-bugs/`
-   - `integration/`
+Choose the disposition after rating:
 
-## Writing the Document
+- use `already captured` when active documentation or tests adequately explain
+  a High-rated learning;
+- use `updated` or `captured` for an authorized High-rated learning, preferring
+  a relevant existing solution over a near-duplicate;
+- use `proposed` for a High-rated learning found outside an authorized document
+  or wrap request, and wait for acceptance before writing;
+- use `required` when an accepted handoff cannot write the High-rated artifact
+  without broader authority; and
+- use `chat only` for Medium or `not applicable` for Low.
 
-Create `docs/solutions/[category]/[slug].md` using the template below.
+Always report the candidate, rating, evidence against the rating criteria,
+existing coverage, disposition, and artifact path when one exists.
+Keep the result in chat unless the High-rated candidate has write authority.
 
-## Auto-Triggered Post-Review
+## Capture the reusable core
 
-Immediately after generating the solution document, perform a targeted review based on the category. These categories get extra scrutiny because incomplete solutions in these areas tend to introduce silent regressions:
-- **Performance:** Does the solution prevent N+1 queries or memory bloat?
-- **Security:** Does the solution introduce any injection risks or bypass authorization?
-- **Database:** Are any migrations or schema changes documented correctly?
-If the review identifies gaps, update the solution document before concluding.
+Use `references/solution-template.md` as a menu, not a form. Include only useful
+sections:
 
-## Knowledge Tiers
+- observable symptom and affected boundary;
+- root cause and the evidence that proved it;
+- minimal solution, including exact code or configuration only when it helps;
+- dead ends only when they are plausible and reusable warnings;
+- prevention only when there is a concrete test, guardrail, or practice;
+- related code, tests, issues, or documents.
 
-Knowledge exists at multiple levels. Place learnings at the right tier:
+Do not claim unsupported causality or fabricate a prevention strategy to fill a
+heading. Redact credentials, customer data, and private operational details.
 
-| Tier | Location | Persistence | When to use |
-|------|----------|-------------|-------------|
-| **Conversation memory** | Agent brain / conversation logs | Automatic — summaries carry forward | Always happens — no action needed |
-| **Solution docs** | `docs/solutions/[category]/` | Git-tracked, searchable | Default target for compound — specific problem/solution pairs |
-| **Rules** | `AGENTS.md` | Always-on or model-decision | Recurring patterns seen in 3+ solutions — propose promotion |
-| **Skills** | `.agents/skills/` | On-demand, loaded by name | Reusable expertise checklists (review, research) |
+## Store and verify
 
-> Conversation summaries and walkthrough artifacts are automatically available at the start of each session. Solution docs require explicit search. Rules are always loaded. Use the right tier for the right type of knowledge.
+For a qualifying candidate, an explicit document request, an accepted proposed
+handoff, or an explicit wrap of accepted work authorizes the ordinary repository
+write. Use a short kebab-case path under the closest existing `docs/solutions/`
+category. Create a new category only when it will remain meaningful; elevated
+publication or sensitive-data effects still need an exact decision.
 
-## Solution Doc Template
-
-Use the template in `references/solution-template.md` for all solution docs. The template includes YAML frontmatter for metadata and sections for Symptom, Root Cause, Solution, What Didn't Work, Prevention, and Related links.
-
-## Rules
-
-- Always create the category directory if it doesn't exist (`mkdir -p docs/solutions/[category]/`).
-- Use kebab-case for filenames: `n-plus-one-brief-generation.md`.
-- Include code examples — a solution without code is incomplete.
-- Conversation walkthroughs already capture implementation context — solution docs should focus on the *reusable* problem/fix, not repeat the full narrative.
-- Document dead ends — knowing what doesn't work is as valuable as what does.
-- Never skip the Prevention section — that's where the compounding happens.
+Check links, commands, snippets, and agreement with the implemented fix. For
+security, data, or performance topics, apply the corresponding review only when
+that boundary is actually present. Report the path and verification; do not
+promote the lesson into always-on rules or a skill without a separate request.

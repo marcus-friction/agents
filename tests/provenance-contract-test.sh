@@ -40,7 +40,7 @@ entries = lock.get("entries")
 if not isinstance(entries, list):
     raise SystemExit("retained provenance lock entries must be an array")
 expected_retained_counts = {
-    "Superpowers": 4,
+    "Superpowers": 3,
     "Jezweb Claude Skills": 7,
     "Anthropic Skills": 13,
     "Agentic SEO Skill": 1,
@@ -109,18 +109,10 @@ for exception in distribution.get("exceptions", []):
     if exception.get("sha256") not in (None, hashlib.sha256((root / relative).read_bytes()).hexdigest()):
         raise SystemExit(f"distribution manifest digest disagrees with retained lock: {relative}")
 
-office_template = next(
-    item for item in distribution["exceptions"]
-    if item.get("path") == ".agents/skills/office-hours/SKILL.md.tmpl"
-)
-if "adapted gstack" not in office_template.get("reason", "").lower() \
-        or "sha256" in office_template:
-    raise SystemExit("adapted office-hours template is misclassified as retained")
-
 components = {
-    "TomFit Agent Ecosystem": ("00c3885b4a456fb1317e6ec2faf5f73d0d0ddf77", "MIT"),
+    "TomFit Agent Ecosystem": ("037860a575a41ca36db2569ba1eb957832d0d515", "MIT"),
     "gstack": ("1211b6b40becb684eaf29b0f30a650a8a9b222a5", "MIT"),
-    "Compound Engineering": ("59dbaef37607354d103113f05c13b731eecbb690", "MIT"),
+    "Compound Engineering": ("b36047e1b4b2123df2f3529bf04b5f2a7c5f84e4", "MIT"),
     "Superpowers": ("b36e0829c6d0140e93cfef2ca599b1b07d4a7797", "MIT"),
     "Jezweb Claude Skills": ("bf917575ed6b65eb98307ced903f469020d8cd0a", "MIT"),
     "shadcn/ui": ("7c9eaba1c0a6404c990c144a654792e3313c650d", "MIT"),
@@ -129,12 +121,15 @@ components = {
     "Marketing Skills": ("0d586e4952494d58ed5c60926aa5982311e41044", "MIT"),
     "Google Labs DESIGN.md": ("89012cc4d140530d60742f76be04768585c1aa3a", "Apache-2.0"),
     "Vue.js AI Skills": ("f3dd1bf4d3ac78331bdc903e4519d561c538ca6a", "MIT"),
-    "VueUse Skills": ("b6bb79b99fb1f1dba1f907829676a651735bbc10", "MIT"),
+    "VueUse Skills": ("5706f866118f04a6238bf77368dafa4a2c34b96b", "MIT"),
 }
 for name, (revision, license_id) in components.items():
     for value in (name, revision, license_id):
         if value not in notices:
             raise SystemExit(f"third-party notice missing {value}")
+
+if "Release: `v0.2.0`" not in notices:
+    raise SystemExit("third-party notice missing the TomFit v0.2.0 release pin")
 
 for fragment in (
     "SheetJS 0.20.3",

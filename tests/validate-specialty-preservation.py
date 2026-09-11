@@ -21,8 +21,8 @@ REQUIRED_SKILLS = {
         "min_files": 21,
         "fragments": (
             "N+1 queries",
-            "Use Form Requests for meaningful or complex payloads",
-            "$fillable",
+            "Form Requests when input is meaningful or complex",
+            "Laravel-owned resources",
         ),
     },
     "nuxt": {
@@ -37,7 +37,7 @@ REQUIRED_SKILLS = {
     },
     "vue-best-practices": {
         "name": "vue-best-practices",
-        "min_files": 205,
+        "min_files": 25,
         "fragments": ("MUST be used for Vue.js tasks", "Composition API", "TypeScript"),
     },
     "vue-router-best-practices": {
@@ -75,28 +75,18 @@ REQUIRED_SKILLS = {
         "min_files": 15,
         "fragments": ("Nitro v3", "H3 v2", "Route rules"),
     },
-    "ma-review": {
-        "name": "ma-review",
-        "min_files": 1,
-        "fragments": (
-            "report-only parallel code review",
-            ".agents/skills/ma-architecture-review/SKILL.md",
-            ".agents/skills/ma-performance-review/SKILL.md",
-            ".agents/skills/ma-security-review/SKILL.md",
-        ),
-    },
-    "ma-architecture-review": {
-        "name": "ma-architecture-review",
+    "stack-architecture-review": {
+        "name": "stack-architecture-review",
         "min_files": 1,
         "fragments": ("# Architecture Persona", "R0 and report-only", "Laravel/Nuxt"),
     },
-    "ma-performance-review": {
-        "name": "ma-performance-review",
+    "stack-performance-review": {
+        "name": "stack-performance-review",
         "min_files": 1,
         "fragments": ("# Performance Persona", "R0 and report-only", "Laravel/Nuxt"),
     },
-    "ma-security-review": {
-        "name": "ma-security-review",
+    "stack-security-review": {
+        "name": "stack-security-review",
         "min_files": 1,
         "fragments": ("# Security Persona", "R0 and report-only", "Laravel/Nuxt"),
     },

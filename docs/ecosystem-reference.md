@@ -49,23 +49,9 @@ route needs no GitHub CLI or private-repository authentication:
 )
 ```
 
-The default installation changes no host tooling. Dependency setup is explicit:
-
-Add one of these options to the final installer command inside that self-cleaning
-checkout:
-
-```text
---deps frontend
---deps backend
---deps docker
---deps all
-```
-
-Each `--deps` mode presents the exact component plan and asks before host
-changes. Use `--skip-deps` to omit dependency guidance. Frontend covers the
-Node/Nuxt toolchain, backend covers PHP/Composer/Laravel requirements, and
-Docker covers the local Sail/container capability. Projects may adopt any
-subset.
+Installation changes no host tooling or runtime dependencies. Install PHP,
+Composer, Node, package managers, Docker, and project packages through the
+target repository's own documented workflow.
 
 ### Immutable source boundary
 
@@ -76,6 +62,7 @@ use its full 40-character commit SHA for both acquisition and installation:
 (
   set -euo pipefail
   AGENTS_ECOSYSTEM_SHA="PASTE_A_REVIEWED_40_CHARACTER_COMMIT_SHA"
+  AGENTS_ECOSYSTEM_SOURCE="${AGENTS_ECOSYSTEM_SOURCE:-https://github.com/marcus-friction/agents.git}"
   [[ "$AGENTS_ECOSYSTEM_SHA" =~ ^[0-9a-f]{40}$ ]]
   source_dir="$(mktemp -d)"
   trap 'rm -rf "$source_dir"' EXIT
@@ -93,7 +80,7 @@ use its full 40-character commit SHA for both acquisition and installation:
   }
   release_git init -q "$source_dir"
   release_git -C "$source_dir" fetch --depth 1 --no-tags \
-    https://github.com/marcus-friction/agents.git "$AGENTS_ECOSYSTEM_SHA"
+    "$AGENTS_ECOSYSTEM_SOURCE" "$AGENTS_ECOSYSTEM_SHA"
   release_git -C "$source_dir" checkout -q --detach FETCH_HEAD
   [ "$(release_git -C "$source_dir" rev-parse 'HEAD^{commit}')" = "$AGENTS_ECOSYSTEM_SHA" ]
   ! release_git -C "$source_dir" symbolic-ref -q HEAD
@@ -109,8 +96,9 @@ but it is not stable until a release record binds its full commit SHA.
 
 ### User-level installation
 
-`install-global.sh [--ref FULL_40_SHA]` maintains one canonical checkout and
-registers supported user adapters. Without `--ref`, it tracks mutable `master`.
+`install-global.sh [--ref FULL_40_SHA]` maintains one verified snapshot and
+registers supported user adapters. Without `--ref`, it follows `master` only
+through verified fast-forward updates.
 For an immutable release, run a physical `install-global.sh` from the reviewed
 checkout and pass the release record's full SHA:
 
@@ -127,7 +115,15 @@ AGENTS_ECOSYSTEM_HOME=/absolute/path/to/.agent-ecosystem \
   ./install-global.sh --ref "$AGENTS_ECOSYSTEM_SHA"
 ```
 
-Do not use `~/.agents` as the checkout; that path is reserved for discovery.
+Do not use `~/.agents` as the snapshot; that path is reserved for discovery.
+Custom destinations and private artifacts require trusted directory ancestry;
+shared writable directories are rejected. System-owned sticky temporary roots
+are supported when the destination is created exclusively or verified as yours.
+
+An older Git checkout migrates only when its physical payload matches the
+canonical commit, including file types and executable bits. The installer prints
+the retained recovery directory containing the complete previous checkout.
+Local edits or extra payload files block migration.
 
 Reload supported agent tools after registration. Remote environments do not
 inherit links from a local home directory, so install into the repository or
@@ -141,18 +137,20 @@ remote effect:
 
 ```bash
 ./scripts/install-into-repos.sh --ref "$AGENTS_ECOSYSTEM_SHA" \
-  --plan-dir /absolute/private/path/agents-plan \
+  --branch fix/update-agents --plan-dir /absolute/private/path/agents-plan \
   OWNER/repo-one OWNER/repo-two
 ```
 
 Inspect each patch and the aggregate digest. Applying is a separate explicit
 operation that revalidates the source, targets, bases, host, and plan before it
-pushes an import branch:
+pushes an import branch. In the command interface, the reviewed digest occupies
+`--expected-plan-sha256 <reviewed-plan-sha256>`:
 
 ```bash
+REVIEWED_PLAN_SHA256="PASTE_REVIEWED_PLAN_DIGEST"
 ./scripts/install-into-repos.sh --ref "$AGENTS_ECOSYSTEM_SHA" \
-  --plan-dir /absolute/private/path/agents-plan \
-  --apply --expected-plan-sha256 PASTE_REVIEWED_PLAN_DIGEST \
+  --branch fix/update-agents --plan-dir /absolute/private/path/agents-plan \
+  --apply --expected-plan-sha256 "$REVIEWED_PLAN_SHA256" \
   --author-name "YOUR NAME" --author-email "YOU@example.com" \
   OWNER/repo-one OWNER/repo-two
 ```
@@ -175,12 +173,12 @@ machine links, so run it in each intended environment.
 
 ### Claude Code plugin — edge only
 
-The public marketplace exposes plugin `agents` through
+The public marketplace exposes plugin `ma` through
 `marcus-friction-plugins`, backed by `./.agents`:
 
 ```text
 /plugin marketplace add marcus-friction/agents
-/plugin install agents@marcus-friction-plugins
+/plugin install ma@marcus-friction-plugins
 ```
 
 Restart Claude Code after first installation. For a deliberately installed
@@ -206,7 +204,7 @@ The Claude router is staged as an inactive candidate at
 `.agents/templates/adapters/claude/CLAUDE.md`; an installer never appends to or
 replaces a project's existing provider instructions. A pre-existing discovery
 path that is not the exact expected link is a collision and remains untouched.
-Claude marketplace metadata exposes plugin `agents` through marketplace
+Claude marketplace metadata exposes plugin `ma` through marketplace
 `marcus-friction-plugins`, with `./.agents` as its source.
 
 ## Ownership and Update Contract
@@ -216,7 +214,6 @@ Installation and semantic adoption are separate operations:
 | Path | Owner | Install or update behavior |
 |---|---|---|
 | `.agents/skills/` | Mixed by path | Refresh upstream paths; retain and report local-only skill paths. |
-| `.agents/tools/` | Upstream | Refresh managed component-aware tools. |
 | `.agents/legal/` and `.agents/.claude-plugin/` | Upstream after marked adoption | Refresh only through the managed-tree contract. |
 | `project-templates/base/` | Upstream | Canonical source for document candidates. |
 | `.agents/templates/` | Upstream-generated candidate state | Restage inactive candidates; never activate them. |
@@ -231,6 +228,10 @@ preserves their bytes even when a newer upstream candidate exists.
 Before the first write, installation preflights managed targets, candidates,
 adapter paths, symlink ancestors, non-regular files, and type conflicts. Managed
 updates are assembled away from the target and revalidated before replacement.
+Pre-state project installs can adopt exact files listed in the checked-in
+historical inventory at `scripts/legacy-project-manifest.tsv`, allowing the
+original checkout's umask. Modified or unknown files stay local; a collision
+with new upstream content blocks the update. Project-owned roots stay untouched.
 Run one installer at a time. Restoration after an interrupted commit is
 best-effort; crash-level atomicity is not claimed.
 
@@ -246,9 +247,9 @@ byte-identical copies under `.agents/templates/`.
 
 Use `onboard-project` to compare candidates with repository evidence. The
 workflow preserves existing content, inventories relevant meaning, classifies
-the proposed change, and presents an exact patch for approval. Clean R1/R2
-document changes may combine the semantic summary and patch decision. R3 changes
-retain separate gates, a durable relevant inventory, and strict revalidation.
+the proposed change, and shows the resulting diff. Ordinary R1 document edits
+need no separate patch gate. R2 effects require an exact-target decision and
+strict revalidation immediately before the elevated effect.
 
 `start-project` delegates document reconciliation to the same workflow. A
 request to start fresh does not authorize erasing an existing README, badge,
@@ -284,6 +285,13 @@ The preferred full stack includes:
 Existing project evidence wins over a preferred default. A migration requires
 an explicit scope, parity plan, and replacement decision.
 
+Laravel Cloud is an explicitly selectable delivery path through `deploy` for
+Laravel-only and Laravel + Nuxt applications. It supports separate Cloud
+applications for backend and frontend, including roots in one monorepo. Select
+Cloud in the project's deployment decision before replacing an existing host;
+the skill does not automatically replace adopted Forge, PM2, or Cloudflare
+infrastructure. Cloud readiness checks can remain entirely read-only.
+
 ## Change Rigor
 
 The canonical classifier is
@@ -292,9 +300,8 @@ The canonical classifier is
 | Level | Typical trigger | Handling |
 |---|---|---|
 | **R0** | Read-only inspection | No repository or external writes. |
-| **R1** | Clean additive and reversible work | Implement directly and verify. |
-| **R2** | Public contracts, existing meaning, planned dependencies, or bounded cross-file effects | Add proportionate planning, tests, and standard review. |
-| **R3** | Deletion, weakening, dirty or special targets, conflict, sensitive boundaries, destructive migration, production effect, or irreversibility | Require explicit decisions, exact-target revalidation, and conditional independent review. |
+| **R1** | Ordinary repository changes, including tracked edits and deletions | Implement directly within the supplied scope and verify. |
+| **R2** | External, privileged, secret-bearing, destructive, irreversible, or materially ambiguous effects | Confirm the exact target, scope, credentials, exposure, and recovery path immediately before the effect. |
 
 The highest trigger wins, and relevant uncertainty escalates. Runtime exposure
 does not determine approval count. Skills alter the method used inside existing
@@ -314,40 +321,34 @@ artifacts, unreachable code, or trivial forwarding without an executable
 contract. Record justified exclusions. Coverage demonstrates execution, not
 correctness; assertions and boundary selection still matter.
 
-Use `review` for normal work. `ma-review` may run applicable architecture,
-security, and performance specialties in parallel while remaining report-only
-unless fixes were explicitly authorized. Reserve `review-gstack` and independent
-adversarial review for R3, significant architecture/security/data/production
-work, or an explicit request.
+Use `review` for normal work. It selects applicable architecture, security, and
+performance passes while remaining report-only unless deterministic autofix was
+explicitly selected. Use independent adversarial review for R2, significant
+architecture/security/data/production work, or an explicit request.
 
 ## Skills
 
 The catalog follows declared skill names, including the
-`laravel-best-practices` name exposed by the physical `laravel/` directory.
+`laravel-best-practices` name exposed by the physical `laravel/` directory. In
+the Claude plugin, every entry is namespaced as `ma:<skill>`; for example,
+`ma:review` and `ma:laravel-best-practices`.
 
 | Skill | Purpose | Source |
 |---|---|---|
 | `adversarial-review` | Independently challenge hazardous or significant changes | [gstack](https://github.com/garrytan/gstack) |
 | `architecture-review` | Review compliance with adopted architecture boundaries | [Compound Engineering](https://github.com/EveryInc/compound-engineering-plugin) |
-| `brainstorm` | Explore technical approaches and engineering tradeoffs | [Compound Engineering](https://github.com/EveryInc/compound-engineering-plugin) |
 | `build-start-scripts` | Build reliable local development startup scripts | Original |
-| `changelog` | Summarize recent merges as an engaging changelog | [Compound Engineering](https://github.com/EveryInc/compound-engineering-plugin) |
 | `code-review-excellence` | Improve the method and quality of code review | Original |
 | `compound` | Capture a solved problem as reusable project knowledge | [Compound Engineering](https://github.com/EveryInc/compound-engineering-plugin) |
 | `contribute-back` | Prepare a bounded upstream contribution proposal | Original |
 | `copy-editing` | Improve existing copy through structured editing sweeps | [Marketing Skills](https://github.com/coreyhaines31/marketingskills) |
 | `copywriting` | Write clear, persuasive marketing and product copy | [Marketing Skills](https://github.com/coreyhaines31/marketingskills) |
-| `design-consultation` | Establish or amend an evidence-backed visual system | [gstack](https://github.com/garrytan/gstack) |
+| `deploy` | Prepare, deploy, verify, and diagnose Laravel + Nuxt on Laravel Cloud | Original |
 | `end2end` | Plan and run browser-based user-flow tests | Original |
 | `laravel-best-practices` | Apply Laravel 13 architecture, security, data, and testing patterns | [Laravel Boost](https://github.com/laravel/boost) |
-| `ma-architecture-review` | Run the Laravel/Nuxt architecture review persona | Original |
-| `ma-performance-review` | Run the Laravel/Nuxt performance review persona | Original |
-| `ma-review` | Orchestrate parallel Laravel/Nuxt specialist reviews | Original |
-| `ma-security-review` | Run the Laravel/Nuxt security review persona | Original |
 | `migrate-project` | Plan a behavior-preserving migration into adopted components | [TomFit Agent Ecosystem](https://github.com/TomFitAG/tomfit-agents) |
 | `nitro` | Guide Nitro server routes, storage, caching, and deployment | [antfu/skills](https://github.com/antfu/skills) |
 | `nuxt` | Guide Nuxt 4 routing, SSR, data fetching, and modules | [antfu/skills](https://github.com/antfu/skills) |
-| `office-hours` | Test product demand or shape a builder project | [gstack](https://github.com/garrytan/gstack) |
 | `onboard-project` | Reconcile ecosystem candidates with an existing repository | Original |
 | `path-to-10` | Apply a rigorous quality standard to plans and outputs | Original |
 | `performance-review` | Review measured performance risks in adopted components | [Compound Engineering](https://github.com/EveryInc/compound-engineering-plugin) |
@@ -355,18 +356,18 @@ The catalog follows declared skill names, including the
 | `plan` | Scope and verify multi-step or high-risk implementation work | [gstack](https://github.com/garrytan/gstack) |
 | `playwright` | Apply robust browser testing, locator, and isolation patterns | [TomFit Agent Ecosystem](https://github.com/TomFitAG/tomfit-agents) |
 | `review` | Perform a scoped, multi-angle pre-merge review | [Compound Engineering](https://github.com/EveryInc/compound-engineering-plugin) |
-| `review-gstack` | Run rigorous pre-landing review for significant changes | [gstack](https://github.com/garrytan/gstack) |
 | `review-plan` | Challenge an implementation plan before execution | [gstack](https://github.com/garrytan/gstack) |
 | `security-review` | Review proportionate controls at affected trust boundaries | [Compound Engineering](https://github.com/EveryInc/compound-engineering-plugin) |
 | `seo-review` | Review SEO, Core Web Vitals, semantics, and E-E-A-T | [Agentic SEO](https://github.com/Bhanunamikaze/Agentic-SEO-Skill) and [Marketing Skills](https://github.com/coreyhaines31/marketingskills) |
 | `skill-creator` | Create, improve, and evaluate agent skills | [Anthropic Skills](https://github.com/anthropics/skills) |
 | `start-project` | Clarify and plan the smallest valuable new project | Original |
-| `stats` | Summarize the day's work in project context | Original |
+| `stack-architecture-review` | Run the retained Laravel/Nuxt architecture persona | Original |
+| `stack-performance-review` | Run the retained Laravel/Nuxt performance persona | Original |
+| `stack-security-review` | Run the retained Laravel/Nuxt security persona | Original |
 | `systematic-debugging` | Reproduce, isolate, test hypotheses, and verify a fix | [Superpowers](https://github.com/obra/superpowers) |
 | `tailwind-v4-shadcn` | Apply Tailwind v4 and shadcn/ui theme patterns | [Jezweb Claude Skills](https://github.com/jezweb/claude-skills) |
 | `terminal-blindness-fix` | Diagnose missing or unreadable VS Code terminal output | Original |
 | `test-driven-development` | Drive observable behavior through red, green, and refactor | [Superpowers](https://github.com/obra/superpowers) |
-| `ui-accessibility-review` | Review design fit, responsiveness, and WCAG AA | Original |
 | `update-agents` | Refresh managed ecosystem assets without replacing project policy | Original |
 | `vite` | Guide Vite configuration, plugins, SSR, and builds | [antfu/skills](https://github.com/antfu/skills) |
 | `vitest` | Guide Vitest tests, mocks, coverage, and fixtures | [antfu/skills](https://github.com/antfu/skills) |
@@ -375,7 +376,6 @@ The catalog follows declared skill names, including the
 | `vue-router-best-practices` | Apply Vue Router 4 navigation and lifecycle patterns | [Vue.js AI Skills](https://github.com/vuejs-ai/skills) |
 | `vue-testing-best-practices` | Test Vue components and flows with the appropriate layer | [Vue.js AI Skills](https://github.com/vuejs-ai/skills) |
 | `vueuse-functions` | Select and apply maintainable VueUse composables | [VueUse](https://github.com/vueuse/vueuse) |
-| `whats-next` | Report repository status and useful next work | Original |
 | `wrap` | Prepare requested commits or pushes with separate authority | Original |
 
 Skills load on demand. Framework skills do not authorize adopting their
@@ -414,8 +414,9 @@ Primary sources include:
 
 | Source | Areas informed or adapted |
 |---|---|
-| gstack by Garry Tan | Planning, mega review, adversarial review, office hours, design consultation |
-| Compound Engineering by Every and Kieran Klaassen | Review, architecture, security, performance, brainstorm, changelog, compound workflow |
+| TomFit Agent Ecosystem v0.2.0 (`037860a575a41ca36db2569ba1eb957832d0d515`) | Core workflows, installer and distribution safety, provider adapters, and evaluation contracts |
+| gstack by Garry Tan | Planning and adversarial review |
+| Compound Engineering by Every and Kieran Klaassen | Review, architecture, security, performance, and compound workflow |
 | Superpowers by Jesse Vincent | Systematic debugging and test-driven development |
 | Laravel Boost | Laravel framework guidance |
 | antfu/skills | Nuxt, Nitro, Vue, Vite, Vitest, Pinia, and VueUse references |
@@ -454,15 +455,16 @@ original scope and are not rewritten by later policy.
 - Version 1.7.0 is an unreleased integration version. `master` remains an edge
   channel; no immutable stable release is published by this update.
 - Provider links do not cross machines or remote environments automatically.
-- Full dependency bootstrap targets macOS and Linux; native Windows projects use
-  WSL2 for the complete Laravel/Nuxt baseline.
+- The ecosystem does not provision host runtimes or project dependencies;
+  projects keep those choices and installation steps in their own setup docs.
 - Installation performs preflight and best-effort restoration but does not claim
   crash-level atomicity. Run only one installer per target at a time.
 - Candidate staging cannot decide project architecture. A project owner must
   reconcile and approve active document changes.
 - Forge, PM2, and Cloudflare are the ecosystem's adopted delivery defaults, not
   authority to create accounts, alter production, or replace documented project
-  infrastructure.
+  infrastructure. Laravel Cloud is selectable through `deploy` with the same
+  project-ownership and external-effect boundaries.
 
 ## Licensing Status
 

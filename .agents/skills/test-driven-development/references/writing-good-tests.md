@@ -1,3 +1,6 @@
+<!-- Adapted by TomFit AG in 2026 to remove unavailable skill dependencies and
+make mock guidance proportional to observable contracts. -->
+
 # Writing Good Tests
 
 **Load this reference when:** writing or changing tests, adding mocks, or
@@ -14,8 +17,9 @@ here:
 ```
 
 Strict TDD produces both naturally: a test written first and watched
-failing against real code has already proven it can fail, and only earns
-a mock when the real dependency proves slow or external.
+failing against real code has already proven it can fail. Use a double only
+when the real dependency is slow, external, nondeterministic, or otherwise
+impractical at the chosen test level.
 
 ## Principle 1: Name the Break
 
@@ -39,17 +43,17 @@ expect(buildSearchQuery({ tag: 'urgent' })).toBe('tag:"urgent"');
 ```
 
 **No change detectors.** If only intentional decisions can fail a test —
-a constant's value, exact message wording, private structure — it fires
+a private constant, non-contractual wording, or private structure — it fires
 on redesign and sleeps through bugs. Test the behavior that depends on
 the decision: not `expect(MAX_RETRIES).toBe(5)` but "a failing call is
-retried 5 times and the 6th attempt never happens."
+retried 5 times and the 6th attempt never happens." Exact public text or data
+may still be asserted when it is itself the accepted boundary contract.
 
 **Behavior, not text.** Asserting that a script, skill, or config
 contains an exact line proves only that the source is the source. Run
 scripts against controlled inputs and assert outputs, side effects, or
-exit codes. Documents that instruct agents are tested by the consuming
-agent's behavior (superpowers:writing-skills); prose for humans earns no
-test at all.
+exit codes. Evaluate agent instructions through realistic consuming-agent
+behavior; prose for humans earns no executable test by itself.
 
 **Your code, not the framework.** Test the contract your code makes at
 its boundaries — the route you register, the query you emit, the payload
@@ -80,10 +84,10 @@ BEFORE writing the test body:
 
 ## Principle 2: Exercise the Real Thing
 
-**The mock earns no assertions.** A mock assertion passes when the mock
-is present and fails when it is absent — it says nothing about the
-component. Assert the real component's behavior; if the mock is what you
-are checking, unmock it or delete the assertion.
+**Assert the component contract, not mock existence.** A mock-presence
+assertion often says nothing about the component. Prefer the real component's
+observable behavior. Verify calls, arguments, or ordering only when that
+outbound interaction is itself the accepted boundary contract.
 
 ```typescript
 // ✅ Real behavior
@@ -92,9 +96,6 @@ expect(screen.getByRole('navigation')).toBeInTheDocument();
 // ❌ Mock existence
 expect(screen.getByTestId('sidebar-mock')).toBeInTheDocument();
 ```
-
-**your human partner's correction:** "Are we testing the behavior of a
-mock?"
 
 **Mock at the right level.** Learn every side effect of the real method
 before replacing it; mock the slow or external operation and keep what
@@ -116,21 +117,20 @@ part of the contract, assert them — a fake that accepts anything verifies
 nothing. Give each branch (success, error, malformed) its own fixture or
 spy, so the wrong branch cannot satisfy the expectation.
 
-**Mirror real data completely.** Mock the complete structure as it exists
-in reality — all documented fields — not just the ones your test reads.
-Partial mocks fail silently when downstream code reads an omitted field:
-the test passes while integration breaks.
+**Match the consumed data contract.** Include every field the component may
+observe and every schema-required field. Do not pad a double with unrelated
+fields merely to mirror an entire external payload. When drift is material,
+validate a shared fixture against the real schema or add a narrow integration
+test.
 
-**Production classes carry production methods only.** Cleanup that only
-tests need lives in test utilities, never as a `destroy()` on the
-production class. Ask: is this method called only from tests? Does this
-class own this resource's lifecycle? Wrong answers → test utility.
+**Keep test-only helpers out of production interfaces.** Cleanup used only by
+tests normally belongs in test utilities. A production lifecycle method is
+appropriate when the class actually owns that resource outside tests.
 
 **Prefer real components over complex mocks.** When mock setup outgrows
 the test logic, mocks miss methods the real components have, or tests
 break when the mock changes, switch to an integration test with real
-components. **your human partner's question:** "Do we need to be using a
-mock here?"
+components.
 
 ### Gate Function
 
@@ -139,12 +139,14 @@ BEFORE adding a mock or test helper:
   List the real method's side effects; keep the ones the test
   depends on real — mock the slow/external level below them.
 
-  Mock responses mirror the complete real structure.
+  Mock responses cover the consumed and schema-required contract.
 
-  A method only tests call lives in test utilities, not production.
+  A helper used only by tests normally lives in test utilities. Keep a
+  production lifecycle method when product code owns that resource.
 
   About to assert on the mock itself?
-    Unmock it or delete the assertion.
+    Confirm the interaction is the boundary contract; otherwise assert the
+    component's observable result.
 ```
 
 ## Tests Ship With the Implementation
@@ -176,9 +178,9 @@ test as tautological.
 | Build an expected value | Derive it by hand; never with the code under test |
 | Test a script or document | Run it / pressure-test its consumer; never grep its text |
 | Reach for a dependency test | Test your boundary contract, not their documented mechanics |
-| Want to assert on a mocked element | Test the real component, or unmock it |
+| Want to assert on a mocked element | Assert the real component result unless the interaction is the contract |
 | Are about to mock a method | Learn its side effects; mock the slow/external level |
-| Build a mock response | Mirror the real structure completely |
+| Build a mock response | Cover the consumed and schema-required contract |
 | Need cleanup only tests use | Put it in test utilities |
 | Watch mock setup balloon | Switch to an integration test with real components |
 | Finish a test file | Run the mutation check |

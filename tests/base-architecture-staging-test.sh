@@ -10,17 +10,16 @@ cleanup() {
 }
 trap cleanup EXIT
 
-project="$TEST_ROOT/legacy-project"
+project="$TEST_ROOT/agents-project"
 mkdir -p "$project/.agents/templates/profiles"
-printf '%s\n' 'retired stack policy' \
-  > "$project/.agents/templates/profiles/legacy-stack.md"
+printf '%s\n' 'old laravel/nuxt policy' \
+  > "$project/.agents/templates/profiles/laravel-nuxt.md"
 printf '%s\n' 'old web design policy' \
   > "$project/.agents/templates/profiles/web-design.md"
 
 (
   cd "$project"
   bash "$REPO_ROOT/install.sh" \
-    --skip-deps \
     --from-local "$REPO_ROOT" >/dev/null
 )
 

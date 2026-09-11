@@ -1,6 +1,6 @@
 ---
 name: code-review-excellence
-description: Meta-level code review guidance — how to review well, not just what to check
+description: Guide specific, actionable, evidence-backed code review feedback without style noise. Use as the method layer inside a multi-angle review or when improving review quality.
 ---
 
 # Code Review Excellence Skill
@@ -22,7 +22,7 @@ tells you *how* to review well.
 
 | Substance (flag) | Style (skip) |
 |---|---|
-| Logic errors | Formatting (Pint/ESLint handles this) |
+| Logic errors | Formatting (Spotless/ESLint handles this) |
 | Missing edge cases | Variable naming preferences |
 | Security gaps | Blank line placement |
 | Architectural violations | Import ordering |
@@ -43,21 +43,21 @@ If a linter or formatter can catch it, don't spend review time on it.
 | ❌ Vague | ✅ Actionable |
 |---|---|
 | "This could be better" | "Extract lines 42-58 into a `calculateDiscount()` method — it's reused in OrderAction too" |
-| "Performance concern here" | "This `User::all()` loads ~5K records into memory. Use `paginate(50)` or a scoped query" |
+| "Performance concern here" | "This `userRepository.findAll()` loads ~5K records into memory. Use `PageRequest.of(0, 50)` or a scoped query" |
 | "Needs tests" | "Add a test for the case where `discount > subtotal` — currently returns a negative total" |
 
-### Use Prefixes for Severity
+### Use the Parent Severity Contract
 
-- **`🔴 Must:`** — blocks merging. Security, correctness, data integrity.
-- **`🟡 Should:`** — strong recommendation. Missing tests, standards violations.
-- **`🟢 Nit:`** — optional improvement. Take it or leave it.
-- **`❓ Question:`** — genuine question, not a disguised demand your way.
+- **P0:** catastrophic and immediate.
+- **P1:** concrete merge blocker.
+- **P2:** bounded defect or material gap.
+- **P3:** concrete low-impact issue, never a taste preference.
+- A genuine question is not a finding until the answer establishes a defect.
 
-### Acknowledge Good Work
+### Keep Positive Notes Proportionate
 
-- Call out clever solutions, good test coverage, or clean abstractions.
-- "Nice use of `cursorPaginate()` here — much better than offset pagination for this dataset."
-- A review that's only criticism is demoralizing and incomplete.
+- A brief positive note can identify a pattern worth preserving, but it must not
+  displace findings, applicability, evidence gaps, or the verdict.
 
 ## Review Order
 

@@ -6,9 +6,11 @@ documentation. Installation stages byte-identical copies under
 
 Use `onboard-project` to reconcile a candidate with repository evidence and
 existing root documents. Preserve current meaning, badges, commands, links,
-license text, local constraints, and uncommitted content unless an approved
-exact patch changes them. A new project may adopt a candidate only after its
-placeholders and component classifications are resolved.
+license text, local constraints, and uncommitted content. Ordinary in-scope
+document edits need no second approval; elevated destructive, privileged,
+production, publication, or irreversible effects retain an exact decision. A
+new project may adopt a candidate only after its placeholders and component
+classifications are resolved.
 
 The candidate set is intentionally compact:
 

@@ -1,6 +1,6 @@
 ---
 name: review-plan
-description: Challenge an implementation plan for scope, architecture, design, security, and verification gaps. Use after drafting a non-trivial plan or when asked whether a plan is ready.
+description: Challenge an implementation plan for scope, architecture, design, security, and verification gaps. Use after drafting any implementation plan or when asked whether a plan is ready.
 ---
 
 # Review Plan
@@ -12,9 +12,10 @@ increment. The goal is convergence, not ritual.
 
 Declare scope mode: expansion, selective expansion, hold scope, or reduction.
 Read the accepted request, plan, applicable `AGENTS.md`, `README.md`, and
-`CONTRIBUTING.md`. Load `ARCHITECTURE.md` when runtime boundaries matter and
-`DESIGN.md` only for UI scope. Identify R0–R3 change rigor and affected
-boundary-assurance facts.
+`CONTRIBUTING.md`, plus the plan's sibling `tasks.md` when present. Load
+`ARCHITECTURE.md` when runtime boundaries matter and `DESIGN.md` only for UI
+scope. Identify R0, R1, or R2 change rigor and affected boundary-assurance
+facts.
 
 Ask only questions whose answers materially change the plan. Present concrete
 options and a recommendation. Group related decisions when clearer.
@@ -77,15 +78,19 @@ A ready plan states:
 - existing patterns and knowledge to reuse;
 - completion criteria.
 
+Its `tasks.md` maps the implementation, failure-path tests, verification,
+documentation, and applicable review work without contradicting or expanding
+the plan.
+
 ## Convergence and verdict
 
 Perform one thorough pass. Repeat only to resolve a newly found material issue;
 do not require a fixed pass count. If the same blocker survives three attempted
 resolutions, stop for owner input.
 
-Before finalizing, use an outside-voice challenge for R3 or significant
-architecture, security, data, or production scope. Routine plans do not require
-an adversarial persona or mega review.
+Before finalizing, use an independent outside-voice challenge for elevated or
+significant architecture, security, data, migration, permission, deployment, or
+production scope. Routine plans do not require it.
 
 Report:
 

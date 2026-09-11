@@ -1,411 +1,353 @@
 #!/usr/bin/env bash
 
 set -u
-
-REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-SYNC_SCRIPT="$REPO_ROOT/scripts/sync-managed-tree.sh"
-TEST_ROOT="$(mktemp -d)"
-
-cleanup() {
-  rm -rf "$TEST_ROOT"
-}
-trap cleanup EXIT
-
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
+SYNC="$ROOT/scripts/sync-managed-tree.sh"
+TMP="$(mktemp -d)"
+trap 'rm -rf -- "$TMP"' EXIT
 failures=0
 
-run_test() {
-  local name="$1"
-  shift
+run() { local name="$1"; shift; if ("$@"); then echo "ok - $name"; else echo "not ok - $name"; failures=$((failures + 1)); fi; }
 
-  if ("$@"); then
-    echo "ok - $name"
-  else
-    echo "not ok - $name"
-    failures=$((failures + 1))
-  fi
+initial_and_update() {
+  local base="$TMP/update"
+  mkdir -p "$base/source/nested" "$base/target/local"
+  printf 'one\n' > "$base/source/nested/rule.md"
+  printf 'keep\n' > "$base/target/local/extension.md"
+  bash "$SYNC" "$base/source" "$base/target" >/dev/null || return 1
+  grep -q one "$base/target/nested/rule.md" || return 1
+  grep -q keep "$base/target/local/extension.md" || return 1
+  grep -q '^agents-ecosystem-managed-state-v2$' "$base/target/.agents-ecosystem-managed-state-v2" || return 1
+  printf 'two\n' > "$base/source/nested/rule.md"
+  bash "$SYNC" "$base/source" "$base/target" >/dev/null || return 1
+  grep -q two "$base/target/nested/rule.md"
 }
 
-test_overlay_updates_managed_files_and_retains_extensions() {
-  local case_root="$TEST_ROOT/overlay"
-  mkdir -p "$case_root/source/standard" "$case_root/target/local-only"
-  printf 'new managed content\n' > "$case_root/source/standard/rule.md"
-  printf 'old managed content\n' > "$case_root/target/old.md"
-  printf 'local extension\n' > "$case_root/target/local-only/SKILL.md"
-  mkdir -p "$case_root/target/standard"
-  printf 'nested local extension\n' > \
-    "$case_root/target/standard/local-extension.md"
-
-  bash "$SYNC_SCRIPT" "$case_root/source" "$case_root/target" >/dev/null || return 1
-
-  grep -q 'new managed content' "$case_root/target/standard/rule.md" || return 1
-  grep -q 'old managed content' "$case_root/target/old.md" || return 1
-  grep -q 'local extension' "$case_root/target/local-only/SKILL.md" || return 1
-  grep -q 'nested local extension' \
-    "$case_root/target/standard/local-extension.md"
+retires_only_managed() {
+  local base="$TMP/retire"
+  mkdir -p "$base/source" "$base/target"
+  printf 'managed\n' > "$base/source/old.md"
+  printf 'local\n' > "$base/target/local.md"
+  bash "$SYNC" "$base/source" "$base/target" >/dev/null || return 1
+  rm "$base/source/old.md"
+  bash "$SYNC" "$base/source" "$base/target" >/dev/null || return 1
+  [ ! -e "$base/target/old.md" ] && grep -q local "$base/target/local.md"
 }
 
-test_collision_preflight_prevents_every_write() {
-  local case_root="$TEST_ROOT/symlink-collision"
-  local output
-  mkdir -p "$case_root/source" "$case_root/target"
-  printf 'replacement one\n' > "$case_root/source/one.md"
-  printf 'replacement two\n' > "$case_root/source/two.md"
-  printf 'original one\n' > "$case_root/target/one.md"
-  printf 'external victim\n' > "$case_root/victim.md"
-  ln -s "$case_root/victim.md" "$case_root/target/two.md"
-
-  if output="$(bash "$SYNC_SCRIPT" \
-    "$case_root/source" "$case_root/target" 2>&1)"; then
-    return 1
-  fi
-
-  grep -q 'must not be a symlink' <<< "$output" || return 1
-  grep -q 'original one' "$case_root/target/one.md" || return 1
-  grep -q 'external victim' "$case_root/victim.md"
+retired_symlink_ancestor_blocks() {
+  local base="$TMP/retired-symlink" output
+  mkdir -p "$base/source/nested" "$base/target" "$base/external/nested"
+  printf 'managed\n' > "$base/source/nested/old.md"
+  bash "$SYNC" "$base/source" "$base/target" >/dev/null || return 1
+  rm "$base/source/nested/old.md"
+  rmdir "$base/source/nested"
+  cp "$base/target/nested/old.md" "$base/external/nested/old.md"
+  rm "$base/target/nested/old.md"
+  rmdir "$base/target/nested"
+  ln -s "$base/external/nested" "$base/target/nested"
+  if output="$(bash "$SYNC" "$base/source" "$base/target" 2>&1)"; then return 1; fi
+  grep -q 'crosses a symlink' <<< "$output" \
+    && grep -q managed "$base/external/nested/old.md" \
+    && [ -L "$base/target/nested" ]
 }
 
-test_atomic_replace_does_not_modify_hardlink_peer() {
-  local case_root="$TEST_ROOT/hardlink"
-  mkdir -p "$case_root/source" "$case_root/target"
-  printf 'replacement\n' > "$case_root/source/rule.md"
-  printf 'external original\n' > "$case_root/external.md"
-  ln "$case_root/external.md" "$case_root/target/rule.md"
-
-  bash "$SYNC_SCRIPT" "$case_root/source" "$case_root/target" >/dev/null || return 1
-
-  grep -q 'replacement' "$case_root/target/rule.md" || return 1
-  grep -q 'external original' "$case_root/external.md"
+modified_managed_blocks() {
+  local base="$TMP/modified" output
+  mkdir -p "$base/source"
+  printf 'managed\n' > "$base/source/rule.md"
+  bash "$SYNC" "$base/source" "$base/target" >/dev/null || return 1
+  printf 'owner edit\n' > "$base/target/rule.md"
+  printf 'upstream edit\n' > "$base/source/rule.md"
+  if output="$(bash "$SYNC" "$base/source" "$base/target" 2>&1)"; then return 1; fi
+  grep -q 'changed locally' <<< "$output" && grep -q 'owner edit' "$base/target/rule.md"
 }
 
-test_unsearchable_directory_fails_before_any_write() {
-  local case_root="$TEST_ROOT/unsearchable-target"
-  local output
-
-  if [ "$(id -u)" -eq 0 ]; then
-    echo "# skip - uid 0 bypasses directory permission checks"
-    return 0
-  fi
-
-  mkdir -p "$case_root/source/z" "$case_root/target/z"
-  printf 'new first file\n' > "$case_root/source/a.md"
-  printf 'new nested file\n' > "$case_root/source/z/rule.md"
-  printf 'original first file\n' > "$case_root/target/a.md"
-  printf 'original nested file\n' > "$case_root/target/z/rule.md"
-  chmod 0222 "$case_root/target/z"
-
-  if output="$(bash "$SYNC_SCRIPT" \
-    "$case_root/source" "$case_root/target" 2>&1)"; then
-    chmod 0755 "$case_root/target/z"
-    return 1
-  fi
-  chmod 0755 "$case_root/target/z"
-
-  grep -q 'not writable and searchable' <<< "$output" || return 1
-  grep -q 'original first file' "$case_root/target/a.md" || return 1
-  grep -q 'original nested file' "$case_root/target/z/rule.md"
-}
-
-test_source_symlinks_are_rejected() {
-  local case_root="$TEST_ROOT/source-symlink"
-  local output
-  mkdir -p "$case_root/source" "$case_root/target"
-  printf 'outside\n' > "$case_root/outside.md"
-  ln -s "$case_root/outside.md" "$case_root/source/rule.md"
-
-  if output="$(bash "$SYNC_SCRIPT" \
-    "$case_root/source" "$case_root/target" 2>&1)"; then
-    return 1
-  fi
-
-  grep -q 'source contains a symlink or special file' <<< "$output" || return 1
-  [ -z "$(find "$case_root/target" -mindepth 1 -print -quit)" ]
-}
-
-test_source_symlink_race_is_rejected_before_chmod() {
-  local case_root="$TEST_ROOT/source-symlink-race"
-  local fake_bin="$case_root/bin"
-  local real_cp
-  local original_mode
-  local output
-  mkdir -p "$case_root/source" "$case_root/target" "$fake_bin"
-  printf 'validated source\n' > "$case_root/source/rule.md"
-  printf 'original target\n' > "$case_root/target/rule.md"
-  printf 'external victim\n' > "$case_root/external.md"
-  chmod 0666 "$case_root/external.md"
-  original_mode="$(stat -c '%a' -- "$case_root/external.md")"
-
-  cat > "$fake_bin/cp" <<'EOF'
-#!/usr/bin/env bash
-case "${2:-}" in
-  */.managed-tree-stage.*/next/rule.md) is_staged_file=1 ;;
-  *) is_staged_file=0 ;;
-esac
-if [ "$is_staged_file" -eq 1 ] && [ ! -e "$AGENTS_ECOSYSTEM_TEST_MUTATED" ]; then
-  : > "$AGENTS_ECOSYSTEM_TEST_MUTATED"
-  rm -f -- "$AGENTS_ECOSYSTEM_TEST_SOURCE_FILE"
-  ln -s -- "$AGENTS_ECOSYSTEM_TEST_EXTERNAL_FILE" \
-    "$AGENTS_ECOSYSTEM_TEST_SOURCE_FILE"
-fi
-exec "$AGENTS_ECOSYSTEM_TEST_REAL_CP" "$@"
-EOF
-  chmod +x "$fake_bin/cp"
+content_change_during_staging_is_preserved() {
+  local base="$TMP/content-race" fake="$TMP/content-race/bin" output real_cp
+  mkdir -p "$base/source" "$fake"
+  printf 'managed v1\n' > "$base/source/rule.md"
+  bash "$SYNC" "$base/source" "$base/target" >/dev/null || return 1
+  printf 'managed v2\n' > "$base/source/rule.md"
   real_cp="$(command -p -v cp)"
-
-  if output="$(
-    PATH="$fake_bin:$PATH" \
-    AGENTS_ECOSYSTEM_TEST_REAL_CP="$real_cp" \
-    AGENTS_ECOSYSTEM_TEST_SOURCE_FILE="$case_root/source/rule.md" \
-    AGENTS_ECOSYSTEM_TEST_EXTERNAL_FILE="$case_root/external.md" \
-    AGENTS_ECOSYSTEM_TEST_MUTATED="$case_root/mutated" \
-      bash "$SYNC_SCRIPT" "$case_root/source" "$case_root/target" 2>&1
-  )"; then
-    return 1
-  fi
-
-  grep -Eqi 'source.*changed|staged.*regular|symlink' <<< "$output" || return 1
-  grep -q 'external victim' "$case_root/external.md" || return 1
-  [ "$(stat -c '%a' -- "$case_root/external.md")" = "$original_mode" ] || return 1
-  grep -q 'original target' "$case_root/target/rule.md" || return 1
-  [ -z "$(find "$case_root" -path '*/next/rule.md' -type l -print -quit)" ]
-}
-
-test_sync_uses_safe_directory_modes() {
-  local case_root="$TEST_ROOT/safe-directory-modes"
-  mkdir -p "$case_root/source/nested"
-  printf 'content\n' > "$case_root/source/nested/rule.md"
-  chmod 0666 "$case_root/source/nested/rule.md"
-
-  (
-    umask 000
-    bash "$SYNC_SCRIPT" "$case_root/source" "$case_root/target" >/dev/null
-  ) || return 1
-
-  [ -z "$(find "$case_root/target" -type d -perm -002 -print -quit)" ] || return 1
-  [ -z "$(find "$case_root/target" -type f -perm -020 -print -quit)" ] || return 1
-  [ -z "$(find "$case_root/target" -type f -perm -002 -print -quit)" ]
-}
-
-test_commit_failure_restores_prior_tree() {
-  local case_root="$TEST_ROOT/commit-rollback"
-  local fake_bin="$case_root/bin"
-  local count_file="$case_root/mv-count"
-  local real_mv
-  local output
-  mkdir -p "$case_root/source/nested" "$case_root/target" "$fake_bin"
-  printf 'replacement\n' > "$case_root/source/a.md"
-  printf 'new managed file\n' > "$case_root/source/nested/b.md"
-  printf 'original\n' > "$case_root/target/a.md"
-  printf 'local extension\n' > "$case_root/target/local.md"
-
-  cat > "$fake_bin/mv" <<'EOF'
-#!/usr/bin/env bash
-count=0
-if [ -f "$AGENTS_ECOSYSTEM_TEST_MV_COUNT" ]; then
-  count="$(cat "$AGENTS_ECOSYSTEM_TEST_MV_COUNT")"
-fi
-count=$((count + 1))
-printf '%s\n' "$count" > "$AGENTS_ECOSYSTEM_TEST_MV_COUNT"
-if [ "$count" -eq 2 ]; then
-  exit 55
-fi
-exec "$AGENTS_ECOSYSTEM_TEST_REAL_MV" "$@"
-EOF
-  chmod +x "$fake_bin/mv"
-  real_mv="$(command -p -v mv)"
-
-  if output="$(
-    PATH="$fake_bin:$PATH" \
-    AGENTS_ECOSYSTEM_TEST_MV_COUNT="$count_file" \
-    AGENTS_ECOSYSTEM_TEST_REAL_MV="$real_mv" \
-      bash "$SYNC_SCRIPT" "$case_root/source" "$case_root/target" 2>&1
-  )"; then
-    return 1
-  fi
-
-  grep -q 'original' "$case_root/target/a.md" || return 1
-  grep -q 'local extension' "$case_root/target/local.md" || return 1
-  [ ! -e "$case_root/target/nested/b.md" ] || return 1
-  [ -z "$(find "$case_root" -maxdepth 1 -name '.managed-tree-stage.*' -print -quit)" ]
-}
-
-test_target_change_during_staging_aborts_before_commit() {
-  local case_root="$TEST_ROOT/concurrent-target-change"
-  local fake_bin="$case_root/bin"
-  local real_cp
-  local real_mv
-  local output
-  mkdir -p \
-    "$case_root/source" \
-    "$case_root/target" \
-    "$case_root/external" \
-    "$fake_bin"
-  printf 'replacement\n' > "$case_root/source/rule.md"
-  printf 'original\n' > "$case_root/target/rule.md"
-
-  cat > "$fake_bin/cp" <<'EOF'
-#!/usr/bin/env bash
-"$AGENTS_ECOSYSTEM_TEST_REAL_CP" "$@"
-if [ ! -e "$AGENTS_ECOSYSTEM_TEST_MUTATED" ]; then
-  : > "$AGENTS_ECOSYSTEM_TEST_MUTATED"
-  "$AGENTS_ECOSYSTEM_TEST_REAL_MV" "$AGENTS_ECOSYSTEM_TEST_TARGET" "$AGENTS_ECOSYSTEM_TEST_SAVED_TARGET"
-  ln -s "$AGENTS_ECOSYSTEM_TEST_EXTERNAL" "$AGENTS_ECOSYSTEM_TEST_TARGET"
+  cat > "$fake/cp" <<'EOF'
+#!/bin/bash
+"$AGENTS_ECOSYSTEM_TEST_CP" "$@" || exit $?
+if [ "${1:-}" = -a ] && [ ! -e "$AGENTS_ECOSYSTEM_TEST_MARKER" ]; then
+  : > "$AGENTS_ECOSYSTEM_TEST_MARKER"
+  printf 'owner edit during staging\n' > "$AGENTS_ECOSYSTEM_TEST_TARGET/rule.md"
 fi
 EOF
-  chmod +x "$fake_bin/cp"
+  chmod +x "$fake/cp"
+  if output="$(PATH="$fake:$PATH" AGENTS_ECOSYSTEM_TEST_CP="$real_cp" \
+    AGENTS_ECOSYSTEM_TEST_MARKER="$base/triggered" AGENTS_ECOSYSTEM_TEST_TARGET="$base/target" \
+    bash "$SYNC" "$base/source" "$base/target" 2>&1)"; then return 1; fi
+  grep -q 'changed during staging' <<< "$output" \
+    && grep -q 'owner edit during staging' "$base/target/rule.md"
+}
+
+mode_change_during_staging_is_preserved() {
+  local base="$TMP/mode-race" fake="$TMP/mode-race/bin" output real_cp
+  mkdir -p "$base/source" "$fake"
+  printf 'managed v1\n' > "$base/source/rule.md"
+  bash "$SYNC" "$base/source" "$base/target" >/dev/null || return 1
+  printf 'managed v2\n' > "$base/source/rule.md"
   real_cp="$(command -p -v cp)"
-  real_mv="$(command -p -v mv)"
-
-  if output="$(
-    PATH="$fake_bin:$PATH" \
-    AGENTS_ECOSYSTEM_TEST_REAL_CP="$real_cp" \
-    AGENTS_ECOSYSTEM_TEST_REAL_MV="$real_mv" \
-    AGENTS_ECOSYSTEM_TEST_MUTATED="$case_root/mutated" \
-    AGENTS_ECOSYSTEM_TEST_TARGET="$case_root/target" \
-    AGENTS_ECOSYSTEM_TEST_SAVED_TARGET="$case_root/saved-target" \
-    AGENTS_ECOSYSTEM_TEST_EXTERNAL="$case_root/external" \
-      bash "$SYNC_SCRIPT" "$case_root/source" "$case_root/target" 2>&1
-  )"; then
-    return 1
-  fi
-
-  grep -q 'changed during staging' <<< "$output" || return 1
-  [ -L "$case_root/target" ] || return 1
-  [ -z "$(find "$case_root/external" -mindepth 1 -print -quit)" ] || return 1
-  grep -q 'original' "$case_root/saved-target/rule.md"
-}
-
-test_target_replacement_at_commit_boundary_is_preserved() {
-  local case_root="$TEST_ROOT/commit-boundary-replacement"
-  local fake_bin="$case_root/bin"
-  local real_cmp
-  local real_mkdir
-  local real_mv
-  local count_file="$case_root/cmp-count"
-  local output
-  mkdir -p "$case_root/source" "$case_root/target" "$fake_bin"
-  printf 'replacement\n' > "$case_root/source/rule.md"
-  printf 'original\n' > "$case_root/target/rule.md"
-
-  cat > "$fake_bin/cmp" <<'EOF'
-#!/usr/bin/env bash
-"$AGENTS_ECOSYSTEM_TEST_REAL_CMP" "$@"
-status="$?"
-if [ "$status" -eq 0 ]; then
-  count=0
-  [ ! -f "$AGENTS_ECOSYSTEM_TEST_CMP_COUNT" ] \
-    || count="$(cat "$AGENTS_ECOSYSTEM_TEST_CMP_COUNT")"
-  count=$((count + 1))
-  printf '%s\n' "$count" > "$AGENTS_ECOSYSTEM_TEST_CMP_COUNT"
-  if [ "$count" -eq 2 ]; then
-    : > "$AGENTS_ECOSYSTEM_TEST_MUTATED"
-    "$AGENTS_ECOSYSTEM_TEST_REAL_MV" "$AGENTS_ECOSYSTEM_TEST_TARGET" "$AGENTS_ECOSYSTEM_TEST_SAVED_TARGET"
-    "$AGENTS_ECOSYSTEM_TEST_REAL_MKDIR" "$AGENTS_ECOSYSTEM_TEST_TARGET"
-    printf 'concurrent owner content\n' > "$AGENTS_ECOSYSTEM_TEST_TARGET/concurrent.md"
-  fi
+  cat > "$fake/cp" <<'EOF'
+#!/bin/bash
+"$AGENTS_ECOSYSTEM_TEST_CP" "$@" || exit $?
+if [ "${1:-}" = -a ] && [ ! -e "$AGENTS_ECOSYSTEM_TEST_MARKER" ]; then
+  : > "$AGENTS_ECOSYSTEM_TEST_MARKER"
+  chmod 0600 "$AGENTS_ECOSYSTEM_TEST_TARGET/rule.md"
 fi
-exit "$status"
 EOF
-  chmod +x "$fake_bin/cmp"
-  real_cmp="$(command -p -v cmp)"
-  real_mkdir="$(command -p -v mkdir)"
-  real_mv="$(command -p -v mv)"
-
-  if output="$(
-    PATH="$fake_bin:$PATH" \
-    AGENTS_ECOSYSTEM_TEST_REAL_CMP="$real_cmp" \
-    AGENTS_ECOSYSTEM_TEST_REAL_MKDIR="$real_mkdir" \
-    AGENTS_ECOSYSTEM_TEST_REAL_MV="$real_mv" \
-    AGENTS_ECOSYSTEM_TEST_TARGET="$case_root/target" \
-    AGENTS_ECOSYSTEM_TEST_SAVED_TARGET="$case_root/saved-target" \
-    AGENTS_ECOSYSTEM_TEST_MUTATED="$case_root/mutated" \
-    AGENTS_ECOSYSTEM_TEST_CMP_COUNT="$count_file" \
-      bash "$SYNC_SCRIPT" "$case_root/source" "$case_root/target" 2>&1
-  )"; then
-    return 1
-  fi
-
-  grep -Eqi 'changed.*commit|quarantin|replacement' <<< "$output" || return 1
-  grep -q 'concurrent owner content' "$case_root/target/concurrent.md" || return 1
-  grep -q 'original' "$case_root/saved-target/rule.md"
+  chmod +x "$fake/cp"
+  if output="$(PATH="$fake:$PATH" AGENTS_ECOSYSTEM_TEST_CP="$real_cp" \
+    AGENTS_ECOSYSTEM_TEST_MARKER="$base/triggered" AGENTS_ECOSYSTEM_TEST_TARGET="$base/target" \
+    bash "$SYNC" "$base/source" "$base/target" 2>&1)"; then return 1; fi
+  grep -q 'changed during staging' <<< "$output" \
+    && [ "$(stat -c '%a' "$base/target/rule.md")" = 600 ]
 }
 
-test_term_after_original_rename_preserves_recovery() {
-  local case_root="$TEST_ROOT/term-after-original-rename"
-  local fake_bin="$case_root/bin"
-  local real_mv
-  local output
-  mkdir -p "$case_root/source" "$case_root/target" "$fake_bin"
-  printf 'replacement\n' > "$case_root/source/rule.md"
-  printf 'original\n' > "$case_root/target/rule.md"
+unsafe_source_file_modes_are_normalized() {
+  local base="$TMP/source-modes"
+  mkdir -p "$base/source"
+  printf 'plain\n' > "$base/source/plain.md"
+  printf '#!/bin/sh\n' > "$base/source/tool.sh"
+  chmod 0666 "$base/source/plain.md"
+  chmod 0777 "$base/source/tool.sh"
+  bash "$SYNC" "$base/source" "$base/target" >/dev/null || return 1
+  [ "$(stat -c '%a' "$base/target/plain.md")" = 644 ] \
+    && [ "$(stat -c '%a' "$base/target/tool.sh")" = 755 ]
+}
 
-  cat > "$fake_bin/mv" <<'EOF'
-#!/usr/bin/env bash
-"$AGENTS_ECOSYSTEM_TEST_REAL_MV" "$@"
-status="$?"
-if [ "$status" -eq 0 ] && [ ! -e "$AGENTS_ECOSYSTEM_TEST_SIGNAL_SENT" ]; then
-  : > "$AGENTS_ECOSYSTEM_TEST_SIGNAL_SENT"
-  kill -TERM "$PPID"
+existing_target_root_mode_is_preserved() {
+  local base="$TMP/target-root-mode"
+  mkdir -p "$base/source"
+  printf 'managed v1\n' > "$base/source/rule.md"
+  bash "$SYNC" "$base/source" "$base/target" >/dev/null || return 1
+  chmod 0700 "$base/target"
+  printf 'managed v2\n' > "$base/source/rule.md"
+  bash "$SYNC" "$base/source" "$base/target" >/dev/null || return 1
+  [ "$(stat -c '%a' "$base/target")" = 700 ] \
+    && grep -q 'managed v2' "$base/target/rule.md"
+}
+
+permissive_managed_state_mode_is_rejected() {
+  local base="$TMP/state-mode" output
+  mkdir -p "$base/source"
+  printf 'managed v1\n' > "$base/source/rule.md"
+  bash "$SYNC" "$base/source" "$base/target" >/dev/null || return 1
+  chmod 0666 "$base/target/.agents-ecosystem-managed-state-v2"
+  printf 'managed v2\n' > "$base/source/rule.md"
+  if output="$(bash "$SYNC" "$base/source" "$base/target" 2>&1)"; then return 1; fi
+  grep -q 'managed state mode' <<< "$output" \
+    && [ "$(stat -c '%a' "$base/target/.agents-ecosystem-managed-state-v2")" = 666 ] \
+    && grep -q 'managed v1' "$base/target/rule.md"
+}
+
+future_collision_blocks_before_mutation() {
+  local base="$TMP/collision" output
+  mkdir -p "$base/source" "$base/target"
+  printf 'v1\n' > "$base/source/current.md"
+  bash "$SYNC" "$base/source" "$base/target" >/dev/null || return 1
+  printf 'local\n' > "$base/target/future.md"
+  printf 'upstream\n' > "$base/source/future.md"
+  if output="$(bash "$SYNC" "$base/source" "$base/target" 2>&1)"; then return 1; fi
+  grep -q 'collides with a local extension' <<< "$output" \
+    && grep -q local "$base/target/future.md" \
+    && grep -q v1 "$base/target/current.md"
+}
+
+matching_local_collision_blocks() {
+  local base="$TMP/matching-collision" output
+  mkdir -p "$base/source" "$base/target"
+  printf 'v1\n' > "$base/source/current.md"
+  bash "$SYNC" "$base/source" "$base/target" >/dev/null || return 1
+  printf 'same bytes\n' > "$base/source/future.md"
+  printf 'same bytes\n' > "$base/target/future.md"
+  if output="$(bash "$SYNC" "$base/source" "$base/target" 2>&1)"; then return 1; fi
+  grep -q 'collides with a local extension' <<< "$output" \
+    && grep -q 'same bytes' "$base/target/future.md"
+}
+
+activation_gap_fresh_preserves_concurrent_target() {
+  local base="$TMP/activation-fresh" fake="$TMP/activation-fresh/bin" output real_mv
+  mkdir -p "$base/source" "$fake"
+  printf 'managed\n' > "$base/source/rule.md"
+  real_mv="$(command -p -v mv)"
+  cat > "$fake/mv" <<'EOF'
+#!/bin/bash
+if [ "${1##*/}" = next ] && [ "${2:-}" = "$AGENTS_ECOSYSTEM_TEST_TARGET" ] \
+  && [ ! -e "$AGENTS_ECOSYSTEM_TEST_MARKER" ]; then
+  : > "$AGENTS_ECOSYSTEM_TEST_MARKER"
+  mkdir "$AGENTS_ECOSYSTEM_TEST_TARGET"
+  printf 'concurrent owner\n' > "$AGENTS_ECOSYSTEM_TEST_TARGET/concurrent.md"
 fi
-exit "$status"
+exec "$AGENTS_ECOSYSTEM_TEST_MV" "$@"
 EOF
-  chmod +x "$fake_bin/mv"
-  real_mv="$(command -p -v mv)"
-
-  if output="$(
-    PATH="$fake_bin:$PATH" \
-    AGENTS_ECOSYSTEM_TEST_REAL_MV="$real_mv" \
-    AGENTS_ECOSYSTEM_TEST_SIGNAL_SENT="$case_root/signal-sent" \
-      bash "$SYNC_SCRIPT" "$case_root/source" "$case_root/target" 2>&1
-  )"; then
-    return 1
-  fi
-
-  if [ -f "$case_root/target/rule.md" ] \
-    && grep -q 'original' "$case_root/target/rule.md"; then
-    return 0
-  fi
-  recovery="$(find "$case_root" -path '*/original/rule.md' -type f -print -quit)"
-  [ -n "$recovery" ] && grep -q 'original' "$recovery" \
-    && grep -Eqi 'recover|retain|restor' <<< "$output"
+  chmod +x "$fake/mv"
+  if output="$(PATH="$fake:$PATH" AGENTS_ECOSYSTEM_TEST_MV="$real_mv" \
+    AGENTS_ECOSYSTEM_TEST_TARGET="$base/target" AGENTS_ECOSYSTEM_TEST_MARKER="$base/triggered" \
+    bash "$SYNC" "$base/source" "$base/target" 2>&1)"; then return 1; fi
+  grep -q 'changed during activation' <<< "$output" \
+    && grep -q 'concurrent owner' "$base/target/concurrent.md" \
+    && [ ! -e "$base/target/next" ]
 }
 
-run_test \
-  "managed overlay updates upstream files and retains local-only paths" \
-  test_overlay_updates_managed_files_and_retains_extensions
-run_test \
-  "one destination collision prevents every managed-tree write" \
-  test_collision_preflight_prevents_every_write
-run_test \
-  "managed files replace hardlinks without modifying their peers" \
-  test_atomic_replace_does_not_modify_hardlink_peer
-run_test \
-  "an unsearchable target directory prevents every managed-tree write" \
-  test_unsearchable_directory_fails_before_any_write
-run_test \
-  "managed sources reject symlinks and special files" \
-  test_source_symlinks_are_rejected
-run_test \
-  "a source symlink race is rejected before staged chmod" \
-  test_source_symlink_race_is_rejected_before_chmod
-run_test \
-  "managed sync creates no world-writable directories" \
-  test_sync_uses_safe_directory_modes
-run_test \
-  "a commit-time failure restores the exact prior managed tree" \
-  test_commit_failure_restores_prior_tree
-run_test \
-  "a target changed during staging aborts before commit" \
-  test_target_change_during_staging_aborts_before_commit
-run_test \
-  "a physical target replacement at the commit boundary is preserved" \
-  test_target_replacement_at_commit_boundary_is_preserved
-run_test \
-  "TERM after quarantining the original retains recoverable content" \
-  test_term_after_original_rename_preserves_recovery
-
-if [ "$failures" -ne 0 ]; then
-  echo "$failures test(s) failed"
-  exit 1
+activation_gap_update_retains_prior() {
+  local base="$TMP/activation-update" fake="$TMP/activation-update/bin" output real_mv recovery
+  mkdir -p "$base/source" "$fake"
+  printf 'managed v1\n' > "$base/source/rule.md"
+  bash "$SYNC" "$base/source" "$base/target" >/dev/null || return 1
+  printf 'managed v2\n' > "$base/source/rule.md"
+  real_mv="$(command -p -v mv)"
+  cat > "$fake/mv" <<'EOF'
+#!/bin/bash
+if [ "${1##*/}" = next ] && [ "${2:-}" = "$AGENTS_ECOSYSTEM_TEST_TARGET" ] \
+  && [ ! -e "$AGENTS_ECOSYSTEM_TEST_MARKER" ]; then
+  : > "$AGENTS_ECOSYSTEM_TEST_MARKER"
+  mkdir "$AGENTS_ECOSYSTEM_TEST_TARGET"
+  printf 'concurrent owner\n' > "$AGENTS_ECOSYSTEM_TEST_TARGET/concurrent.md"
 fi
+exec "$AGENTS_ECOSYSTEM_TEST_MV" "$@"
+EOF
+  chmod +x "$fake/mv"
+  if output="$(PATH="$fake:$PATH" AGENTS_ECOSYSTEM_TEST_MV="$real_mv" \
+    AGENTS_ECOSYSTEM_TEST_TARGET="$base/target" AGENTS_ECOSYSTEM_TEST_MARKER="$base/triggered" \
+    bash "$SYNC" "$base/source" "$base/target" 2>&1)"; then return 1; fi
+  grep -q 'changed during activation' <<< "$output" || return 1
+  grep -q 'concurrent owner' "$base/target/concurrent.md" || return 1
+  [ ! -e "$base/target/next" ] || return 1
+  recovery="$(find "$base" -maxdepth 3 -path '*/previous/rule.md' -print -quit)"
+  [ -n "$recovery" ] && grep -q 'managed v1' "$recovery"
+}
 
-echo "All managed-tree sync tests passed"
+backup_cleanup_failure_keeps_new_tree() {
+  local base="$TMP/backup-cleanup" fake="$TMP/backup-cleanup/bin" output real_rm recovery
+  mkdir -p "$base/source" "$base/target/local" "$fake"
+  printf 'managed v1\n' > "$base/source/rule.md"
+  printf 'owner\n' > "$base/target/local/keep.md"
+  bash "$SYNC" "$base/source" "$base/target" >/dev/null || return 1
+  printf 'managed v2\n' > "$base/source/rule.md"
+  real_rm="$(command -p -v rm)"
+  cat > "$fake/rm" <<'EOF'
+#!/bin/bash
+last="${!#}"
+if [ "${last##*/}" = previous ] && [ ! -e "$AGENTS_ECOSYSTEM_TEST_MARKER" ]; then
+  : > "$AGENTS_ECOSYSTEM_TEST_MARKER"
+  "$AGENTS_ECOSYSTEM_TEST_RM" -f -- "$last/.agents-ecosystem-managed-state-v2" "$last/rule.md"
+  exit 71
+fi
+exec "$AGENTS_ECOSYSTEM_TEST_RM" "$@"
+EOF
+  chmod +x "$fake/rm"
+  if output="$(PATH="$fake:$PATH" AGENTS_ECOSYSTEM_TEST_RM="$real_rm" \
+    AGENTS_ECOSYSTEM_TEST_MARKER="$base/triggered" bash "$SYNC" \
+    "$base/source" "$base/target" 2>&1)"; then return 1; fi
+  grep -q 'backup cleanup failed' <<< "$output" || return 1
+  grep -q 'managed v2' "$base/target/rule.md" || return 1
+  [ -f "$base/target/.agents-ecosystem-managed-state-v2" ] || return 1
+  grep -q owner "$base/target/local/keep.md" || return 1
+  recovery="$(find "$base" -maxdepth 4 -path '*/previous/local/keep.md' -print -quit)"
+  [ -n "$recovery" ] && grep -q owner "$recovery"
+}
+
+stage_cleanup_failure_releases_lock() {
+  local base="$TMP/stage-cleanup" fake="$TMP/stage-cleanup/bin" real_rm
+  mkdir -p "$base/source" "$fake"
+  printf 'managed\n' > "$base/source/rule.md"
+  real_rm="$(command -p -v rm)"
+  cat > "$fake/rm" <<'EOF'
+#!/bin/bash
+last="${!#}"
+if [[ "${last##*/}" = .target.agents-ecosystem-stage.* ]]; then exit 72; fi
+exec "$AGENTS_ECOSYSTEM_TEST_RM" "$@"
+EOF
+  chmod +x "$fake/rm"
+  if PATH="$fake:$PATH" AGENTS_ECOSYSTEM_TEST_RM="$real_rm" \
+    bash "$SYNC" "$base/source" "$base/target" >/dev/null 2>&1; then
+    return 1
+  fi
+  [ ! -e "$base/.target.agents-ecosystem-sync.lock" ] \
+    && grep -q managed "$base/target/rule.md"
+}
+
+early_lock_cleanup_failure_is_reported() {
+  local base="$TMP/early-lock-cleanup" fake="$TMP/early-lock-cleanup/bin" output real_rmdir
+  mkdir -p "$base/source" "$base/target" "$fake"
+  printf 'managed\n' > "$base/source/rule.md"
+  printf 'invalid-state\n' > "$base/target/.agents-ecosystem-managed-state-v2"
+  chmod 0600 "$base/target/.agents-ecosystem-managed-state-v2"
+  real_rmdir="$(command -p -v rmdir)"
+  cat > "$fake/rmdir" <<'EOF'
+#!/bin/bash
+if [[ "${1##*/}" = .target.agents-ecosystem-sync.lock ]]; then exit 75; fi
+exec "$AGENTS_ECOSYSTEM_TEST_RMDIR" "$@"
+EOF
+  chmod +x "$fake/rmdir"
+  if output="$(PATH="$fake:$PATH" AGENTS_ECOSYSTEM_TEST_RMDIR="$real_rmdir" \
+    bash "$SYNC" "$base/source" "$base/target" 2>&1)"; then return 1; fi
+  grep -q 'managed-tree lock cleanup failed' <<< "$output"
+}
+
+check_is_read_only() {
+  local base="$TMP/check"
+  mkdir -p "$base/source"
+  printf 'managed\n' > "$base/source/rule.md"
+  bash "$SYNC" --check "$base/source" "$base/target" >/dev/null || return 1
+  [ ! -e "$base/target" ] && [ ! -e "$base/.target.agents-ecosystem-sync.lock" ]
+}
+
+exclusion_works() {
+  local base="$TMP/exclude"
+  mkdir -p "$base/source/templates" "$base/source/skills"
+  printf 'candidate\n' > "$base/source/templates/README.md"
+  printf 'skill\n' > "$base/source/skills/SKILL.md"
+  bash "$SYNC" --exclude-top-level templates "$base/source" "$base/target" >/dev/null || return 1
+  [ ! -e "$base/target/templates" ] && [ -f "$base/target/skills/SKILL.md" ]
+}
+
+symlinks_are_rejected() {
+  local base="$TMP/symlink"
+  mkdir -p "$base/source" "$base/external" "$base/target"
+  printf 'outside\n' > "$base/external/rule.md"
+  ln -s "$base/external/rule.md" "$base/source/rule.md"
+  ! bash "$SYNC" "$base/source" "$base/target" >/dev/null 2>&1 || return 1
+  rm "$base/source/rule.md"
+  printf 'managed\n' > "$base/source/rule.md"
+  ln -s "$base/external" "$base/target/nested"
+  mkdir -p "$base/source/nested"
+  printf 'managed\n' > "$base/source/nested/rule.md"
+  ! bash "$SYNC" "$base/source" "$base/target" >/dev/null 2>&1
+}
+
+cooperative_lock_blocks() {
+  local base="$TMP/lock"
+  mkdir -p "$base/source" "$base/.target.agents-ecosystem-sync.lock"
+  printf 'managed\n' > "$base/source/rule.md"
+  ! bash "$SYNC" "$base/source" "$base/target" >/dev/null 2>&1
+}
+
+run "initial install and update preserve local extensions" initial_and_update
+run "retirement removes only unchanged managed files" retires_only_managed
+run "retirement rejects a symlinked managed ancestor" retired_symlink_ancestor_blocks
+run "local managed edits block refresh" modified_managed_blocks
+run "content change during staging is detected and preserved" content_change_during_staging_is_preserved
+run "mode change during staging is detected and preserved" mode_change_during_staging_is_preserved
+run "unsafe source file modes are normalized" unsafe_source_file_modes_are_normalized
+run "existing target root mode is preserved" existing_target_root_mode_is_preserved
+run "permissive managed state mode is rejected" permissive_managed_state_mode_is_rejected
+run "future upstream collision blocks before mutation" future_collision_blocks_before_mutation
+run "matching local content is not silently adopted" matching_local_collision_blocks
+run "fresh activation gap preserves concurrent target" activation_gap_fresh_preserves_concurrent_target
+run "update activation gap retains prior recovery" activation_gap_update_retains_prior
+run "backup cleanup failure keeps the verified new tree" backup_cleanup_failure_keeps_new_tree
+run "stage cleanup failure releases cooperative lock" stage_cleanup_failure_releases_lock
+run "early lock cleanup failure is reported" early_lock_cleanup_failure_is_reported
+run "check mode is read-only" check_is_read_only
+run "top-level exclusions remain absent" exclusion_works
+run "source and destination symlinks are rejected" symlinks_are_rejected
+run "cooperative lock rejects overlapping updates" cooperative_lock_blocks
+
+[ "$failures" -eq 0 ] || { echo "$failures sync test(s) failed" >&2; exit 1; }
+echo "All managed-tree sync tests passed."

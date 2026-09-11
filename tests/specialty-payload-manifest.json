@@ -3,27 +3,11 @@
   "roots": {
     "laravel": {
       "entries": 23,
-      "sha256": "9446072cf4a908040871e87e4632de06ef6f9a5f6ced370d819e6637376e524c"
-    },
-    "ma-architecture-review": {
-      "entries": 2,
-      "sha256": "7be6dcf00b6bc68ae74968addb5f9bf61f8a8a91d1bd5368b2ef30f3cc811d46"
-    },
-    "ma-performance-review": {
-      "entries": 2,
-      "sha256": "fb1d8622218b7d6bb594e5df27285d33127128d44b464b7358df559765088c2b"
-    },
-    "ma-review": {
-      "entries": 2,
-      "sha256": "49ee51a0adfb0fe180c5b28e8d36f2db52780121211939122c8b16a893f453da"
-    },
-    "ma-security-review": {
-      "entries": 2,
-      "sha256": "d762dacc83e28884ce2de76467f4756145ddf2644368f8b312e139ffe3799a00"
+      "sha256": "88968446e6f7256633ad1f72a1e472fdecfea49ee4a161ea8e8df971a59e2699"
     },
     "nitro": {
       "entries": 17,
-      "sha256": "e0212bbc20103430aed254608d96b3f455d0f15b9c764307d6928174e0697b72"
+      "sha256": "7ca4e6493d28444ea15302729af1ad5f0411ebfc27266c3c44c7b4b6a70519cf"
     },
     "nuxt": {
       "entries": 22,
@@ -32,6 +16,18 @@
     "pinia": {
       "entries": 13,
       "sha256": "9498355cd14875522bf76585ab4b78205b87b04903921936e59a7bccd4cde8b5"
+    },
+    "stack-architecture-review": {
+      "entries": 2,
+      "sha256": "53307b20837ee50814579176496b293cd015bcc54ab8ea5f89988f118a4292f9"
+    },
+    "stack-performance-review": {
+      "entries": 2,
+      "sha256": "25e75f1d2a23b5175b8791a2a515e3e71af752fd926e3e8066c5fc6a4c0abf95"
+    },
+    "stack-security-review": {
+      "entries": 2,
+      "sha256": "61f89d40107011cff414bdea784fced72a59456cd98be5b44ec94c7e41939c01"
     },
     "vite": {
       "entries": 10,
@@ -46,20 +42,20 @@
       "sha256": "b38eb316029b55295668a7cafbe61a24ff8216b36a952c86654812a45662ee21"
     },
     "vue-best-practices": {
-      "entries": 208,
-      "sha256": "5c2c7b9cfc22acd3af6860ea514e4606b860a2bf9f257c5ea96ae4fe9aea19e9"
+      "entries": 27,
+      "sha256": "a78fb8e47f99cc725ede66051a88ccc4578e25359e9ef52adf2d649dfa66e817"
     },
     "vue-router-best-practices": {
       "entries": 13,
-      "sha256": "42305fbc7bf190235bb8455e4901255a34b34b57fa1b21e34276f0b513c12e4b"
+      "sha256": "a97244ab1fd4d8cf8b63108bc17a0c418107e5dbd34c61903fe654832ab6e826"
     },
     "vue-testing-best-practices": {
       "entries": 16,
       "sha256": "bb4b4ccb8838240d819193aaa9c921ceed819f56a523a10cd36af84dd07652a6"
     },
     "vueuse-functions": {
-      "entries": 271,
-      "sha256": "d40b22627fee550db091b65cb1a64eaa6d3c71cee6135a9a323eed9061ca0622"
+      "entries": 272,
+      "sha256": "72fe05cd01c7bd23043adc271cb348a881b3b8f5bd29e086373892b22feb7849"
     }
   },
   "schema_version": 1

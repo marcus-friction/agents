@@ -1,339 +1,312 @@
 #!/usr/bin/env bash
 
-# Overlay a distribution-managed tree without following destination symlinks.
-# Existing paths absent from the source are retained for local extensions.
+# Cooperatively synchronize a distribution-managed tree. The target-local state
+# records exactly which files the distribution owns; other paths are preserved.
 
 set -euo pipefail
 umask 022
 
 CHECK_ONLY=0
-EXCLUDED_TOP_LEVEL=()
-MV_SUPPORTS_NO_TARGET=0
+LEGACY_MANIFEST=""
+EXCLUDED=()
+STATE_V1=".agents-ecosystem-managed-state-v1"
+STATE_V2=".agents-ecosystem-managed-state-v2"
 
-mv_help="$(command -p mv --help 2>&1 || true)"
-if [[ "$mv_help" == *no-target-directory* ]]; then
-  MV_SUPPORTS_NO_TARGET=1
-fi
+usage() {
+  echo "Usage: $0 [--check] [--exclude-top-level NAME] SOURCE_DIR TARGET_DIR" >&2
+}
 
 while [ "$#" -gt 0 ]; do
   case "$1" in
-    --check)
-      CHECK_ONLY=1
-      shift
-      ;;
+    --check) CHECK_ONLY=1; shift ;;
+    --legacy-manifest)
+      [ -n "${2:-}" ] || exit 1
+      LEGACY_MANIFEST="$2"; shift 2 ;;
     --exclude-top-level)
-      if [ -z "${2:-}" ]; then
-        echo "Error: --exclude-top-level requires a name." >&2
-        exit 1
-      fi
-      if [[ "$2" == */* ]] || [ "$2" = "." ] || [ "$2" = ".." ]; then
-        echo "Error: excluded top-level path must be one name: $2" >&2
-        exit 1
-      fi
-      EXCLUDED_TOP_LEVEL+=("$2")
-      shift 2
-      ;;
-    --*)
-      echo "Unknown option: $1" >&2
-      exit 1
-      ;;
-    *)
-      break
-      ;;
+      [ -n "${2:-}" ] && [[ "$2" != */* ]] && [ "$2" != "." ] && [ "$2" != ".." ] || {
+        echo "Error: --exclude-top-level requires one safe name." >&2; exit 1;
+      }
+      EXCLUDED+=("$2"); shift 2 ;;
+    --*) echo "Unknown option: $1" >&2; usage; exit 1 ;;
+    *) break ;;
   esac
 done
-
-if [ "$#" -ne 2 ]; then
-  echo "Usage: sync-managed-tree.sh [--check] [--exclude-top-level NAME] SOURCE_DIR TARGET_DIR" >&2
-  exit 1
-fi
+[ "$#" -eq 2 ] || { usage; exit 1; }
 
 SOURCE_INPUT="$1"
 TARGET_INPUT="$2"
-
-if [ -L "$SOURCE_INPUT" ] || [ ! -d "$SOURCE_INPUT" ]; then
-  echo "Error: managed source must be a physical directory: $SOURCE_INPUT" >&2
-  exit 1
-fi
-
+[ ! -L "$SOURCE_INPUT" ] && [ -d "$SOURCE_INPUT" ] || {
+  echo "Error: managed source must be a physical directory: $SOURCE_INPUT" >&2; exit 1;
+}
 SOURCE_DIR="$(cd "$SOURCE_INPUT" && pwd -P)"
+case "$SOURCE_INPUT" in
+  /*) SOURCE_EXPECTED="${SOURCE_INPUT%/}" ;;
+  ./*) SOURCE_EXPECTED="$(pwd -P)/${SOURCE_INPUT#./}" ;;
+  *) SOURCE_EXPECTED="$(pwd -P)/$SOURCE_INPUT" ;;
+esac
+[ "$SOURCE_DIR" = "$SOURCE_EXPECTED" ] || {
+  echo "Error: managed source must use a normalized physical path: $SOURCE_INPUT" >&2; exit 1;
+}
+
+case "$TARGET_INPUT" in
+  ""|/|.|..|*/|*//*|*/./*|*/.|*/../*|*/..) echo "Error: target must be a normalized child path: $TARGET_INPUT" >&2; exit 1 ;;
+esac
 TARGET_PARENT_INPUT="$(dirname "$TARGET_INPUT")"
 TARGET_NAME="$(basename "$TARGET_INPUT")"
-
-if [ ! -d "$TARGET_PARENT_INPUT" ]; then
-  echo "Error: managed target parent does not exist: $TARGET_PARENT_INPUT" >&2
-  exit 1
-fi
+[ ! -L "$TARGET_PARENT_INPUT" ] && [ -d "$TARGET_PARENT_INPUT" ] || {
+  echo "Error: target parent must be a physical directory: $TARGET_PARENT_INPUT" >&2; exit 1;
+}
 TARGET_PARENT="$(cd "$TARGET_PARENT_INPUT" && pwd -P)"
+case "$TARGET_PARENT_INPUT" in
+  .) TARGET_PARENT_EXPECTED="$(pwd -P)" ;;
+  /*) TARGET_PARENT_EXPECTED="${TARGET_PARENT_INPUT%/}" ;;
+  ./*) TARGET_PARENT_EXPECTED="$(pwd -P)/${TARGET_PARENT_INPUT#./}" ;;
+  *) TARGET_PARENT_EXPECTED="$(pwd -P)/$TARGET_PARENT_INPUT" ;;
+esac
+[ "$TARGET_PARENT" = "$TARGET_PARENT_EXPECTED" ] || {
+  echo "Error: managed target path crosses a symlink or is not normalized: $TARGET_INPUT" >&2; exit 1;
+}
 TARGET_DIR="$TARGET_PARENT/$TARGET_NAME"
-
-is_excluded_source_path() {
-  local source_path="$1"
-  local relative_path="${source_path#"$SOURCE_DIR"/}"
-  local top_level="${relative_path%%/*}"
-  local excluded_name
-
-  for excluded_name in "${EXCLUDED_TOP_LEVEL[@]}"; do
-    if [ "$top_level" = "$excluded_name" ]; then
-      return 0
-    fi
-  done
-  return 1
+[ ! -L "$TARGET_DIR" ] || { echo "Error: managed target must not be a symlink: $TARGET_DIR" >&2; exit 1; }
+[ ! -e "$TARGET_DIR" ] || [ -d "$TARGET_DIR" ] || {
+  echo "Error: managed target is not a directory: $TARGET_DIR" >&2; exit 1;
 }
 
 hash_file() {
-  local path="$1"
-
   if command -v sha256sum >/dev/null 2>&1; then
-    sha256sum "$path" | awk '{print $1}'
-  elif command -v shasum >/dev/null 2>&1; then
-    shasum -a 256 "$path" | awk '{print $1}'
+    sha256sum "$1" | awk '{print $1}'
   else
-    cksum "$path" | awk '{print $1 ":" $2}'
+    shasum -a 256 "$1" | awk '{print $1}'
   fi
 }
 
-validate_physical_source_file() {
-  local path="$1"
-  local parent
-  local physical_parent
+file_mode() {
+  stat -c '%a' -- "$1" 2>/dev/null || stat -f '%Lp' "$1"
+}
 
-  if [ -L "$path" ] || [ ! -f "$path" ]; then
-    return 1
-  fi
-  parent="$(dirname "$path")"
-  physical_parent="$(cd "$parent" 2>/dev/null && pwd -P)" || return 1
-  [ "$physical_parent" = "$parent" ]
+stat_metadata() {
+  stat -c '%a:%u:%g' -- "$1" 2>/dev/null || stat -f '%Lp:%u:%g' "$1"
 }
 
 path_identity() {
-  local path="$1"
   local kind
-  local metadata
-
-  if [ -L "$path" ]; then
-    kind="symlink"
-  elif [ -d "$path" ]; then
-    kind="directory"
-  elif [ -f "$path" ]; then
-    kind="file"
-  elif [ -e "$path" ]; then
-    kind="special"
+  if [ -L "$1" ]; then kind=symlink
+  elif [ -d "$1" ]; then kind=directory
+  elif [ -e "$1" ]; then kind=other
+  else echo absent; return 0
+  fi
+  if stat -c '%d:%i' -- "$1" >/dev/null 2>&1; then
+    printf '%s:%s\n' "$kind" "$(stat -c '%d:%i' -- "$1")"
   else
-    printf 'absent\n'
-    return 0
+    printf '%s:%s\n' "$kind" "$(stat -f '%d:%i' "$1")"
   fi
-
-  if metadata="$(command -p stat -c '%d:%i:%u' -- "$path" 2>/dev/null)"; then
-    printf '%s:%s\n' "$kind" "$metadata"
-  elif metadata="$(command -p stat -f '%d:%i:%u' "$path" 2>/dev/null)"; then
-    printf '%s:%s\n' "$kind" "$metadata"
-  else
-    return 1
-  fi
-}
-
-snapshot_tree() {
-  local root_path="$1"
-  local output_path="$2"
-  local entry
-  local relative_path
-
-  : > "$output_path"
-  if [ -L "$root_path" ]; then
-    printf 'root-symlink\0%s\0' "$(readlink "$root_path")" > "$output_path"
-    return 0
-  fi
-  if [ ! -e "$root_path" ]; then
-    printf 'root-missing\0' > "$output_path"
-    return 0
-  fi
-  if [ ! -d "$root_path" ]; then
-    printf 'root-special\0' > "$output_path"
-    return 0
-  fi
-
-  printf 'root-directory\0' > "$output_path"
-  while IFS= read -r -d '' entry; do
-    relative_path="${entry#"$root_path"/}"
-    if [ -L "$entry" ]; then
-      printf 'symlink\0%s\0%s\0' \
-        "$relative_path" "$(readlink "$entry")" >> "$output_path"
-    elif [ -d "$entry" ]; then
-      printf 'directory\0%s\0' "$relative_path" >> "$output_path"
-    elif [ -f "$entry" ]; then
-      printf 'file\0%s\0%s\0' \
-        "$relative_path" "$(hash_file "$entry")" >> "$output_path"
-    else
-      printf 'special\0%s\0' "$relative_path" >> "$output_path"
-    fi
-  done < <(find "$root_path" -mindepth 1 -print0)
 }
 
 snapshot_target() {
-  snapshot_tree "$TARGET_DIR" "$1"
+  local output="$1" root="${2:-$TARGET_DIR}" entry rel
+  : > "$output"
+  if [ -L "$root" ]; then printf 'root-symlink\0%s\0' "$(readlink "$root")" > "$output"; return; fi
+  if [ ! -e "$root" ]; then printf 'root-missing\0' > "$output"; return; fi
+  if [ ! -d "$root" ]; then printf 'root-special\0' > "$output"; return; fi
+  printf 'root-directory\0%s\0' "$(stat_metadata "$root")" > "$output"
+  while IFS= read -r -d '' entry; do
+    rel="${entry#"$root"/}"
+    if [ -L "$entry" ]; then
+      printf 'symlink\0%s\0%s\0%s\0' "$rel" "$(readlink "$entry")" "$(stat_metadata "$entry")" >> "$output"
+    elif [ -d "$entry" ]; then
+      printf 'directory\0%s\0%s\0' "$rel" "$(stat_metadata "$entry")" >> "$output"
+    elif [ -f "$entry" ]; then
+      printf 'file\0%s\0%s\0%s\0' "$rel" "$(hash_file "$entry")" "$(stat_metadata "$entry")" >> "$output"
+    else
+      printf 'special\0%s\0' "$rel" >> "$output"
+    fi
+  done < <(find "$root" -mindepth 1 -print0)
 }
 
-move_directory_no_replace() {
-  local source="$1"
-  local target="$2"
-  local expected_identity="$3"
-  local move_status=0
-  local moved_identity=""
-  local restore_status=0
-
-  if [ -L "$source" ] || [ ! -d "$source" ] \
-    || [ "$(path_identity "$source" 2>/dev/null || true)" != "$expected_identity" ]; then
-    echo "Error: managed-tree move source changed before transition: $source" >&2
-    return 1
-  fi
-  if [ -e "$target" ] || [ -L "$target" ]; then
-    echo "Error: managed-tree move target already exists: $target" >&2
-    return 1
-  fi
-
-  if [ "$MV_SUPPORTS_NO_TARGET" -eq 1 ]; then
-    mv -Tn -- "$source" "$target" || move_status="$?"
-  else
-    # BSD mv has no -T. The preflight only permits an absent destination; the
-    # post-move identity check remains authoritative.
-    mv -n -- "$source" "$target" || move_status="$?"
-  fi
-
-  if [ ! -e "$source" ] && [ ! -L "$source" ] \
-    && [ -d "$target" ] && [ ! -L "$target" ] \
-    && [ "$(path_identity "$target" 2>/dev/null || true)" = "$expected_identity" ]; then
-    return 0
-  fi
-
-  if [ ! -e "$source" ] && [ ! -L "$source" ] \
-    && [ -d "$target" ] && [ ! -L "$target" ]; then
-    moved_identity="$(path_identity "$target" 2>/dev/null || true)"
-    if [ -n "$moved_identity" ] && [ ! -e "$source" ] && [ ! -L "$source" ]; then
-      restore_status=0
-      if [ "$MV_SUPPORTS_NO_TARGET" -eq 1 ]; then
-        mv -Tn -- "$target" "$source" || restore_status="$?"
-      else
-        mv -n -- "$target" "$source" || restore_status="$?"
-      fi
-      if [ "$restore_status" -eq 0 ] \
-        && [ "$(path_identity "$source" 2>/dev/null || true)" = "$moved_identity" ]; then
-        echo "Error: managed-tree transition moved an unexpected replacement and restored it." >&2
-        return 1
-      fi
-    fi
-  fi
-
-  if [ "$move_status" -ne 0 ]; then
-    echo "Error: managed-tree directory transition failed: $source -> $target" >&2
-  else
-    echo "Error: managed-tree directory transition was blocked by a changed path: $source -> $target" >&2
-  fi
+is_excluded() {
+  local rel="$1" top="${1%%/*}" name
+  for name in "${EXCLUDED[@]}"; do [ "$top" = "$name" ] && return 0; done
   return 1
 }
 
-validate_legal_adoption() {
-  local source_legal="$SOURCE_DIR/legal"
-  local target_legal="$TARGET_DIR/legal"
-  local source_entry
-  local target_entry
-
-  if [ ! -e "$source_legal" ]; then
-    return 0
-  fi
-  if [ ! -f "$source_legal/.agents-ecosystem-managed" ]; then
-    echo "Error: managed legal source lacks its ownership marker." >&2
-    return 1
-  fi
-  if [ ! -e "$target_legal" ] && [ ! -L "$target_legal" ]; then
-    return 0
-  fi
-  if [ -L "$target_legal" ] || [ ! -d "$target_legal" ]; then
-    echo "Error: target legal payload must be a physical directory: $target_legal" >&2
-    return 1
-  fi
-  if [ -f "$target_legal/.agents-ecosystem-managed" ] \
-    && [ ! -L "$target_legal/.agents-ecosystem-managed" ] \
-    && cmp -s "$source_legal/.agents-ecosystem-managed" \
-      "$target_legal/.agents-ecosystem-managed"; then
-    return 0
-  fi
-
-  while IFS= read -r -d '' source_entry; do
-    target_entry="$target_legal/${source_entry##*/}"
-    if [ ! -e "$target_entry" ] && [ ! -L "$target_entry" ]; then
-      continue
-    fi
-    if [ -L "$target_entry" ] \
-      || [ ! -f "$target_entry" ] \
-      || ! cmp -s "$source_entry" "$target_entry"; then
-      echo "Error: unmanaged .agents/legal collision: $target_entry" >&2
-      return 1
-    fi
-  done < <(find "$source_legal" -mindepth 1 -maxdepth 1 -type f -print0)
+valid_rel() {
+  case "$1" in ""|/*|./*|../*|*//*|*/./*|*/../*|*/.|*/..|*$'\t'*|*$'\n'*) return 1 ;; esac
+  [ "$1" != "$STATE_V1" ] && [ "$1" != "$STATE_V2" ]
 }
 
-if [ -L "$TARGET_INPUT" ]; then
-  echo "Error: managed target must not be a symlink: $TARGET_INPUT" >&2
-  exit 1
-fi
-if [ -e "$TARGET_INPUT" ] && [ ! -d "$TARGET_INPUT" ]; then
-  echo "Error: managed target is not a directory: $TARGET_INPUT" >&2
-  exit 1
-fi
-if [ ! -w "$TARGET_PARENT" ] || [ ! -x "$TARGET_PARENT" ]; then
-  echo "Error: managed target parent is not writable and searchable: $TARGET_PARENT" >&2
-  exit 1
-fi
-if [ -d "$TARGET_INPUT" ] \
-  && { [ ! -w "$TARGET_INPUT" ] || [ ! -x "$TARGET_INPUT" ]; }; then
-  echo "Error: managed target is not writable and searchable: $TARGET_INPUT" >&2
-  exit 1
-fi
-invalid_source=""
-while IFS= read -r -d '' entry; do
-  if is_excluded_source_path "$entry"; then
-    continue
-  fi
-  invalid_source="$entry"
-  break
-done < <(find "$SOURCE_DIR" -mindepth 1 ! -type d ! -type f -print0)
+validate_physical_ancestors() {
+  local root="$1" rel="$2" parent current part
+  local -a parts
+  parent="${rel%/*}"
+  [ "$parent" != "$rel" ] || return 0
+  current="$root"
+  IFS='/' read -r -a parts <<< "$parent"
+  for part in "${parts[@]}"; do
+    current="$current/$part"
+    [ ! -L "$current" ] || {
+      echo "Error: managed destination crosses a symlink: $current" >&2; return 1;
+    }
+    [ ! -e "$current" ] || [ -d "$current" ] || {
+      echo "Error: managed destination ancestor is not a directory: $current" >&2; return 1;
+    }
+  done
+}
 
-if [ -n "$invalid_source" ]; then
-  echo "Error: managed source contains a symlink or special file: $invalid_source" >&2
-  exit 1
-fi
+validate_tree() {
+  local root="$1" entry rel
+  while IFS= read -r -d '' entry; do
+    rel="${entry#"$root"/}"
+    valid_rel "$rel" || { echo "Error: unsupported managed path: $rel" >&2; return 1; }
+    if [ -L "$entry" ] || { [ ! -d "$entry" ] && [ ! -f "$entry" ]; }; then
+      echo "Error: managed trees may contain only physical files and directories: $entry" >&2
+      return 1
+    fi
+  done < <(find "$root" -mindepth 1 -print0)
+}
 
-if [ -d "$TARGET_INPUT" ] && [ "$(cd "$TARGET_INPUT" && pwd -P)" = "$SOURCE_DIR" ]; then
+validate_tree "$SOURCE_DIR"
+for reserved in "$STATE_V1" "$STATE_V2"; do
+  [ ! -e "$SOURCE_DIR/$reserved" ] && [ ! -L "$SOURCE_DIR/$reserved" ] || {
+    echo "Error: source uses reserved state path: $reserved" >&2; exit 1;
+  }
+done
+
+if [ -d "$TARGET_DIR" ] && [ "$(cd "$TARGET_DIR" && pwd -P)" = "$SOURCE_DIR" ]; then
   echo "   [Unchanged] Managed source and target are the same directory"
   exit 0
 fi
 
-# Complete collision preflight before creating or replacing anything.
-while IFS= read -r -d '' source_path; do
-  if is_excluded_source_path "$source_path"; then
-    continue
+LOCK="$TARGET_PARENT/.$TARGET_NAME.agents-ecosystem-sync.lock"
+if [ "$CHECK_ONLY" -eq 0 ]; then
+  if ! mkdir "$LOCK" 2>/dev/null; then
+    echo "Error: another managed-tree update is in progress: $LOCK" >&2; exit 1
   fi
-  relative_path="${source_path#"$SOURCE_DIR"/}"
-  target_path="$TARGET_DIR/$relative_path"
+  release_lock() {
+    local status=$?
+    if ! rmdir "$LOCK" 2>/dev/null; then
+      echo "Error: managed-tree lock cleanup failed: $LOCK" >&2
+      status=1
+    fi
+    exit "$status"
+  }
+  trap release_lock EXIT
+  trap 'exit 130' INT TERM
+fi
 
-  if [ -L "$target_path" ]; then
-    echo "Error: managed destination must not be a symlink: $target_path" >&2
-    exit 1
+declare -a OLD_PATHS=() OLD_HASHES=() OLD_MODES=()
+STATE_PATH=""
+if [ -e "$TARGET_DIR/$STATE_V2" ] || [ -L "$TARGET_DIR/$STATE_V2" ]; then
+  STATE_PATH="$TARGET_DIR/$STATE_V2"
+elif [ -e "$TARGET_DIR/$STATE_V1" ] || [ -L "$TARGET_DIR/$STATE_V1" ]; then
+  STATE_PATH="$TARGET_DIR/$STATE_V1"
+fi
+
+old_contains() {
+  local requested="$1" existing
+  for existing in "${OLD_PATHS[@]}"; do [ "$existing" = "$requested" ] && return 0; done
+  return 1
+}
+
+add_old() {
+  local hash="$1" mode="$2" rel="$3" index="${#OLD_PATHS[@]}"
+  valid_rel "$rel" && [[ "$hash" =~ ^[0-9a-f]+$ ]] && [[ "$mode" =~ ^[0-7]+$ ]] && ! old_contains "$rel" || {
+    echo "Error: invalid or duplicate managed-state record." >&2; return 1;
+  }
+  case "$rel" in project|project/*|rules|rules/*|templates|templates/*)
+    echo "Error: managed state claims protected project content: $rel" >&2; return 1 ;;
+  esac
+  if is_excluded "$rel"; then
+    echo "Error: managed state claims excluded content: $rel" >&2; return 1
   fi
-  if [ -d "$source_path" ]; then
-    if [ -e "$target_path" ] && [ ! -d "$target_path" ]; then
-      echo "Error: managed destination is not a directory: $target_path" >&2
-      exit 1
+  OLD_PATHS+=("$rel"); OLD_HASHES+=("$hash"); OLD_MODES+=("$mode")
+}
+
+if [ -n "$STATE_PATH" ]; then
+  [ ! -L "$STATE_PATH" ] && [ -f "$STATE_PATH" ] || { echo "Error: managed state must be a physical file." >&2; exit 1; }
+  case "$(file_mode "$STATE_PATH")" in
+    600|644) ;;
+    *) echo "Error: managed state mode must remain 0600 or 0644: $STATE_PATH" >&2; exit 1 ;;
+  esac
+  if [ "${STATE_PATH##*/}" = "$STATE_V2" ]; then
+    IFS= read -r header < "$STATE_PATH"
+    [ "$header" = "agents-ecosystem-managed-state-v2" ] || { echo "Error: invalid managed-state header." >&2; exit 1; }
+    while IFS=$'\t' read -r hash mode rel extra; do
+      [ -n "$hash$mode$rel$extra" ] || continue
+      [ -z "$extra" ] || { echo "Error: invalid managed-state record." >&2; exit 1; }
+      add_old "$hash" "$mode" "$rel"
+    done < <(sed '1d' "$STATE_PATH")
+  else
+    exec 3<"$STATE_PATH"
+    IFS= read -r -d '' header <&3 || true
+    [ "$header" = "agents-ecosystem-managed-state-v1" ] || { exec 3<&-; echo "Error: invalid legacy managed-state header." >&2; exit 1; }
+    while IFS= read -r -d '' hash <&3; do
+      IFS= read -r -d '' mode <&3 && IFS= read -r -d '' rel <&3 || {
+        exec 3<&-; echo "Error: partial legacy managed-state record." >&2; exit 1;
+      }
+      add_old "$hash" "$mode" "$rel"
+    done
+    exec 3<&-
+  fi
+fi
+
+if [ -z "$STATE_PATH" ] && [ -n "$LEGACY_MANIFEST" ]; then
+  [ ! -L "$LEGACY_MANIFEST" ] && [ -f "$LEGACY_MANIFEST" ] || {
+    echo "Error: legacy inventory must be a physical file" >&2; exit 1;
+  }
+  while IFS=$'\t' read -r hash mode rel extra; do
+    case "$hash" in \#*|'') continue ;; esac
+    [ -z "$extra" ] && valid_rel "$rel" || exit 1
+    case "$rel" in skills/*|tools/*|legal/*|.*-plugin/*) ;; *) exit 1 ;; esac
+    if [ -e "$TARGET_DIR/$rel" ] || [ -L "$TARGET_DIR/$rel" ]; then
+      validate_physical_ancestors "$TARGET_DIR" "$rel" || exit 1
+      if [ ! -L "$TARGET_DIR/$rel" ] && [ -f "$TARGET_DIR/$rel" ]; then
+        actual_mode="$(file_mode "$TARGET_DIR/$rel")"
+        # Git tracks owner-executable state, while checkout permissions depend
+        # on the original umask. Retain the observed mode in the adopted state.
+        mode_bits=$((8#$actual_mode))
+        if [ $((mode_bits & 07000)) -eq 0 ] \
+          && [ $((mode_bits & 0600)) -eq 384 ] \
+          && { { [ "$mode" = 644 ] && [ $((mode_bits & 0111)) -eq 0 ]; } \
+            || { [ "$mode" = 755 ] && [ $((mode_bits & 0100)) -ne 0 ]; }; } \
+          && [ "$(hash_file "$TARGET_DIR/$rel")" = "$hash" ]; then
+          add_old "$hash" "$actual_mode" "$rel"
+          continue
+        fi
+      fi
+      # No previous state proves this path was ours. Preserve it; the ordinary
+      # collision check below blocks if the new source would overwrite it.
+      echo "   [Preserved] Unverified legacy path: $rel"
     fi
-    if [ -d "$target_path" ] \
-      && { [ ! -w "$target_path" ] || [ ! -x "$target_path" ]; }; then
-      echo "Error: managed destination directory is not writable and searchable: $target_path" >&2
-      exit 1
-    fi
-  elif [ -e "$target_path" ] && [ ! -f "$target_path" ]; then
-    echo "Error: managed destination is not a regular file: $target_path" >&2
-    exit 1
+  done < "$LEGACY_MANIFEST"
+fi
+
+# Confirm that every previously managed path is unchanged. This is the ownership
+# boundary: a local edit blocks refresh instead of being overwritten.
+for i in "${!OLD_PATHS[@]}"; do
+  rel="${OLD_PATHS[$i]}"; path="$TARGET_DIR/$rel"
+  validate_physical_ancestors "$TARGET_DIR" "$rel" || exit 1
+  [ ! -L "$path" ] && [ -f "$path" ] \
+    && [ "$(hash_file "$path")" = "${OLD_HASHES[$i]}" ] \
+    && [ "$(file_mode "$path")" = "${OLD_MODES[$i]}" ] || {
+      echo "Error: managed path changed locally since installation: $path" >&2; exit 1;
+    }
+done
+
+# Preflight source collisions and physical target ancestors.
+while IFS= read -r -d '' source_path; do
+  rel="${source_path#"$SOURCE_DIR"/}"; is_excluded "$rel" && continue
+  target_path="$TARGET_DIR/$rel"
+  current="$TARGET_DIR"
+  IFS='/' read -r -a parts <<< "$rel"
+  for part in "${parts[@]}"; do
+    current="$current/$part"
+    [ ! -L "$current" ] || { echo "Error: managed destination crosses a symlink: $current" >&2; exit 1; }
+  done
+  if [ -f "$source_path" ] && [ -e "$target_path" ] && ! old_contains "$rel"; then
+    echo "Error: upstream path collides with a local extension: $target_path" >&2; exit 1
+  fi
+  if [ -d "$source_path" ] && [ -e "$target_path" ] && [ ! -d "$target_path" ]; then
+    echo "Error: managed destination is not a directory: $target_path" >&2; exit 1
   fi
 done < <(find "$SOURCE_DIR" -mindepth 1 -print0)
 
@@ -342,177 +315,138 @@ if [ "$CHECK_ONLY" -eq 1 ]; then
   exit 0
 fi
 
-STAGING_DIR="$(mktemp -d "$TARGET_PARENT/.managed-tree-stage.XXXXXX")"
-NEXT_DIR="$STAGING_DIR/next"
-BACKUP_DIR="$STAGING_DIR/original"
-SNAPSHOT_BEFORE="$STAGING_DIR/target-before"
-SNAPSHOT_AFTER="$STAGING_DIR/target-after"
-SNAPSHOT_COMMIT="$STAGING_DIR/target-at-commit"
-SNAPSHOT_QUARANTINED="$STAGING_DIR/target-quarantined"
-ORIGINAL_MOVED=0
-COMMIT_COMPLETE=0
-KEEP_STAGING=0
-TARGET_IDENTITY="absent"
-NEXT_IDENTITY=""
-DEFER_SIGNALS=0
-PENDING_SIGNAL=0
+STAGE="$(mktemp -d "$TARGET_PARENT/.$TARGET_NAME.agents-ecosystem-stage.XXXXXX")"
+NEXT="$STAGE/next"; BACKUP="$STAGE/previous"; mkdir "$NEXT"
+SNAPSHOT_BEFORE="$STAGE/target-before"; SNAPSHOT_AFTER="$STAGE/target-after"
+SNAPSHOT_COMMIT="$STAGE/target-commit"; SNAPSHOT_MOVED="$STAGE/target-moved"
+ORIGINAL_ID="$(path_identity "$TARGET_DIR")"; NEXT_ID=""
+BACKUP_MOVED=0; ACTIVATION_STARTED=0; KEEP_STAGE=0
 
-handle_signal() {
-  local status="$1"
-  if [ "$DEFER_SIGNALS" -eq 1 ]; then
-    PENDING_SIGNAL="$status"
-    return 0
+restore_backup() {
+  local nested="$TARGET_DIR/$(basename "$BACKUP")"
+  [ "$(path_identity "$TARGET_DIR")" = absent ] || return 1
+  mv "$BACKUP" "$TARGET_DIR" || return 1
+  [ "$(path_identity "$TARGET_DIR")" = "$ORIGINAL_ID" ] && return 0
+  if [ "$(path_identity "$nested")" = "$ORIGINAL_ID" ]; then
+    mv "$nested" "$BACKUP" || true
   fi
-  exit "$status"
-}
-
-begin_transition() {
-  DEFER_SIGNALS=1
-}
-
-end_transition() {
-  local signal_status
-  DEFER_SIGNALS=0
-  if [ "$PENDING_SIGNAL" -ne 0 ]; then
-    signal_status="$PENDING_SIGNAL"
-    PENDING_SIGNAL=0
-    exit "$signal_status"
-  fi
+  return 1
 }
 
 cleanup() {
-  local status="$?"
+  local status=$?
   trap - EXIT
-  trap '' INT TERM
   set +e
-
-  if [ "$status" -ne 0 ] \
-    && [ "$ORIGINAL_MOVED" -eq 1 ] \
-    && [ "$COMMIT_COMPLETE" -eq 0 ]; then
-    if { [ ! -e "$TARGET_DIR" ] && [ ! -L "$TARGET_DIR" ]; } \
-      && move_directory_no_replace \
-        "$BACKUP_DIR" "$TARGET_DIR" "$TARGET_IDENTITY"; then
-      ORIGINAL_MOVED=0
-      echo "   [Restored] Prior managed tree after commit failure" >&2
+  if [ "$status" -ne 0 ] && [ "$ACTIVATION_STARTED" -eq 1 ] \
+    && [ "$(path_identity "$TARGET_DIR")" = "$NEXT_ID" ]; then
+    if mv "$TARGET_DIR" "$NEXT" && [ "$(path_identity "$NEXT")" = "$NEXT_ID" ]; then
+      ACTIVATION_STARTED=0
     else
-      KEEP_STAGING=1
-      echo "Error: automatic restore failed; prior tree retained at $BACKUP_DIR" >&2
+      echo "Error: activated managed tree could not be isolated; recovery retained at $BACKUP" >&2
+      KEEP_STAGE=1
     fi
   fi
-
-  if [ "$COMMIT_COMPLETE" -eq 1 ] && [ "$ORIGINAL_MOVED" -eq 1 ]; then
-    snapshot_tree "$BACKUP_DIR" "$SNAPSHOT_QUARANTINED.cleanup" || KEEP_STAGING=1
-    if [ "$(path_identity "$BACKUP_DIR" 2>/dev/null || true)" != "$TARGET_IDENTITY" ] \
-      || ! cmp -s "$SNAPSHOT_BEFORE" "$SNAPSHOT_QUARANTINED.cleanup"; then
-      KEEP_STAGING=1
-      echo "Error: prior managed tree changed after commit; recovery material retained at $BACKUP_DIR" >&2
+  if [ "$status" -ne 0 ] && [ "$BACKUP_MOVED" -eq 1 ]; then
+    if [ "$(path_identity "$BACKUP")" = "$ORIGINAL_ID" ] && restore_backup; then
+      BACKUP_MOVED=0
+      echo "   [Restored] Prior managed tree after activation failure" >&2
+    elif [ "$(path_identity "$TARGET_DIR")" = "$ORIGINAL_ID" ] \
+      && [ "$(path_identity "$BACKUP")" = absent ]; then
+      BACKUP_MOVED=0
+    else
+      echo "Error: automatic restore failed; prior tree retained at $BACKUP" >&2
+      KEEP_STAGE=1
     fi
   fi
-
-  if [ "$KEEP_STAGING" -eq 0 ]; then
-    rm -rf "$STAGING_DIR"
+  if [ "$KEEP_STAGE" -eq 0 ] && [ -d "$STAGE" ] \
+    && ! rm -rf -- "$STAGE"; then
+    echo "Error: managed-tree staging cleanup failed: $STAGE" >&2
+    status=1
+  fi
+  if ! rmdir "$LOCK" 2>/dev/null; then
+    echo "Error: managed-tree lock cleanup failed: $LOCK" >&2
+    status=1
   fi
   exit "$status"
 }
 trap cleanup EXIT
-trap 'handle_signal 130' INT
-trap 'handle_signal 143' TERM
+trap 'exit 130' INT TERM
 
 snapshot_target "$SNAPSHOT_BEFORE"
-TARGET_IDENTITY="$(path_identity "$TARGET_DIR")"
-validate_legal_adoption
-if [ -d "$TARGET_DIR" ] && [ ! -L "$TARGET_DIR" ]; then
-  cp -a "$TARGET_DIR" "$NEXT_DIR"
-else
-  mkdir "$NEXT_DIR"
-fi
+if [ -d "$TARGET_DIR" ]; then cp -a "$TARGET_DIR/." "$NEXT/"; fi
+rm -f -- "$NEXT/$STATE_V1" "$NEXT/$STATE_V2"
+for rel in "${OLD_PATHS[@]}"; do
+  validate_physical_ancestors "$NEXT" "$rel" || exit 1
+  rm -f -- "$NEXT/$rel"
+done
+find "$NEXT" -mindepth 1 -depth -type d -empty -delete
 
-if [ -L "$NEXT_DIR" ] || [ ! -d "$NEXT_DIR" ]; then
-  echo "Error: managed target changed to a non-directory during staging: $TARGET_DIR" >&2
-  exit 1
-fi
+while IFS= read -r -d '' source_path; do
+  rel="${source_path#"$SOURCE_DIR"/}"; is_excluded "$rel" && continue
+  if [ -d "$source_path" ]; then
+    mkdir -p "$NEXT/$rel"
+    chmod go-w "$NEXT/$rel"
+  else
+    mkdir -p "$(dirname "$NEXT/$rel")"
+    cp -p "$source_path" "$NEXT/$rel"
+    chmod go-w "$NEXT/$rel"
+  fi
+done < <(find "$SOURCE_DIR" -mindepth 1 -print0)
 
-while IFS= read -r -d '' source_directory; do
-  if is_excluded_source_path "$source_directory"; then
-    continue
-  fi
-  relative_path="${source_directory#"$SOURCE_DIR"/}"
-  next_path="$NEXT_DIR/$relative_path"
-  if [ -L "$next_path" ]; then
-    echo "Error: staged managed destination must not be a symlink: $next_path" >&2
-    exit 1
-  fi
-  mkdir -p "$next_path"
-  chmod go-w "$next_path"
-done < <(find "$SOURCE_DIR" -mindepth 1 -type d -print0)
-
-while IFS= read -r -d '' source_file; do
-  if is_excluded_source_path "$source_file"; then
-    continue
-  fi
-  relative_path="${source_file#"$SOURCE_DIR"/}"
-  next_path="$NEXT_DIR/$relative_path"
-  if ! validate_physical_source_file "$source_file"; then
-    echo "Error: managed source file changed type before copy: $source_file" >&2
-    exit 1
-  fi
-  source_hash="$(hash_file "$source_file")"
-  if ! validate_physical_source_file "$source_file"; then
-    echo "Error: managed source file changed while it was validated: $source_file" >&2
-    exit 1
-  fi
-  if [ -L "$next_path" ]; then
-    echo "Error: staged managed destination must not be a symlink: $next_path" >&2
-    exit 1
-  fi
-  rm -f "$next_path"
-  cp "$source_file" "$next_path"
-  if [ -L "$next_path" ] || [ ! -f "$next_path" ] \
-    || [ "$(hash_file "$next_path" 2>/dev/null || true)" != "$source_hash" ]; then
-    rm -f "$next_path"
-    echo "Error: staged managed file does not match its validated source snapshot: $source_file" >&2
-    exit 1
-  fi
-done < <(find "$SOURCE_DIR" -mindepth 1 -type f -print0)
+{
+  echo "agents-ecosystem-managed-state-v2"
+  while IFS= read -r -d '' path; do
+    rel="${path#"$SOURCE_DIR"/}"; is_excluded "$rel" && continue
+    printf '%s\t%s\t%s\n' "$(hash_file "$NEXT/$rel")" "$(file_mode "$NEXT/$rel")" "$rel"
+  done < <(find "$SOURCE_DIR" -type f -print0)
+} > "$NEXT/$STATE_V2"
+chmod 0644 "$NEXT/$STATE_V2"
 
 snapshot_target "$SNAPSHOT_AFTER"
-if ! cmp -s "$SNAPSHOT_BEFORE" "$SNAPSHOT_AFTER"; then
-  echo "Error: managed target changed during staging; no changes committed: $TARGET_DIR" >&2
-  exit 1
-fi
-
+cmp -s "$SNAPSHOT_BEFORE" "$SNAPSHOT_AFTER" || {
+  echo "Error: managed target changed during staging; no changes committed: $TARGET_DIR" >&2; exit 1;
+}
 snapshot_target "$SNAPSHOT_COMMIT"
-if ! cmp -s "$SNAPSHOT_BEFORE" "$SNAPSHOT_COMMIT"; then
-  echo "Error: managed target changed immediately before commit; no changes committed: $TARGET_DIR" >&2
-  exit 1
-fi
-
-NEXT_IDENTITY="$(path_identity "$NEXT_DIR")"
-begin_transition
+cmp -s "$SNAPSHOT_BEFORE" "$SNAPSHOT_COMMIT" || {
+  echo "Error: managed target changed immediately before commit; no changes committed: $TARGET_DIR" >&2; exit 1;
+}
+[ "$(path_identity "$TARGET_DIR")" = "$ORIGINAL_ID" ] || {
+  echo "Error: managed target identity changed before commit: $TARGET_DIR" >&2; exit 1;
+}
 if [ -d "$TARGET_DIR" ] && [ ! -L "$TARGET_DIR" ]; then
-  if ! move_directory_no_replace \
-    "$TARGET_DIR" "$BACKUP_DIR" "$TARGET_IDENTITY"; then
-    exit 1
-  fi
-  ORIGINAL_MOVED=1
-  snapshot_tree "$BACKUP_DIR" "$SNAPSHOT_QUARANTINED"
-  if [ "$(path_identity "$BACKUP_DIR")" != "$TARGET_IDENTITY" ] \
-    || ! cmp -s "$SNAPSHOT_BEFORE" "$SNAPSHOT_QUARANTINED"; then
-    echo "Error: managed target changed while it was quarantined; the concurrent tree will be restored." >&2
-    exit 1
-  fi
+  BACKUP_MOVED=1
+  mv "$TARGET_DIR" "$BACKUP"
+  [ "$(path_identity "$BACKUP")" = "$ORIGINAL_ID" ] || {
+    echo "Error: managed target changed while being isolated: $TARGET_DIR" >&2; exit 1;
+  }
+  snapshot_target "$SNAPSHOT_MOVED" "$BACKUP"
+  cmp -s "$SNAPSHOT_BEFORE" "$SNAPSHOT_MOVED" || {
+    echo "Error: managed target changed after the final comparison; prior content will be restored." >&2; exit 1;
+  }
 elif [ -e "$TARGET_DIR" ] || [ -L "$TARGET_DIR" ]; then
-  echo "Error: managed target changed before commit: $TARGET_DIR" >&2
+  echo "Error: managed target changed before activation: $TARGET_DIR" >&2
   exit 1
 fi
-
-if [ "$PENDING_SIGNAL" -ne 0 ]; then
-  end_transition
-fi
-if ! move_directory_no_replace "$NEXT_DIR" "$TARGET_DIR" "$NEXT_IDENTITY"; then
+NEXT_ID="$(path_identity "$NEXT")"; ACTIVATION_STARTED=1
+mv "$NEXT" "$TARGET_DIR"
+if [ "$(path_identity "$TARGET_DIR")" != "$NEXT_ID" ]; then
+  nested="$TARGET_DIR/$(basename "$NEXT")"
+  if [ "$(path_identity "$nested")" = "$NEXT_ID" ]; then
+    mv "$nested" "$NEXT" || true
+  fi
+  echo "Error: managed target changed during activation; concurrent content was preserved" >&2
   exit 1
 fi
-COMMIT_COMPLETE=1
-end_transition
-
-echo "   [Synced] Upstream-managed tree at $TARGET_DIR"
+ACTIVATION_STARTED=0
+if [ "$BACKUP_MOVED" -eq 1 ]; then
+  [ "$(path_identity "$BACKUP")" = "$ORIGINAL_ID" ] || {
+    echo "Error: prior managed tree changed before cleanup: $BACKUP" >&2; exit 1;
+  }
+  BACKUP_MOVED=0
+  if ! rm -rf -- "$BACKUP"; then
+    KEEP_STAGE=1
+    echo "Error: backup cleanup failed; verified new tree remains active and recovery is retained at $BACKUP" >&2
+    exit 1
+  fi
+fi
+echo "   [Updated] Managed tree at $TARGET_DIR"

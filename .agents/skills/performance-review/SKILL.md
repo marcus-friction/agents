@@ -1,6 +1,6 @@
 ---
 name: performance-review
-description: Review performance risks in affected adopted components using measured behavior and project evidence.
+description: Review code or plans when a change can materially affect latency, throughput, capacity, database work, memory, network, rendering, or cache behavior.
 ---
 
 # Performance Review
@@ -84,3 +84,11 @@ Cite evidence or label the claim as a hypothesis requiring measurement. Report
 the affected workload, realistic consequence, expected benefit, tradeoff,
 smallest correction, and benchmark or observation that would verify it. Avoid
 arbitrary line, query, payload, or duration thresholds without project evidence.
+
+## Parent review handoff
+
+When invoked by the parent review, use its supplied finding contract and review
+packet. Do not widen the accepted file set. Return either an evidence-backed
+not-applicable reason or normalized findings with classification, severity,
+confidence, exact location, workload and failure path, consequence, smallest
+correction, benchmark or observation, and pre-existing status.

@@ -7,17 +7,13 @@
 #
 # Usage:
 #   bash install.sh
-#   bash install.sh --skip-deps
-#   bash install.sh --deps frontend,backend
-#   bash install.sh --skip-deps --from-local /path/to/agents
-#   bash install.sh --skip-deps --ref <40-character-commit-sha>
+#   bash install.sh --from-local /path/to/agents
+#   bash install.sh --ref <40-character-commit-sha>
 
 set -euo pipefail
 umask 022
 
 REPO_URL="https://github.com/marcus-friction/agents.git"
-SKIP_DEPS=0
-DEPS_SELECTION=""
 FROM_LOCAL=""
 RELEASE_REF=""
 
@@ -26,7 +22,7 @@ for git_variable in "${!GIT_@}"; do
 done
 
 usage() {
-  echo "Usage: $0 [--skip-deps] [--deps selection] [--from-local path] [--ref 40-character-commit-sha]"
+  echo "Usage: $0 [--from-local path] [--ref 40-character-commit-sha]"
 }
 
 safe_git() {
@@ -46,50 +42,6 @@ safe_git() {
       "$@"
 }
 
-validate_immutable_source_config() {
-  local source="$1"
-  local config="$source/.git/config"
-  local config_keys
-  local key
-  local link_count
-
-  if [ -L "$config" ] || [ ! -f "$config" ]; then
-    echo "Error: immutable source local Git configuration must be a physical file: $config" >&2
-    return 1
-  fi
-  if link_count="$(command -p stat -c '%h' -- "$config" 2>/dev/null)"; then
-    :
-  elif link_count="$(command -p stat -f '%l' -- "$config" 2>/dev/null)"; then
-    :
-  else
-    echo "Error: immutable source local Git configuration identity could not be verified: $config" >&2
-    return 1
-  fi
-  if [ "$link_count" != "1" ]; then
-    echo "Error: immutable source local Git configuration must have one physical link: $config" >&2
-    return 1
-  fi
-  config_keys="$(safe_git config --file "$config" \
-    --no-includes --name-only --list)" || {
-    echo "Error: immutable source local Git configuration could not be parsed safely: $config" >&2
-    return 1
-  }
-  while IFS= read -r key; do
-    [ -n "$key" ] || continue
-    case "$key" in
-      core.repositoryformatversion|core.filemode|core.bare|core.logallrefupdates|\
-      core.ignorecase|core.precomposeunicode|core.symlinks|extensions.objectformat|\
-      user.name|user.email|remote.origin.url|remote.origin.fetch|\
-      branch.*.remote|branch.*.merge)
-        ;;
-      *)
-        echo "Error: immutable source has unsupported local Git configuration: $key" >&2
-        return 1
-        ;;
-    esac
-  done <<< "$config_keys"
-}
-
 verify_immutable_source() {
   local source="$1"
   local expected="$2"
@@ -101,7 +53,6 @@ verify_immutable_source() {
     echo "Error: immutable source must have a physical .git directory: $source" >&2
     return 1
   fi
-  validate_immutable_source_config "$source"
   actual="$(safe_git -C "$source" rev-parse --verify 'HEAD^{commit}' 2>/dev/null || true)"
   if [ "$actual" != "$expected" ]; then
     echo "Error: source HEAD $actual does not match expected release commit $expected." >&2
@@ -146,18 +97,6 @@ materialize_immutable_source() {
 
 while [ $# -gt 0 ]; do
   case "$1" in
-    --skip-deps)
-      SKIP_DEPS=1
-      shift
-      ;;
-    --deps)
-      DEPS_SELECTION="${2:-}"
-      if [ -z "$DEPS_SELECTION" ]; then
-        echo "Error: --deps requires frontend, backend, docker, all, or a comma-separated selection."
-        exit 1
-      fi
-      shift 2
-      ;;
     --from-local)
       FROM_LOCAL="${2:-}"
       if [ -z "$FROM_LOCAL" ]; then
@@ -189,17 +128,6 @@ done
 if [ -n "$RELEASE_REF" ] && ! [[ "$RELEASE_REF" =~ ^[0-9a-f]{40}$ ]]; then
   echo "Error: --ref requires a full 40-character lowercase commit SHA." >&2
   exit 1
-fi
-
-if [ "$SKIP_DEPS" -eq 1 ] && [ -n "$DEPS_SELECTION" ]; then
-    echo "Error: --skip-deps and --deps cannot be used together."
-    exit 1
-fi
-if [ -n "$DEPS_SELECTION" ] \
-    && ! [[ "$DEPS_SELECTION" =~ ^(all|(frontend|backend|docker)(,(frontend|backend|docker))*)$ ]]; then
-    echo "Error: unsupported dependency selection '$DEPS_SELECTION'." >&2
-    echo "Use frontend, backend, docker, all, or a comma-separated component list." >&2
-    exit 1
 fi
 
 SRC=""
@@ -285,58 +213,6 @@ stage_project_templates() {
     bash "$staging_script" "$SRC" "$(pwd -P)"
 }
 
-preflight_legal_payload() {
-    local project_root="$1"
-    local source_legal="$SRC/.agents/legal"
-    local target_legal="$project_root/.agents/legal"
-    local source_entry
-    local target_entry
-
-    if [ ! -e "$source_legal" ] && [ ! -L "$source_legal" ]; then
-        return 0
-    fi
-    if [ -L "$source_legal" ] || [ ! -d "$source_legal" ]; then
-        echo "Error: source .agents/legal must be a physical directory." >&2
-        exit 1
-    fi
-    if [ -L "$source_legal/.agents-ecosystem-managed" ] \
-        || [ ! -f "$source_legal/.agents-ecosystem-managed" ]; then
-        echo "Error: source legal payload lacks its physical management marker." >&2
-        exit 1
-    fi
-    if [ ! -e "$target_legal" ] && [ ! -L "$target_legal" ]; then
-        return 0
-    fi
-    if [ -L "$target_legal" ] || [ ! -d "$target_legal" ]; then
-        echo "Error: target .agents/legal must be a physical directory." >&2
-        exit 1
-    fi
-    if [ -f "$target_legal/.agents-ecosystem-managed" ] \
-        && [ ! -L "$target_legal/.agents-ecosystem-managed" ] \
-        && cmp -s \
-            "$source_legal/.agents-ecosystem-managed" \
-            "$target_legal/.agents-ecosystem-managed"; then
-        return 0
-    fi
-
-    while IFS= read -r -d '' source_entry; do
-        if [ -L "$source_entry" ] || [ ! -f "$source_entry" ]; then
-            echo "Error: source legal payload entries must be physical files: $source_entry" >&2
-            exit 1
-        fi
-        target_entry="$target_legal/${source_entry##*/}"
-        if [ ! -e "$target_entry" ] && [ ! -L "$target_entry" ]; then
-            continue
-        fi
-        if [ -L "$target_entry" ] \
-            || [ ! -f "$target_entry" ] \
-            || ! cmp -s "$source_entry" "$target_entry"; then
-            echo "Error: unmanaged .agents/legal collision: $target_entry" >&2
-            exit 1
-        fi
-    done < <(find "$source_legal" -mindepth 1 -maxdepth 1 -print0)
-}
-
 preflight_installation() {
     local project_root
     local managed_tree_sync="$SRC/scripts/sync-managed-tree.sh"
@@ -344,10 +220,6 @@ preflight_installation() {
     local registrar="$SRC/scripts/register-skills.sh"
     project_root="$(pwd -P)"
 
-    if [ -L "$SRC/scripts" ] || [ ! -d "$SRC/scripts" ]; then
-        echo "Error: source scripts must be a physical directory: $SRC/scripts" >&2
-        exit 1
-    fi
     for required_script in "$managed_tree_sync" "$staging_script" "$registrar"; do
         if [ -L "$required_script" ] || [ ! -f "$required_script" ]; then
             echo "Error: required installation script must be a physical file: $required_script"
@@ -356,9 +228,9 @@ preflight_installation() {
     done
 
     echo "=> Preflighting every managed path and adapter target..."
-    preflight_legal_payload "$project_root"
     bash "$managed_tree_sync" \
         --check \
+        --legacy-manifest "$SRC/scripts/legacy-project-manifest.tsv" \
         --exclude-top-level templates \
         "$SRC/.agents" \
         "$project_root/.agents"
@@ -391,6 +263,7 @@ echo "=> Installing upstream-managed .agents assets..."
 if [ -d "$SRC/.agents" ]; then
     managed_tree_sync="$SRC/scripts/sync-managed-tree.sh"
     bash "$managed_tree_sync" \
+        --legacy-manifest "$SRC/scripts/legacy-project-manifest.tsv" \
         --exclude-top-level templates \
         "$SRC/.agents" \
         "$(pwd -P)/.agents"
@@ -410,27 +283,6 @@ for project_document in AGENTS.md README.md CONTRIBUTING.md DESIGN.md ARCHITECTU
 done
 
 register_skill_adapters
-
-if [ "$SKIP_DEPS" -eq 1 ]; then
-    echo "=> [Skipped] System dependency bootstrap (--skip-deps)."
-elif [ -n "$DEPS_SELECTION" ]; then
-    dependency_tool="$INSTALL_ROOT/.agents/tools/bootstrap-dependencies.sh"
-    if [ -L "$dependency_tool" ] || [ ! -f "$dependency_tool" ]; then
-        echo "Error: installed dependency tool must be a physical file: $dependency_tool"
-        exit 1
-    fi
-    echo "=> Preparing explicit dependency setup for: $DEPS_SELECTION"
-    if [ "$DEPS_SELECTION" = "all" ]; then
-        bash "$dependency_tool" --all --apply
-    else
-        bash "$dependency_tool" --components "$DEPS_SELECTION" --apply
-    fi
-else
-    echo "=> [Skipped] Host dependency changes are opt-in."
-    echo "   Review a non-mutating plan with:"
-    echo "   .agents/tools/bootstrap-dependencies.sh --plan --all"
-    echo "   Or rerun install.sh with --deps frontend|backend|docker|all."
-fi
 
 echo ""
 echo "=> Installation Complete!"

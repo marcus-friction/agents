@@ -1,0 +1,6 @@
+{
+  "name": "queue-monitor",
+  "scripts": {
+    "test": "node --test"
+  }
+}

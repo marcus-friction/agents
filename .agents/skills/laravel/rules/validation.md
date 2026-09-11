@@ -1,100 +1,104 @@
-# Validation & Forms Best Practices
+# Validation and Forms Best Practices
 
-## Choose the Validation Boundary Proportionally
+## Extract Validation When It Improves the Boundary
 
-Use a dedicated Form Request when a meaningful or complex untrusted payload,
-reused rules, request authorization, or the project's established convention
-earns a named boundary. A small, one-off framework-supported input may be
-validated inline when the transport remains clear and testable.
+Use a form request when validation is complex or substantial, rules are reused,
+request authorization belongs there, or the project consistently establishes
+that boundary. Inline `$request->validate()` remains appropriate for a small,
+endpoint-specific rule set.
 
-| Case | Evidence | Default boundary |
-|---|---|---|
-| `trivial-local` | One small input, no reused rules, no request authorization, and no established Form Request convention | Inline validation at the current Laravel transport boundary is acceptable. |
-| `substantial-or-shared` | Meaningful or complex payload, reused rules, request authorization, or an established Form Request convention | Use a dedicated Form Request and consume its validated data. |
-
-For a substantial payload, avoid leaving the full rule set in the controller:
 ```php
-public function store(Request $request)
+public function store(StorePostRequest $request): RedirectResponse
 {
-    $request->validate([
-        'title' => 'required|max:255',
-        'body' => 'required',
-    ]);
+    $post = Post::create($request->validated());
+
+    return redirect()->route('posts.show', $post);
 }
 ```
 
-Use a Form Request instead:
-```php
-public function store(StorePostRequest $request)
-{
-    Post::create($request->validated());
-}
-```
+A form request's `authorize()` method can enforce access to the operation. Validation establishes the shape and values of input; it does not itself authorize the user.
 
-## Array vs. String Notation for Rules
+## Prefer Readable Rule Syntax
 
-Array syntax is more readable and composes cleanly with `Rule::` objects. Prefer it in new code, but check existing Form Requests first and match whatever notation the project already uses.
+Array syntax composes cleanly with rule objects and avoids delimiter issues. Prefer it in new code when it improves readability, while following a consistent local style.
 
 ```php
-// Preferred for new code
 'email' => ['required', 'email', Rule::unique('users')],
+```
 
-// Follow existing convention if the project uses string notation
+String syntax remains valid for simple rules:
+
+```php
 'email' => 'required|email|unique:users',
 ```
 
-## Use Only Validated Data
+## Use Only Intended Validated Data
 
-Get only validated data. Never use `$request->all()` for mass operations. With
-a Form Request, use `validated()` or `safe()`; inline validation should use the
-array returned by `$request->validate()`.
+Use `validated()` or `safe()` instead of `$request->all()` when passing request data onward. Then select the fields intended for the operation when the validation rules also cover control fields or nested data.
 
-Incorrect:
+Unsafe:
+
 ```php
 Post::create($request->all());
 ```
 
-Correct:
-```php
-Post::create($request->validated());
-```
-
-For a trivial local input:
+Preferred:
 
 ```php
-public function index(Request $request)
-{
-    $validated = $request->validate([
-        'direction' => ['sometimes', Rule::in(['asc', 'desc'])],
-    ]);
-
-    return Post::query()
-        ->orderBy('created_at', $validated['direction'] ?? 'desc')
-        ->paginate();
-}
+$post = Post::create($request->safe()->only(['title', 'body']));
 ```
 
-## Use `Rule::when()` for Conditional Validation
+With inline validation on a base request, use the array returned by
+`$request->validate()` rather than reading the same fields back through
+`all()`:
+
+```php
+$validated = $request->validate([
+    'status' => ['required', Rule::in(['draft', 'published'])],
+]);
+
+$post->update($validated);
+```
+
+Validated data is not automatically safe for mass assignment. Keep model `$fillable` or `$guarded` rules aligned with the operation, and never add a sensitive attribute to validation merely to make mass assignment convenient.
+
+## Express Conditional Rules Clearly
+
+Use conditional rules such as `Rule::when()`, `required_if`, or `exclude_unless` when they make the condition explicit. Choose the simplest form that remains easy to test.
 
 ```php
 'company_name' => [
-    Rule::when($this->account_type === 'business', ['required', 'string', 'max:255']),
+    'string',
+    'max:255',
+    Rule::when(
+        $this->input('account_type') === 'business',
+        ['required'],
+        ['nullable'],
+    ),
 ],
 ```
 
-## Use the `after()` Method for Custom Validation
+## Add Cross-Field Validation After Base Rules
 
-Use `after()` instead of `withValidator()` for custom validation logic that depends on multiple fields.
+Use a form request's `after()` method for validation that depends on multiple fields or application state. Avoid expensive queries when prerequisite fields have already failed validation.
 
 ```php
 public function after(): array
 {
     return [
         function (Validator $validator) {
-            if ($this->quantity > Product::find($this->product_id)?->stock) {
+            if ($validator->errors()->hasAny(['product_id', 'quantity'])) {
+                return;
+            }
+
+            $stock = Product::find($this->integer('product_id'))?->stock;
+
+            if ($stock !== null && $this->integer('quantity') > $stock) {
                 $validator->errors()->add('quantity', 'Not enough stock.');
             }
         },
     ];
 }
 ```
+
+Validation against mutable state does not prevent a race between validation and persistence. Enforce inventory, uniqueness, and similar invariants with database constraints, atomic updates, or a database transaction as appropriate.

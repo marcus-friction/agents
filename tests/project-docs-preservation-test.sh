@@ -58,7 +58,6 @@ cp "$project/install-dependencies.sh" "$originals/install-dependencies.sh"
 (
   cd "$project"
   HOME="$TEST_ROOT/home" bash "$REPO_ROOT/install.sh" \
-    --skip-deps \
     --from-local "$REPO_ROOT" >/dev/null
 )
 
@@ -84,7 +83,6 @@ EOF
 (
   cd "$project"
   HOME="$TEST_ROOT/home" bash "$REPO_ROOT/install.sh" \
-    --skip-deps \
     --from-local "$REPO_ROOT" >/dev/null
 )
 
@@ -106,9 +104,6 @@ cmp -s "$REPO_ROOT/project-templates/base/README.md" "$project/.agents/templates
 cmp -s "$REPO_ROOT/project-templates/base/CONTRIBUTING.md" "$project/.agents/templates/CONTRIBUTING.md"
 cmp -s "$REPO_ROOT/project-templates/base/DESIGN.md" "$project/.agents/templates/DESIGN.md"
 cmp -s "$REPO_ROOT/project-templates/base/ARCHITECTURE.md" "$project/.agents/templates/ARCHITECTURE.md"
-cmp -s "$REPO_ROOT/.agents/tools/bootstrap-dependencies.sh" \
-  "$project/.agents/tools/bootstrap-dependencies.sh"
-[ -x "$project/.agents/tools/bootstrap-dependencies.sh" ]
 cmp -s "$REPO_ROOT/scripts/skill-adapters/claude-router.md" \
   "$project/.agents/templates/adapters/claude/CLAUDE.md"
 [ -z "$(find "$project/.agents/templates" -type f -perm -020 -print -quit)" ]
@@ -120,7 +115,6 @@ mkdir -p "$fresh_project"
 (
   cd "$fresh_project"
   HOME="$TEST_ROOT/home" bash "$REPO_ROOT/install.sh" \
-    --skip-deps \
     --from-local "$REPO_ROOT" >/dev/null
 )
 
@@ -139,7 +133,6 @@ ln -s "$external_templates" "$collision_project/.agents/templates"
 if (
   cd "$collision_project"
   HOME="$TEST_ROOT/home" bash "$REPO_ROOT/install.sh" \
-    --skip-deps \
     --from-local "$REPO_ROOT" >/dev/null 2>&1
 ); then
   echo "Installer accepted a symlinked template target"
@@ -163,7 +156,6 @@ ln -s "$managed_collision_victim" \
 if (
   cd "$managed_collision_project"
   HOME="$TEST_ROOT/home" bash "$REPO_ROOT/install.sh" \
-    --skip-deps \
     --from-local "$REPO_ROOT" >/dev/null 2>&1
 ); then
   echo "Installer accepted a symlink inside an upstream-managed destination"
@@ -190,7 +182,6 @@ touch "$adapter_collision_project/.cursor/skills/project-owned-sentinel"
 if (
   cd "$adapter_collision_project"
   HOME="$TEST_ROOT/home" bash "$REPO_ROOT/install.sh" \
-    --skip-deps \
     --from-local "$REPO_ROOT" >/dev/null 2>&1
 ); then
   echo "Installer accepted a provider discovery collision"
@@ -213,7 +204,6 @@ printf 'provider notes must remain intact\n' > "$template_hardlink_adapter_victi
 (
   cd "$template_hardlink_project"
   HOME="$TEST_ROOT/home" bash "$REPO_ROOT/install.sh" \
-    --skip-deps \
     --from-local "$REPO_ROOT" >/dev/null
 )
 
@@ -227,7 +217,6 @@ ln "$template_hardlink_adapter_victim" \
 (
   cd "$template_hardlink_project"
   HOME="$TEST_ROOT/home" bash "$REPO_ROOT/install.sh" \
-    --skip-deps \
     --from-local "$REPO_ROOT" >/dev/null
 )
 
@@ -247,7 +236,6 @@ cp -a "$REPO_ROOT/project-templates" "$incomplete_source/project-templates"
 if (
   cd "$incomplete_target"
   HOME="$TEST_ROOT/home" bash "$REPO_ROOT/install.sh" \
-    --skip-deps \
     --from-local "$incomplete_source" >/dev/null 2>&1
 ); then
   echo "Installer accepted a distribution without canonical skills"
@@ -271,7 +259,6 @@ printf 'legacy source content\n' > \
 if (
   cd "$reserved_target"
   HOME="$TEST_ROOT/home" bash "$REPO_ROOT/install.sh" \
-    --skip-deps \
     --from-local "$reserved_source" >/dev/null 2>&1
 ); then
   echo "Installer accepted reserved project context in a distribution"
@@ -295,7 +282,6 @@ ln -s "$REPO_ROOT/project-templates/base/AGENTS.md" \
 if (
   cd "$symlink_source_target"
   HOME="$TEST_ROOT/home" bash "$REPO_ROOT/install.sh" \
-    --skip-deps \
     --from-local "$symlink_source" >/dev/null 2>&1
 ); then
   echo "Installer accepted a symlinked distribution template"
@@ -319,7 +305,6 @@ if [ "$(id -u)" -ne 0 ]; then
   if (
     cd "$readonly_adapter_project"
     HOME="$TEST_ROOT/home" bash "$REPO_ROOT/install.sh" \
-      --skip-deps \
       --from-local "$REPO_ROOT" >/dev/null 2>&1
   ); then
     echo "Installer accepted an unwritable adapter template directory"
@@ -355,7 +340,6 @@ cp "$target_only_project/.agents/skills/onboard-project/SKILL.md" \
 if ! (
   cd "$target_only_project"
   HOME="$TEST_ROOT/home" bash "$REPO_ROOT/install.sh" \
-    --skip-deps \
     --from-local "$target_only_source" >/dev/null 2>&1
 ); then
   echo "Installer failed to isolate a target-only source templates path"
@@ -381,7 +365,6 @@ for run in 1 2; do
   (
     cd "$self_install_project"
     HOME="$TEST_ROOT/home" bash "$REPO_ROOT/install.sh" \
-      --skip-deps \
       --from-local "$self_install_project" >/dev/null
   )
 done
