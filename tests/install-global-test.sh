@@ -485,6 +485,40 @@ fi
 grep -Fq 'does not use the canonical agent ecosystem origin' \
   "$TEST_ROOT/wrong-edge.out"
 
+edge_failure_source="$TEST_ROOT/edge-failure-source"
+edge_failure_checkout="$TEST_ROOT/edge-failure-checkout"
+edge_failure_home="$TEST_ROOT/edge-failure-home"
+git clone -q "$release_source" "$edge_failure_source"
+git -C "$edge_failure_source" config user.name "Edge Rewrite Test"
+git -C "$edge_failure_source" config user.email "edge-rewrite@example.invalid"
+git clone -q "$edge_failure_source" "$edge_failure_checkout"
+git -C "$edge_failure_checkout" config remote.origin.url \
+  'https://github.com/marcus-friction/agents.git'
+git -C "$edge_failure_source" checkout -qb rewritten "$release_a"
+printf 'rewritten edge\n' > \
+  "$edge_failure_source/.agents/skills/example/SKILL.md"
+git -C "$edge_failure_source" add .agents/skills/example/SKILL.md
+git -C "$edge_failure_source" commit -qm "rewrite edge history"
+rewritten_edge="$(git -C "$edge_failure_source" rev-parse HEAD)"
+git -C "$edge_failure_source" branch -f master "$rewritten_edge"
+mkdir -p "$edge_failure_home"
+if PATH="$(dirname "$git_wrapper"):$PATH" \
+  HOME="$edge_failure_home" \
+  AGENTS_ECOSYSTEM_HOME="$edge_failure_checkout" \
+  AGENTS_ECOSYSTEM_TEST_REAL_GIT="$real_git" \
+  AGENTS_ECOSYSTEM_TEST_SOURCE="$edge_failure_source" \
+    bash "$REPO_ROOT/install-global.sh" \
+      >"$TEST_ROOT/edge-failure.out" 2>&1; then
+  echo "global edge update reported success after a non-fast-forward rewrite" >&2
+  exit 1
+fi
+grep -Fq 'fast-forward' "$TEST_ROOT/edge-failure.out"
+if grep -Fq 'Global install complete' "$TEST_ROOT/edge-failure.out"; then
+  echo "failed global edge update printed a success report" >&2
+  exit 1
+fi
+[ "$(git -C "$edge_failure_checkout" rev-parse HEAD)" = "$release_b" ]
+
 stash_checkout="$TEST_ROOT/stash-checkout"
 stash_home="$TEST_ROOT/stash-home"
 cp -a "$stable_checkout" "$stash_checkout"

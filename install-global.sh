@@ -623,7 +623,8 @@ sync_checkout() {
   safe_git -C "$dir" fetch --no-tags "$REPO_URL" \
     '+refs/heads/master:refs/remotes/origin/master'
   if ! safe_git -C "$dir" merge --ff-only refs/remotes/origin/master; then
-    echo "Warning: fast-forward pull failed. Leaving $dir as-is."
+    echo "Error: fast-forward update failed. Leaving $dir as-is." >&2
+    return 1
   fi
 }
 
