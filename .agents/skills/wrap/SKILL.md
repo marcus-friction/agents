@@ -1,6 +1,6 @@
 ---
 name: wrap
-description: Complete a clean, documented, knowledge-preserving handoff when the user explicitly asks to wrap, commit, or push. A wrap may finish accepted local work but never implies commit or push; those permissions remain separate.
+description: Complete a clean, documented handoff through the Git CLI when the user explicitly asks to wrap, commit, or push, including missing repository/tool setup and guided GitHub CLI login when needed. A wrap never implies commit or push; those permissions remain separate.
 ---
 
 # Wrap
@@ -20,7 +20,7 @@ the completion workflow without authorizing either Git effect.
 
 | Request | Authorized | Still requires authority |
 |---|---|---|
-| Explicit wrap | Audit the handoff; finish bounded cleanup, knowledge, and documentation for accepted work completed in this task | Any commit or push |
+| Explicit wrap | Audit the handoff; initialize a missing local repository; finish bounded cleanup, knowledge, and documentation for accepted work completed in this task | Tool installation and account authorization when needed; any commit or push |
 | Exact commit | Audit, then commit only the named files or hunks once every gate is resolved | Push; missing cleanup, knowledge, or documentation outside the named scope |
 | Exact push | Audit, then push only the named local ref to the named remote/ref | Creating or amending commits; missing local completion work |
 
@@ -30,6 +30,18 @@ If a commit or push request lacks exact scope or destination, inspect and
 preview the missing facts instead of guessing them.
 
 ## Workflow
+
+### 0. Establish CLI readiness
+
+Always use the `git` CLI for repository operations and the `gh` CLI for GitHub
+operations, not an editor integration, connector, or direct HTTP substitute.
+Check `git --version` before repository inspection. Read
+[Git and GitHub setup](references/git-setup.md) when a tool, repository, or
+GitHub login is missing, and before a GitHub handoff. Install missing tools
+with the required approval, initialize a genuinely missing local repository,
+and guide the user through CLI authentication after asking them first.
+Explicit no-write/no-Git-change instructions still control. Local-only work
+does not require a GitHub account or login.
 
 ### 1. Inventory the handoff
 

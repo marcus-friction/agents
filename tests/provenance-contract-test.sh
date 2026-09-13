@@ -166,7 +166,8 @@ for stale in ("Vercel Skills.sh", "**v2.0.0**", "**v1.5.0+**"):
     if stale in reference:
         raise SystemExit(f"ecosystem reference retains an unsupported provenance/release claim: {stale}")
 
-for fragment in ("LICENSE", "THIRD_PARTY_NOTICES.md", "1.7.0"):
+version = (root / "VERSION").read_text(encoding="utf-8").strip()
+for fragment in ("LICENSE", "THIRD_PARTY_NOTICES.md", version):
     if fragment not in readme:
         raise SystemExit(f"README lacks release/licensing reference: {fragment}")
 

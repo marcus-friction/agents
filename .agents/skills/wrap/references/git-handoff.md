@@ -3,6 +3,11 @@
 Load this reference only when wrap needs to preview or execute a commit or push.
 All completion gates in `../SKILL.md` must already be resolved.
 
+Use `git` for local history and transport, and `gh` for GitHub operations.
+Resolve missing tools, repository state, and required authentication through
+[Git and GitHub setup](git-setup.md) before executing Git effects. Setup does
+not grant commit, remote creation, push, or publication authority.
+
 ## Preview
 
 Reinspect the workspace and group only accepted changes into atomic commits
@@ -30,6 +35,8 @@ preserve unrelated work.
   and subjects.
 - Push only with exact push authority and just-in-time confirmation of the
   remote, ref, exposure, credential class, and recovery path. Never force.
+  Revalidate these facts; do not ask again when existing approval still covers
+  them. CLI setup or login consent is not push approval.
 - If push is rejected, report options. Do not automatically pull, rebase,
   merge, amend, retry, or rewrite history.
 
