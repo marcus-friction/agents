@@ -93,7 +93,7 @@ use its full 40-character commit SHA for both acquisition and installation:
 This verifies source consistency after a revision is selected; it does not by
 itself authenticate the publisher. A version becomes stable only when a release
 record binds its full commit SHA. Use the
-[v1.7.1 release record](https://github.com/marcus-friction/agents/releases/tag/v1.7.1).
+[v1.7.2 release record](https://github.com/marcus-friction/agents/releases/tag/v1.7.2).
 
 ### User-level installation
 
@@ -432,6 +432,9 @@ to the legal files for the authoritative classification.
 
 ## Releases
 
+- **v1.7.2 — 2026-09-14:** Clarified plan amendments, live task tracking and
+  task-based progress reports in AGENTS.md and its inactive template. See
+  [`2026-09-14-plan-task-maintenance.md`](releases/2026-09-14-plan-task-maintenance.md).
 - **v1.7.1 — 2026-09-13:** Added CLI-first wrap setup, missing-repository
   initialization, approved tool installation and guided GitHub authentication
   with installed-version flag checks. See

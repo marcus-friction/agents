@@ -14,8 +14,13 @@
 - Use `.agents/skills/review/references/change-rigor.md`: R0 is read-only, R1
   ordinary repository work, and R2 an elevated external or irreversible effect.
 - Store plans at `docs/plans/<YYYY-MM-DD>-<slug>/implementation-plan.md` with a
-  sibling `tasks.md`; follow the accepted plan and maintain its checkbox tracker.
-  Review may update only an already-authorized matching tracker with actionable
+  sibling `tasks.md`. During authorized work, update both files as work changes,
+  before reporting progress or handing off.
+- Append dated plan amendments for scope extensions and their rationale; obtain
+  required approval. Add new tasks promptly, track actual status, and check off
+  only verified completion. Tie progress reports to task items, blockers, and
+  next steps.
+- Review may update only an already-authorized matching tracker with actionable
   findings, never fixes. An explicit no-write instruction still controls.
 - Stop and explain when work cascades beyond scope or the same blocker survives
   three attempted resolutions. Ask before unplanned dependencies, major
