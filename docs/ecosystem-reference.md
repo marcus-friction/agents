@@ -93,7 +93,7 @@ use its full 40-character commit SHA for both acquisition and installation:
 This verifies source consistency after a revision is selected; it does not by
 itself authenticate the publisher. A version becomes stable only when a release
 record binds its full commit SHA. Use the
-[v1.8.0 release record](https://github.com/marcus-friction/agents/releases/tag/v1.8.0).
+[v1.9.0 release record](https://github.com/marcus-friction/agents/releases/tag/v1.9.0).
 
 ### User-level installation
 
@@ -433,6 +433,10 @@ to the legal files for the authoritative classification.
 
 ## Releases
 
+- **v1.9.0 — 2026-09-24:** Generalized delivery from wrap through integration,
+  applicable release, partial-state recovery, and safe cleanup, with project-
+  owned variables in `CONTRIBUTING.md`. See
+  [`2026-09-23-generalized-delivery-lifecycle.md`](releases/2026-09-23-generalized-delivery-lifecycle.md).
 - **v1.8.0 — 2026-09-23:** Standardized review and adversarial-review reports
   as consistent Markdown tables, and restored exact read-only Git previews for
   generic wrap requests without granting commit or push authority. See

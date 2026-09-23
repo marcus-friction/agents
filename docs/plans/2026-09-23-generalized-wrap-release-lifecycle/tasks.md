@@ -227,8 +227,11 @@
   `origin/master`, all four branches are absent, and v1.8.0 remains immutable at
   `edca625b…cc927e`. Target-drift recomputation found only release-excluded plan
   evidence on the advanced base, so the v1.9.0 disposition remains required.
-- [ ] T22 — Prepare and verify the synchronized v1.9.0 version metadata, stable
+- [x] T22 — Prepare and verify the synchronized v1.9.0 version metadata, stable
   documentation, release index, release notes, and release-handoff amendment.
+  All release artifacts identify v1.9.0; `git diff --check` and the complete
+  offline suite pass with 66 registered live cases. Remote tag/release collision
+  checks are clear, and no automatic release or deployment trigger exists.
 - [ ] T23 — Push the exact feature head, publish its public `master` pull
   request and dedicated secret-free checkpoint comment, then record that
   handoff in one final plan-only commit, push it, update the checkpoint, and

@@ -939,3 +939,11 @@ disclosed commits, public branch push, pull-request publication, checkpoint
 creation/update, the final plan-only handoff commit, and exact-head CI
 observation. It stops before integration, tag or GitHub release publication,
 deployment, and current-branch cleanup.
+
+Release preparation now identifies `1.9.0` consistently in `VERSION`, both
+plugin manifests, the two stable-install references, the public release index,
+and `docs/releases/2026-09-23-generalized-delivery-lifecycle.md`. The exact
+prepared tree passes `git diff --check` and the complete `bash tests/run.sh`
+suite with `offline-deterministic=passed` and 66 registered live cases. No
+v1.9.0 tag or GitHub release exists, and GitHub exposes no automatic release or
+deployment trigger for this repository.
