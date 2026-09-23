@@ -6,13 +6,13 @@
 - [x] T3 — Review the complete release set and resolve all actionable findings.
 - [x] T4 — Pass focused version, documentation, provenance, routing, authority,
   contribution-policy, whitespace, and full offline-suite verification.
-- [ ] T5 — Commit the exact release-preparation scope; preview and obtain the
+- [x] T5 — Commit the exact release-preparation scope; preview and obtain the
   first exact decision for release-branch push and PR publication.
-- [ ] T6 — Push the exact release head and open the public `master` PR without
+- [x] T6 — Push the exact release head and open the public `master` PR without
   including unrelated work.
-- [ ] T7 — Verify exact head/base and passing CI; obtain the owner's review and
+- [x] T7 — Verify exact head/base and passing CI; obtain the owner's review and
   separate exact normal-merge decision, then merge and verify remote `master`.
-- [ ] T8 — Preview, obtain a separate exact decision for, publish, and verify
+- [x] T8 — Preview, obtain a separate exact decision for, publish, and verify
   latest stable v1.8.0 at the resolved merge SHA.
 - [ ] T9 — Prepare and verify the tracker-only evidence commit; obtain the
   separate exact decision to push it and publish its public `master` PR.
@@ -84,3 +84,32 @@ offline suite passes with 47 registered live cases, completing T4.
 T3: the fresh independent adversarial release challenge returned GO with no
 findings. Its GO authorizes only completion of local release preparation; every
 public or irreversible effect remains behind the separate exact gates below.
+
+T5–T6: committed release preparation as
+`1b2161db3dd2f1030d817101505c694a6abfd374`, confirmed remote `master` remained
+`6c4b84dabfd925b6ddae2c1a2ec4f65fb0c26a95`, received the exact push-and-PR
+decision, pushed `feature/release-1.8.0`, and opened public PR #5:
+https://github.com/marcus-friction/agents/pull/5. GitHub reports the exact
+approved head/base and a mergeable PR; CI is pending. Merge remains
+unauthorized.
+
+T7 status: `Offline deterministic` passed in 3m21s for exact PR head
+`1b2161db3dd2f1030d817101505c694a6abfd374`. PR #5 is clean and mergeable;
+remote `master` remains the reviewed base
+`6c4b84dabfd925b6ddae2c1a2ec4f65fb0c26a95`. Awaiting the owner's post-CI
+review of that exact head and separate normal merge-commit decision.
+
+T7: the owner authorized the normal merge after CI. PR #5 merged at
+2026-09-23T14:06:28Z as
+`edca625bfad486d32071912c41563cbd54cc927e`; GitHub records the reviewed head
+`1b2161db3dd2f1030d817101505c694a6abfd374`, original base
+`6c4b84dabfd925b6ddae2c1a2ec4f65fb0c26a95`, and remote `master` now resolves
+to the merge SHA. The release branch remains present. Tag/release publication
+has not occurred.
+
+T8: after the separate exact publication decision, `v1.8.0` was published at
+2026-09-23T14:09:29Z as the latest, non-draft, non-prerelease release:
+https://github.com/marcus-friction/agents/releases/tag/v1.8.0. The lightweight
+tag, release target, latest-release record, and remote `master` all resolve to
+`edca625bfad486d32071912c41563cbd54cc927e`. The release notes include the full
+immutable SHA and installer `--ref` guidance.

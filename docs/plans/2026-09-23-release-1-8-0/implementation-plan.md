@@ -243,3 +243,35 @@ against its bound raw output. The deterministic profile guard, both affected
 skill contracts, whitespace check, and complete offline suite pass with 47
 registered cases. Primary and testing re-reviews returned Ready with no
 findings, resolving R180-T01, R180-002, and R180-T02.
+
+### Release execution evidence — 2026-09-23
+
+Release preparation was committed as
+`1b2161db3dd2f1030d817101505c694a6abfd374`. After an exact owner decision, that
+head was pushed to `origin/feature/release-1.8.0` and public PR #5 was opened
+against `master` at `6c4b84dabfd925b6ddae2c1a2ec4f65fb0c26a95`:
+https://github.com/marcus-friction/agents/pull/5. The verified PR is open,
+non-draft, mergeable, and bound to the approved head/base. CI is pending; merge,
+tag/release publication, evidence publication, and cleanup remain unauthorized.
+
+The `Offline deterministic` check subsequently passed in 3m21s for exact head
+`1b2161db3dd2f1030d817101505c694a6abfd374`. PR #5 is clean and mergeable, and
+remote `master` remains the reviewed base
+`6c4b84dabfd925b6ddae2c1a2ec4f65fb0c26a95`. The workflow is now paused for the
+owner's post-CI review and separate merge-commit decision.
+
+The owner authorized the named normal merge method. PR #5 merged at
+2026-09-23T14:06:28Z as
+`edca625bfad486d32071912c41563cbd54cc927e`; GitHub binds the merge to reviewed
+head `1b2161db3dd2f1030d817101505c694a6abfd374` and original base
+`6c4b84dabfd925b6ddae2c1a2ec4f65fb0c26a95`. Remote `master` resolves to the
+merge SHA. The release branch remains intact, and no `v1.8.0` tag or release
+exists. Publication remains at its separate exact gate.
+
+After the separate exact publication decision, `v1.8.0` was published at
+2026-09-23T14:09:29Z as the latest, non-draft, non-prerelease release:
+https://github.com/marcus-friction/agents/releases/tag/v1.8.0. The lightweight
+tag object, release target, latest-release API record, and remote `master` all
+resolve to `edca625bfad486d32071912c41563cbd54cc927e`. Release notes include the
+full immutable SHA and installer `--ref` guidance. The tag will not be moved;
+any correction requires a later SemVer release.
