@@ -232,8 +232,13 @@
   All release artifacts identify v1.9.0; `git diff --check` and the complete
   offline suite pass with 66 registered live cases. Remote tag/release collision
   checks are clear, and no automatic release or deployment trigger exists.
-- [ ] T23 — Push the exact feature head, publish its public `master` pull
+- [x] T23 — Push the exact feature head, publish its public `master` pull
   request and dedicated secret-free checkpoint comment, then record that
   handoff in one final plan-only commit, push it, update the checkpoint, and
   verify **Offline deterministic** on the exact final head. Stop before merge,
   tag/release publication, deployment, or current-branch cleanup.
+  The prepared head `2f0ff833…48850` is public as PR #7 against exact base
+  `1abcf898…1a35e`; checkpoint comment `5804270691` owns later identities. This
+  final plan-only commit closes repository tracking. Its resulting SHA and CI
+  result are recorded externally in that checkpoint and the final report so
+  verification cannot create a recursive evidence-commit loop.

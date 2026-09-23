@@ -947,3 +947,19 @@ prepared tree passes `git diff --check` and the complete `bash tests/run.sh`
 suite with `offline-deterministic=passed` and 66 registered live cases. No
 v1.9.0 tag or GitHub release exists, and GitHub exposes no automatic release or
 deployment trigger for this repository.
+
+### Terminal handoff publication
+
+The three prepared commits were pushed without force to the public
+`origin/feature/generalized-wrap-release-lifecycle` ref. GitHub PR #7 targets
+`master` at `1abcf898385aead22aae0085e3b9a6033931a35e`; its initial published
+head is `2f0ff833784b3b7e07b0b1d7219f233f55d48850`. Dedicated secret-free
+checkpoint comment `5804270691` records the release disposition, per-effect
+identity states, cleanup ownership, and terminal cutoff.
+
+This plan-only handoff update is the last repository bookkeeping commit. Its
+resulting exact head, the replacement exact-head CI result, and any later merge,
+tag, release, or cleanup identities belong in the checkpoint and final report,
+not another evidence commit. The authorized batch ends after that CI
+observation; integration and all later effects remain pending separate exact
+authority.
