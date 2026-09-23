@@ -125,7 +125,7 @@ This self-cleaning variant isolates the temporary checkout:
 ### Stable installation
 
 Stable installation uses the full commit SHA in the
-[v1.7.2 release record](https://github.com/marcus-friction/agents/releases/tag/v1.7.2).
+[v1.8.0 release record](https://github.com/marcus-friction/agents/releases/tag/v1.8.0).
 A version becomes stable only when its release record binds that exact SHA.
 
 <!-- stable-project-quickstart -->

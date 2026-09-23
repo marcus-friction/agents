@@ -796,6 +796,11 @@ def grade(
                 passed = type(actual) is type(expected) and actual == expected
             elif assertion["operator"] == "set-equals":
                 passed = isinstance(actual, list) and sorted(actual) == sorted(expected)
+            elif assertion["operator"] == "contains":
+                expected_text = normalized_whitespace(expected) \
+                    if isinstance(expected, str) else ""
+                passed = isinstance(actual, str) and bool(expected_text) \
+                    and expected_text in normalized_whitespace(actual)
             else:
                 raise ValueError(f"unknown result operator: {assertion['operator']}")
             evidence = f"actual={actual!r}; expected={expected!r}"

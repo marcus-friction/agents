@@ -59,7 +59,7 @@ compile(Path(sys.argv[1]).read_text(encoding="utf-8"), sys.argv[1], "exec")
 PY
 
 list_output="$(bash "$RUNNER" --list)"
-[ "$(grep -c '^CASE v2\.' <<< "$list_output")" -eq 45 ]
+[ "$(grep -c '^CASE v2\.' <<< "$list_output")" -eq 47 ]
 grep -q '^PROFILE live-agent-v2$' <<< "$list_output"
 
 # Registry loading itself enforces the important coverage invariant: a case may
@@ -75,10 +75,18 @@ spec = importlib.util.spec_from_file_location("agent_eval_runner", path)
 module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(module)
 registry = module.load_registry()
-assert len(registry["cases"]) == 45
+assert len(registry["cases"]) == 47
 for case in registry["cases"]:
     for rule in case["affected_paths"]:
         assert module.path_is_covered(rule, case["context_paths"]), (case["id"], rule)
+
+adversarial_table_case = next(
+    case for case in registry["cases"]
+    if case["id"] == "v2.adversarial-review.table-output-degraded"
+)
+assert ".agents/skills/adversarial-review/references/what-if-matrix.md" in (
+    adversarial_table_case["context_paths"]
+)
 
 tdd_prompt = (
     Path(sys.argv[1]) / "tests/agent-evals/fixtures/tdd-positive/prompt.md"
@@ -176,6 +184,52 @@ commit_only_decision_grade = module.grade(
 assert next(
     check for check in commit_only_decision_grade["checks"]
     if check["id"] == "single-effect-decision"
+)["passed"] is False
+
+markdown_table_case = {
+    "id": "markdown-table-summary",
+    "capability_profile": "read-only",
+    "permitted_fixture_mutations": [],
+    "result_assertions": [{
+        "id": "findings-table",
+        "pointer": "/summary",
+        "operator": "contains",
+        "expected": "| ID | Severity | Confidence |",
+    }],
+    "state_assertions": [],
+}
+markdown_table_grade = module.grade(
+    markdown_table_case,
+    {
+        "case_id": "markdown-table-summary",
+        "summary": "| ID | Severity | Confidence |\n| --- | --- | --- |\n| None | — | — |",
+    },
+    {},
+    {},
+    {},
+    0,
+    [{"type": "turn.completed"}],
+)
+assert next(
+    check for check in markdown_table_grade["checks"]
+    if check["id"] == "findings-table"
+)["passed"] is True
+
+missing_table_grade = module.grade(
+    markdown_table_case,
+    {
+        "case_id": "markdown-table-summary",
+        "summary": "Findings: none.",
+    },
+    {},
+    {},
+    {},
+    0,
+    [{"type": "turn.completed"}],
+)
+assert next(
+    check for check in missing_table_grade["checks"]
+    if check["id"] == "findings-table"
 )["passed"] is False
 
 wrapped_content = "The check preserves filesystem\nidentity across replacement.\n"
