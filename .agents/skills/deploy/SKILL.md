@@ -16,6 +16,9 @@ failure. Read-only checks and diagnosis authorize inspection and a report, not
 fixes or remote mutations. A preparation or deployment request authorizes
 ordinary in-scope local work; invocation alone does not authorize paid resources,
 publication, production changes, dependencies, or data migration.
+Repository release does not authorize deployment. When an integration, tag, or
+release automatically triggers Cloud, disclose and authorize the actual
+production/shared-state effect before causing that trigger.
 
 Read project instructions, adopted architecture, deployment docs, manifests,
 lockfiles, Git state, and existing CI. Preserve documented hosting and unrelated

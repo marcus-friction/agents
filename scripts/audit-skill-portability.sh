@@ -146,7 +146,7 @@ slash_names = {
     "test-driven-development", "update-agents",
     "vite", "vitest", "vue", "vue-best-practices",
     "vue-router-best-practices", "vue-testing-best-practices",
-    "vueuse-functions", "wrap",
+    "vueuse-functions", "wrap", "release",
 }
 slash_command_pattern = re.compile(
     r"(?<![A-Za-z0-9_./~-])/(?:"

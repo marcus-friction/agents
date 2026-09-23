@@ -356,6 +356,7 @@ the Claude plugin, every entry is namespaced as `ma:<skill>`; for example,
 | `pinia` | Guide typed Pinia stores, SSR, plugins, and tests | [antfu/skills](https://github.com/antfu/skills) |
 | `plan` | Scope and verify multi-step or high-risk implementation work | [gstack](https://github.com/garrytan/gstack) |
 | `playwright` | Apply robust browser testing, locator, and isolation patterns | [TomFit Agent Ecosystem](https://github.com/TomFitAG/tomfit-agents) |
+| `release` | Prepare, publish, verify, and recover provider-neutral releases | Original |
 | `review` | Perform a scoped, multi-angle pre-merge review | [Compound Engineering](https://github.com/EveryInc/compound-engineering-plugin) |
 | `review-plan` | Challenge an implementation plan before execution | [gstack](https://github.com/garrytan/gstack) |
 | `security-review` | Review proportionate controls at affected trust boundaries | [Compound Engineering](https://github.com/EveryInc/compound-engineering-plugin) |
@@ -377,7 +378,7 @@ the Claude plugin, every entry is namespaced as `ma:<skill>`; for example,
 | `vue-router-best-practices` | Apply Vue Router 4 navigation and lifecycle patterns | [Vue.js AI Skills](https://github.com/vuejs-ai/skills) |
 | `vue-testing-best-practices` | Test Vue components and flows with the appropriate layer | [Vue.js AI Skills](https://github.com/vuejs-ai/skills) |
 | `vueuse-functions` | Select and apply maintainable VueUse composables | [VueUse](https://github.com/vueuse/vueuse) |
-| `wrap` | Complete accepted handoffs and preview separately authorized Git effects | Original |
+| `wrap` | Orchestrate accepted handoffs through integration, release, and safe cleanup | Original |
 
 Skills load on demand. Framework skills do not authorize adopting their
 framework in a project where the component is optional, absent, or unresolved.
@@ -473,6 +474,9 @@ original scope and are not rewritten by later policy.
   crash-level atomicity. Run only one installer per target at a time.
 - Candidate staging cannot decide project architecture. A project owner must
   reconcile and approve active document changes.
+- Delivery variables are project-owned in active `CONTRIBUTING.md`. Missing
+  release or deployment-trigger policy remains unresolved; neither `wrap` nor
+  `release` invents it or grants authority for external effects.
 - Forge, PM2, and Cloudflare are the ecosystem's adopted delivery defaults, not
   authority to create accounts, alter production, or replace documented project
   infrastructure. Laravel Cloud is selectable through `deploy` with the same
