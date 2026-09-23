@@ -1,6 +1,6 @@
 ---
 name: wrap
-description: Complete a clean, documented handoff through the Git CLI when the user explicitly asks to wrap, commit, or push, including missing repository/tool setup and guided GitHub CLI login when needed. A wrap never implies commit or push; those permissions remain separate.
+description: Complete a clean, documented handoff through the Git CLI when the user explicitly asks to wrap, commit, or push, including a read-only Git preview for a generic wrap, missing repository/tool setup, and guided GitHub CLI login when needed. A wrap never authorizes commit or push; those permissions remain separate.
 ---
 
 # Wrap
@@ -20,7 +20,7 @@ the completion workflow without authorizing either Git effect.
 
 | Request | Authorized | Still requires authority |
 |---|---|---|
-| Explicit wrap | Audit the handoff; initialize a missing local repository; finish bounded cleanup, knowledge, and documentation for accepted work completed in this task | Tool installation and account authorization when needed; any commit or push |
+| Explicit wrap | Audit the handoff; initialize a missing local repository; finish bounded cleanup, knowledge, and documentation for accepted work completed in this task; prepare an exact read-only Git preview unless both commit and push are explicitly excluded | Tool installation and account authorization when needed; executing any commit or push |
 | Exact commit | Audit, then commit only the named files or hunks once every gate is resolved | Push; missing cleanup, knowledge, or documentation outside the named scope |
 | Exact push | Audit, then push only the named local ref to the named remote/ref | Creating or amending commits; missing local completion work |
 
@@ -101,10 +101,15 @@ with exact paths, effects, and reasons.
 
 ### 3. Prepare or execute Git effects when applicable
 
-If the request includes or may lead to a commit or push, read
-`references/git-handoff.md` completely and follow it after every completion gate
-is resolved. If the user explicitly excluded both effects, skip that reference
-and report the completed local handoff.
+For every generic wrap where the user did not explicitly exclude both commit
+and push, read `references/git-handoff.md` completely after every completion
+gate is resolved. Prepare its exact read-only preview of atomic commit groups,
+proposed Conventional Commit messages, files or reviewed hunks, and any known
+push destination, then ask once which Git effects to execute. Preparing and
+showing this preview requires no commit or push authority; executing either
+effect does. Apply the same reference for an explicit commit or push request.
+If the user explicitly excluded both effects, skip that reference and report
+the completed local handoff.
 
 ### 4. Report the handoff
 

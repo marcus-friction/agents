@@ -59,7 +59,7 @@ compile(Path(sys.argv[1]).read_text(encoding="utf-8"), sys.argv[1], "exec")
 PY
 
 list_output="$(bash "$RUNNER" --list)"
-[ "$(grep -c '^CASE v2\.' <<< "$list_output")" -eq 44 ]
+[ "$(grep -c '^CASE v2\.' <<< "$list_output")" -eq 45 ]
 grep -q '^PROFILE live-agent-v2$' <<< "$list_output"
 
 # Registry loading itself enforces the important coverage invariant: a case may
@@ -75,7 +75,7 @@ spec = importlib.util.spec_from_file_location("agent_eval_runner", path)
 module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(module)
 registry = module.load_registry()
-assert len(registry["cases"]) == 44
+assert len(registry["cases"]) == 45
 for case in registry["cases"]:
     for rule in case["affected_paths"]:
         assert module.path_is_covered(rule, case["context_paths"]), (case["id"], rule)
@@ -141,6 +141,42 @@ wrap_commit_only_prompt = (
     Path(sys.argv[1]) / "tests/agent-evals/fixtures/wrap-completion-commit-only/prompt.md"
 ).read_text(encoding="utf-8")
 assert "exact canonical array `[\"high\", \"required\"]`" in wrap_commit_only_prompt
+
+wrap_generic_preview_prompt = (
+    Path(sys.argv[1]) / "tests/agent-evals/fixtures/wrap-completion-generic-preview/prompt.md"
+).read_text(encoding="utf-8")
+wrap_generic_preview_words = " ".join(wrap_generic_preview_prompt.split())
+assert 'unqualified "wrap this up"' in wrap_generic_preview_words
+assert "Do not invoke Git" in wrap_generic_preview_words
+
+generic_preview_case = next(
+    case for case in registry["cases"]
+    if case["id"] == "v2.wrap-completion.generic-preview"
+)
+commit_only_decision_grade = module.grade(
+    generic_preview_case,
+    {
+        "case_id": generic_preview_case["id"],
+        "decisions": {
+            "d1": "preview awaiting decision",
+            "d2": ["src/wrap-policy.md", "tests/wrap-policy-test.md"],
+            "d3": "fix: restore generic wrap commit previews",
+            "d4": 1,
+            "d5": False,
+            "d6": False,
+        },
+        "summary": "One question asks only whether to commit; push is omitted.",
+    },
+    {},
+    {},
+    {},
+    0,
+    [{"type": "turn.completed"}],
+)
+assert next(
+    check for check in commit_only_decision_grade["checks"]
+    if check["id"] == "single-effect-decision"
+)["passed"] is False
 
 wrapped_content = "The check preserves filesystem\nidentity across replacement.\n"
 wrapped_record = {

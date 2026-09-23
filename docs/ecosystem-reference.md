@@ -377,7 +377,7 @@ the Claude plugin, every entry is namespaced as `ma:<skill>`; for example,
 | `vue-router-best-practices` | Apply Vue Router 4 navigation and lifecycle patterns | [Vue.js AI Skills](https://github.com/vuejs-ai/skills) |
 | `vue-testing-best-practices` | Test Vue components and flows with the appropriate layer | [Vue.js AI Skills](https://github.com/vuejs-ai/skills) |
 | `vueuse-functions` | Select and apply maintainable VueUse composables | [VueUse](https://github.com/vueuse/vueuse) |
-| `wrap` | Prepare requested commits or pushes with separate authority | Original |
+| `wrap` | Complete accepted handoffs and preview separately authorized Git effects | Original |
 
 Skills load on demand. Framework skills do not authorize adopting their
 framework in a project where the component is optional, absent, or unresolved.

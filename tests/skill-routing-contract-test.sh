@@ -26,6 +26,15 @@ grep -Fq 'Report the rating value as `high`, `medium`, or `low`.' "$compound"
 grep -Eqi 'Only.*High.*(compound|capture|persist)' "$compound"
 grep -Eqi 'authori[sz]ation.*(does not|never).*qualification|qualification.*separate.*authori[sz]ation' "$compound"
 grep -Eqi 'compound.*owns.*(rating|relevance)|do not duplicate.*(rating|eligibility)' "$wrap"
+python3 - "$wrap" <<'PY'
+from pathlib import Path
+import sys
+
+content = " ".join(Path(sys.argv[1]).read_text(encoding="utf-8").lower().split())
+assert "for every generic wrap where the user did not explicitly exclude both commit and push" in content
+assert "prepare its exact read-only preview of atomic commit groups" in content
+assert "then ask once which git effects to execute" in content
+PY
 grep -Eqi 'code or configuration only when it helps' "$compound"
 grep -Eqi 'dead ends only when' "$compound"
 grep -Eqi 'prevention only when' "$compound"
