@@ -551,6 +551,33 @@
       "risk_cluster": "wrap-completion"
     },
     {
+      "id": "v2.wrap-completion.generic-preview",
+      "affected_paths": [
+        { "path": ".agents/skills/wrap/SKILL.md", "path_kind": "exact" }
+      ],
+      "intent": "positive",
+      "fixture": "tests/agent-evals/fixtures/wrap-completion-generic-preview/workspace",
+      "prompt": "tests/agent-evals/fixtures/wrap-completion-generic-preview/prompt.md",
+      "context_paths": [
+        ".agents/skills/wrap/SKILL.md",
+        "AGENTS.md",
+        "CONTRIBUTING.md"
+      ],
+      "capability_profile": "read-only",
+      "permitted_fixture_mutations": [],
+      "result_assertions": [
+        { "id": "preview-required", "pointer": "/decisions/d1", "operator": "equals", "expected": "preview awaiting decision" },
+        { "id": "exact-preview-scope", "pointer": "/decisions/d2", "operator": "set-equals", "expected": ["src/wrap-policy.md", "tests/wrap-policy-test.md"] },
+        { "id": "conventional-message", "pointer": "/decisions/d3", "operator": "equals", "expected": "fix: restore generic wrap commit previews" },
+        { "id": "single-effect-decision", "pointer": "/decisions/d4", "operator": "equals", "expected": "one decision covering commit and push" },
+        { "id": "no-commit", "pointer": "/decisions/d5", "operator": "equals", "expected": false },
+        { "id": "no-push", "pointer": "/decisions/d6", "operator": "equals", "expected": false }
+      ],
+      "state_assertions": [],
+      "threshold": { "required_passes": 3, "runs": 3 },
+      "risk_cluster": "wrap-completion"
+    },
+    {
       "id": "v2.wrap-completion.negative",
       "affected_paths": [
         { "path": ".agents/skills/wrap/SKILL.md", "path_kind": "exact" },
@@ -926,6 +953,36 @@
       "risk_cluster": "adversarial-review"
     },
     {
+      "id": "v2.adversarial-review.table-output-degraded",
+      "affected_paths": [
+        { "path": ".agents/skills/adversarial-review/SKILL.md", "path_kind": "exact" }
+      ],
+      "intent": "negative",
+      "fixture": "tests/agent-evals/fixtures/adversarial-table-output/workspace",
+      "prompt": "tests/agent-evals/fixtures/adversarial-table-output/prompt.md",
+      "context_paths": [
+        ".agents/skills/adversarial-review/SKILL.md",
+        ".agents/skills/adversarial-review/references/what-if-matrix.md"
+      ],
+      "capability_profile": "read-only",
+      "permitted_fixture_mutations": [],
+      "result_assertions": [
+        { "id": "missing-coverage", "pointer": "/decisions/d1", "operator": "equals", "expected": true },
+        { "id": "no-confirmed-finding", "pointer": "/decisions/d2", "operator": "equals", "expected": false },
+        { "id": "verdict-withheld", "pointer": "/decisions/d3", "operator": "equals", "expected": "Withheld" },
+        { "id": "no-inline-substitute", "pointer": "/decisions/d4", "operator": "equals", "expected": false },
+        { "id": "no-go", "pointer": "/decisions/d5", "operator": "equals", "expected": false },
+        { "id": "no-write", "pointer": "/decisions/d6", "operator": "equals", "expected": false },
+        { "id": "findings-table", "pointer": "/summary", "operator": "contains", "expected": "| ID | Severity | Confidence | Category / status | Location / boundary | Evidence / impact | Recommended action | Verification |" },
+        { "id": "results-table", "pointer": "/summary", "operator": "contains", "expected": "| Section | Item | Status | Evidence / notes |" },
+        { "id": "decision-table", "pointer": "/summary", "operator": "contains", "expected": "| Decision | Basis |" },
+        { "id": "no-findings-row", "pointer": "/summary", "operator": "contains", "expected": "| None |" }
+      ],
+      "state_assertions": [],
+      "threshold": { "required_passes": 3, "runs": 3 },
+      "risk_cluster": "adversarial-review"
+    },
+    {
       "id": "v2.review.synthesis-positive",
       "affected_paths": [
         { "path": ".agents/skills/review/SKILL.md", "path_kind": "exact" },
@@ -990,6 +1047,38 @@
         { "id": "no-false-promotion", "pointer": "/decisions/d4", "operator": "equals", "expected": false },
         { "id": "verdict-withheld", "pointer": "/decisions/d5", "operator": "equals", "expected": "Withheld" },
         { "id": "no-automatic-egress", "pointer": "/decisions/d6", "operator": "equals", "expected": false }
+      ],
+      "state_assertions": [],
+      "threshold": { "required_passes": 3, "runs": 3 },
+      "risk_cluster": "review-orchestration"
+    },
+    {
+      "id": "v2.review.table-output-finding",
+      "affected_paths": [
+        { "path": ".agents/skills/review/SKILL.md", "path_kind": "exact" }
+      ],
+      "intent": "positive",
+      "fixture": "tests/agent-evals/fixtures/review-table-output/workspace",
+      "prompt": "tests/agent-evals/fixtures/review-table-output/prompt.md",
+      "context_paths": [
+        ".agents/skills/review/SKILL.md",
+        ".agents/skills/review/references/change-rigor.md",
+        ".agents/skills/review/references/scope-and-orchestration.md",
+        ".agents/skills/review/references/finding-contract.md"
+      ],
+      "capability_profile": "read-only",
+      "permitted_fixture_mutations": [],
+      "result_assertions": [
+        { "id": "finding-id", "pointer": "/decisions/d1", "operator": "equals", "expected": "REV-001" },
+        { "id": "severity", "pointer": "/decisions/d2", "operator": "equals", "expected": "P1" },
+        { "id": "confidence", "pointer": "/decisions/d3", "operator": "equals", "expected": 75 },
+        { "id": "classification", "pointer": "/decisions/d4", "operator": "equals", "expected": "Primary" },
+        { "id": "verdict", "pointer": "/decisions/d5", "operator": "equals", "expected": "Not ready" },
+        { "id": "no-write", "pointer": "/decisions/d6", "operator": "equals", "expected": false },
+        { "id": "findings-table", "pointer": "/summary", "operator": "contains", "expected": "| ID | Severity | Confidence | Category / status | Location / boundary | Evidence / impact | Recommended action | Verification |" },
+        { "id": "results-table", "pointer": "/summary", "operator": "contains", "expected": "| Section | Item | Status | Evidence / notes |" },
+        { "id": "decision-table", "pointer": "/summary", "operator": "contains", "expected": "| Decision | Basis |" },
+        { "id": "finding-rendered", "pointer": "/summary", "operator": "contains", "expected": "| REV-001 | P1 | 75 |" }
       ],
       "state_assertions": [],
       "threshold": { "required_passes": 3, "runs": 3 },

@@ -9,7 +9,7 @@
       "name": "ma",
       "source": "./.agents",
       "description": "Agent ecosystem (edge channel; use the full-SHA Git installer for stable releases)",
-      "version": "1.7.2"
+      "version": "1.8.0"
     }
   ]
 }

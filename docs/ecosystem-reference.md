@@ -93,7 +93,7 @@ use its full 40-character commit SHA for both acquisition and installation:
 This verifies source consistency after a revision is selected; it does not by
 itself authenticate the publisher. A version becomes stable only when a release
 record binds its full commit SHA. Use the
-[v1.7.2 release record](https://github.com/marcus-friction/agents/releases/tag/v1.7.2).
+[v1.8.0 release record](https://github.com/marcus-friction/agents/releases/tag/v1.8.0).
 
 ### User-level installation
 
@@ -377,7 +377,7 @@ the Claude plugin, every entry is namespaced as `ma:<skill>`; for example,
 | `vue-router-best-practices` | Apply Vue Router 4 navigation and lifecycle patterns | [Vue.js AI Skills](https://github.com/vuejs-ai/skills) |
 | `vue-testing-best-practices` | Test Vue components and flows with the appropriate layer | [Vue.js AI Skills](https://github.com/vuejs-ai/skills) |
 | `vueuse-functions` | Select and apply maintainable VueUse composables | [VueUse](https://github.com/vueuse/vueuse) |
-| `wrap` | Prepare requested commits or pushes with separate authority | Original |
+| `wrap` | Complete accepted handoffs and preview separately authorized Git effects | Original |
 
 Skills load on demand. Framework skills do not authorize adopting their
 framework in a project where the component is optional, absent, or unresolved.
@@ -432,6 +432,10 @@ to the legal files for the authoritative classification.
 
 ## Releases
 
+- **v1.8.0 — 2026-09-23:** Standardized review and adversarial-review reports
+  as consistent Markdown tables, and restored exact read-only Git previews for
+  generic wrap requests without granting commit or push authority. See
+  [`2026-09-23-review-and-wrap-handoffs.md`](releases/2026-09-23-review-and-wrap-handoffs.md).
 - **v1.7.2 — 2026-09-14:** Clarified plan amendments, live task tracking and
   task-based progress reports in AGENTS.md and its inactive template. See
   [`2026-09-14-plan-task-maintenance.md`](releases/2026-09-14-plan-task-maintenance.md).
