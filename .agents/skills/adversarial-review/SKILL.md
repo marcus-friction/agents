@@ -111,21 +111,45 @@ the tracking gap. No other file may change under tracker authority.
 
 ## Report
 
-For each finding, report severity and confidence, category, exact location or
-boundary, evidence, failure path, user or system impact, existing controls,
-smallest mitigation, and verification. Include likelihood and reversibility only
-when they materially affect priority.
+Render the final adversarial review as Markdown tables, not a bulleted findings
+or results list. Lead with a Findings table containing one row per stable
+finding ID. Use the same table schema as `review`:
 
-Then report:
+| ID | Severity | Confidence | Category / status | Location / boundary | Evidence / impact | Recommended action | Verification |
+|---|---|---|---|---|---|---|---|
 
-- qualifying executor route or routes and any missing coverage;
-- findings shared across independent routes, unique findings, and gaps in the
-  primary review;
-- blocking scenarios and non-blocking residual risks;
-- tracker tasks added, deduplicated, or unavailable;
-- `GO` only when no blocking scenario remains under the observed evidence, or
-  `NO-GO` when a confirmed blocker or critical unresolved uncertainty remains.
+Use short labeled lines separated by `<br>` when one cell contains multiple
+required fields. Put `Category:`, `Classification:`, and `Disposition:` in
+Category / status, using `CONFIRMED`, `HYPOTHESIS`, or `MISSING COVERAGE` for
+Classification and `FIXABLE` or `INVESTIGATE` for Disposition. Put `Evidence:`,
+`Failure path:`, `Impact:`, and `Existing controls:` in Evidence / impact. Add
+`Likelihood:` and `Reversibility:` there only when they materially affect
+priority. Put `Smallest mitigation:` in Recommended action and keep the exact
+location or boundary in Location / boundary. When there are no findings, keep
+the table and use one `None` row with the remaining cells set to `—`.
 
-End the recommendation with the strongest specific finding or the concrete
-no-blocker rationale. A verdict is evidence-bounded, not proof that no defect
+Follow it with a Results table. Use one row per item so separate routes,
+scenarios, and risks remain independently visible:
+
+| Section | Item | Status | Evidence / notes |
+|---|---|---|---|
+
+Cover each qualifying executor route and any missing coverage. Report route
+results as shared and unique findings. Also cover gaps in the primary review,
+blocking scenarios, non-blocking residual risks, and tracker tasks added,
+deduplicated, or unavailable.
+
+End with the same Decision table used by `review`, containing exactly one
+decision and its evidence-bounded basis:
+
+| Decision | Basis |
+|---|---|
+
+Use `GO` only when no blocking scenario remains under the observed evidence, or
+`NO-GO` when a confirmed blocker or critical unresolved uncertainty remains.
+Use `Withheld` when the independence gate or other required coverage is missing
+and the workflow cannot issue `GO` or `NO-GO`.
+
+End the Basis cell with the strongest specific finding or the concrete
+no-blocker rationale. A decision is evidence-bounded, not proof that no defect
 exists. No fix occurs until a separate implementation request authorizes it.

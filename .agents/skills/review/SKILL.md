@@ -109,20 +109,42 @@ other file.
 
 ## 6. Report
 
-Lead with stable-numbered findings ordered P0-P3. Each finding includes exact
-location, confidence, action, evidence, consequence, smallest correction, and
-verification. Then report:
+Render the final review as Markdown tables, not a bulleted findings or results
+list. Lead with a Findings table containing one row per stable-numbered finding,
+ordered P0-P3. Use the same table schema as `adversarial-review`:
 
-- scope and intent;
-- explicit requirements as complete, partial, missing, or equivalently met;
-- every pass as completed, not applicable, or missing coverage;
-- tests and inspections run, unavailable evidence, pre-existing issues, and
-  residual risks;
-- tracker tasks added, deduplicated, or unavailable; and
-- one verdict last: **Ready**, **Not ready**, or **Withheld**.
+| ID | Severity | Confidence | Category / status | Location / boundary | Evidence / impact | Recommended action | Verification |
+|---|---|---|---|---|---|---|---|
 
-Use **Not ready** for unresolved P0/P1 findings or an incomplete explicit
-requirement. Use **Withheld** when missing required coverage or unavailable
-material evidence prevents a defensible verdict. Otherwise use **Ready**. If
-there are no findings, say so directly, but never call the change Ready when a
+Use short labeled lines separated by `<br>` when one cell contains multiple
+required fields. Put the finding category or affected pass in Category / status,
+or `—` when neither adds useful information. Put `Evidence:` and `Impact:` in
+Evidence / impact; the impact is the consequence. In Recommended action, use
+separate `Action:` and `Smallest correction:` labeled lines. Keep the exact
+location in Location / boundary.
+
+When there are no findings, keep the table and use one `None` row with the
+remaining cells set to `—`.
+
+Follow it with a Results table. Use one row per item so multiple requirements or
+passes remain independently visible:
+
+| Section | Item | Status | Evidence / notes |
+|---|---|---|---|
+
+Cover scope and intent; each explicit requirement as complete, partial, missing,
+or equivalently met; every pass as completed, not applicable, or missing
+coverage; tests and inspections run; unavailable evidence; pre-existing issues;
+residual risks; and tracker tasks added, deduplicated, or unavailable.
+
+End with the same Decision table used by `adversarial-review`, containing exactly
+one decision and its evidence-bounded basis:
+
+| Decision | Basis |
+|---|---|
+
+Use `Not ready` for unresolved P0/P1 findings or an incomplete explicit
+requirement. Use `Withheld` when missing required coverage or unavailable
+material evidence prevents a defensible verdict. Otherwise use `Ready`. If there
+are no findings, say so directly, but never call the change `Ready` when a
 required pass did not complete.

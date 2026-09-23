@@ -35,6 +35,10 @@ grep -Eqi 'exclude advisory-only' "$SKILL"
 grep -zEqi 'review task complete[^.]*findings[^.]*recorded' "$SKILL"
 grep -zEqi 'tracker authority[^.]*never permits[^.]*reviewed code' "$SKILL"
 grep -Eqi 'tracker tasks added, deduplicated, or unavailable' "$SKILL"
+grep -Eqi 'Markdown tables' "$SKILL"
+grep -Fq '| ID | Severity | Confidence | Category / status | Location / boundary | Evidence / impact | Recommended action | Verification |' "$SKILL"
+grep -Fq '| Section | Item | Status | Evidence / notes |' "$SKILL"
+grep -Fq '| Decision | Basis |' "$SKILL"
 grep -Fq "$UPSTREAM_REVISION" "$NOTICES"
 
 for delegated in architecture-review performance-review security-review; do
