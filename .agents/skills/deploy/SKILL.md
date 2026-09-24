@@ -29,8 +29,11 @@ existing host needs an explicit migration scope; keep that host intact.
 Load [Cloud operations](references/laravel-cloud.md) for CLI, configuration and
 resources; [Laravel + Nuxt](references/laravel-nuxt.md) when Nuxt is present;
 and [verification and recovery](references/verification-and-recovery.md) before
-a release or when diagnosing one. Use current official docs and installed CLI
-help for capabilities that change. Report unavailable evidence honestly.
+a release or when diagnosing one. For every readiness check, deployment, or
+deployment-triggering handoff, load the provider-neutral [deployment
+intervention](../wrap/references/deployment-interventions.md) contract. Use
+current official docs and installed CLI help for capabilities that change.
+Report unavailable evidence honestly.
 
 ## Inspect and recommend
 
@@ -55,6 +58,28 @@ the cost estimate, with current pricing, region, usage assumptions and scaling
 limits. Ask only for unresolved choices that affect the result, such as the
 organization, region, budget or owned domain.
 
+## Resolve deployment intervention
+
+Classify every discovered prerequisite as agent work, a secret/access action,
+or an owner decision. Track its deployment intervention state separately from
+deployment lifecycle and authority using `none`, `required`, `unverified`, or
+`completed`. Repository adjustments remain agent work when scoped edits are
+authorized; otherwise request edit authority rather than delegating the
+technical change to the user.
+
+As soon as a user-owned prerequisite is found, show a conspicuous `USER ACTION
+REQUIRED` handoff with the exact blocked effect, owner, secure location,
+variable or setting name, required timing, safe verification, and non-secret
+resume signal. Never request a secret value in chat. Both `required` and
+`unverified` block deployment and every upstream effect that would trigger it.
+Do not call the target ready while state is `required` or `unverified`; `none`
+or verified `completed` resolves only the intervention gate.
+
+When evidence shows no user-owned prerequisite is pending, report exactly
+`User intervention: none` without paraphrasing it. Follow the shared contract
+for canonical state/category tokens, state transitions, action-card fields,
+checkpoint evidence, and safe verification.
+
 ## Prepare a reviewable deployment
 
 When local edits are in scope, prepare the needed settings and compatibility
@@ -70,6 +95,9 @@ keep it in the response. Record:
 - each app/root, organization and environment ID, region and intended revision;
 - build/start/deploy settings, variable names and their owners, resource links
   without credentials, domains and deployment trigger;
+- deployment intervention state and each user-owned action card, including the
+  blocked effect, secure configuration location, required timing, verification,
+  resume signal, associated scripts and recovery without secret values;
 - checks, release order, expected costs and exposure, data impact, recovery
   target and owner; distinguish proposed settings from applied settings.
 
@@ -79,6 +107,10 @@ authorization as one concrete batch where possible. Account/billing setup and
 Git-provider access may need a short user handoff. Do not repeat approval for
 unchanged facts. Revalidate targets, staged settings and material evidence
 immediately before acting; changed facts invalidate only affected authorization.
+Immediately before deployment, re-resolve intervention state and its safe
+verification evidence for the exact target, configuration, scripts, and trigger.
+Relevant drift invalidates stale `none` or `completed` state and blocks deployment
+as `required` or `unverified` until resolved again.
 
 ## Deploy and verify
 
@@ -102,5 +134,10 @@ when the same blocker survives three attempted resolutions.
 
 Finish with URLs, deployed revisions and deployment IDs, checks actually run,
 remaining failures or unverified behavior, and the next release/recovery method.
+Include exact `User intervention: none` when no user action remains, otherwise
+include the unresolved `USER ACTION REQUIRED` checklist. Record verified
+`completed` state under the deployment result without introducing a third
+user-intervention label. Do not report deployment as ready or verified while
+intervention is `required` or `unverified`.
 Update the deployment record when authorized. Report partial deployment as
 partial; do not call an application verified solely because the build passed.

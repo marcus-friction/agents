@@ -21,6 +21,12 @@ revision. Discover:
   identity, verification, recovery, and owner;
 - integration/tag/release triggers that automatically publish or deploy.
 
+When integration, tagging, or publication can cause an automatic deployment,
+load the provider-neutral [deployment
+intervention](../wrap/references/deployment-interventions.md) contract. Resolve
+its intervention state before the triggering effect; release state and release
+authority do not resolve deployment prerequisites.
+
 Do not hardcode SemVer, tags, hosted releases, GitHub, package registries, or a
 default branch. Missing material policy is `unresolved`. When preparation may
 alter reviewed content, integration is blocked until the decision and artifacts
@@ -75,10 +81,20 @@ revalidate repository/provider/account, release name/version, target revision,
 existing tags/releases/artifacts, credentials, exposure, automatic triggers,
 recovery, and exact current authority.
 
+When the effect triggers deployment, also re-resolve every intervention action
+against the exact current target, configuration, scripts, trigger, and safe
+verification evidence. Relevant drift invalidates stale `none` or `completed`
+state and blocks the triggering effect as `required` or `unverified`.
+
 If integration itself automatically creates the release, observe and verify the
 result rather than triggering it twice. If any step triggers production or
 shared-state deployment, require separate exact deployment authority before the
 triggering effect. Repository release authority is not deployment authority.
+An automatic deployment with intervention state `required` or `unverified`
+blocks the integration, tag, or release that would trigger it, even when release
+publication itself is authorized. Surface the exact `USER ACTION REQUIRED`
+handoff and resume only after safe verification reaches `completed` or evidence
+supports `none`.
 
 Use an adopted provider adapter where available; load
 [GitHub publication](references/github.md) only for confirmed GitHub releases.

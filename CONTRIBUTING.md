@@ -2,7 +2,7 @@
 
 ## Delivery Contract
 
-These values govern `wrap` and `release`; skills never expand authority.
+These govern `wrap` and `release`; skills never expand authority.
 
 | Field | Adopted value |
 |---|---|
@@ -11,11 +11,12 @@ These values govern `wrap` and `release`; skills never expand authority.
 | Release relevance | Consumer-visible managed skills, installers, candidate templates, plugin behavior, or stable install/update contracts require a release. Tests, plans, evidence, and internal bookkeeping alone are not release-relevant. Batching or deferral requires an explicit decision. |
 | Version and preparation | SemVer. Synchronize `VERSION`, plugin/marketplace metadata, stable documentation, and release notes in the reviewed change. |
 | Publication and verification | After integration, publish an immutable Git tag and GitHub release bound to the verified `master` merge SHA; verify the peeled remote tag and release metadata. |
-| Deployment coupling | Not applicable: repository release has no adopted application-deployment trigger and does not authorize deployment. |
-| Checkpoint and terminal evidence | The delivery actor owns a dedicated secret-free GitHub PR comment as checkpoint; create/update is a distinct provider effect needing exact authority. Release record proves completion, not partial state. Select one terminal cutoff: evidence PR merge if used, otherwise the verified content-bearing PR merge. Keep the tracker current through handoff publication; later identity/cleanup stay external. Reconcile refs and task context before publication. |
+| Deployment coupling | Not applicable; release does not authorize deployment. |
+| Deployment prerequisites and intervention | Not applicable: no target, variables, scripts, or user actions. `User intervention: none`. |
+| Checkpoint and terminal evidence | The delivery actor owns a dedicated secret-free GitHub PR checkpoint comment; updating it is a distinct effect needing exact authority. Release record proves completion. Use the evidence PR merge as cutoff, otherwise the verified content-bearing PR merge. Reconcile refs/task context first. Keep the tracker current through publication; later identity/cleanup stay external. |
 | Recovery and cleanup | Never repeat an ambiguous effect before inspecting remote state. Retain recovery state after partial publication. Delete owned local/remote branches and worktrees only after verified integration and terminal release, with merge-method-appropriate proof and no unique work or unrelated dirt. |
 
-Use imperative commit subjects within 72 characters; keep WIP off shared
+Use imperative commit subjects within 72 characters; keep WIP off
 branches and preserve unrelated work.
 
 ## Change Rigor

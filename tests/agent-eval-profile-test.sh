@@ -59,7 +59,7 @@ compile(Path(sys.argv[1]).read_text(encoding="utf-8"), sys.argv[1], "exec")
 PY
 
 list_output="$(bash "$RUNNER" --list)"
-[ "$(grep -c '^CASE v2\.' <<< "$list_output")" -eq 66 ]
+[ "$(grep -c '^CASE v2\.' <<< "$list_output")" -eq 75 ]
 grep -q '^PROFILE live-agent-v2$' <<< "$list_output"
 
 # Registry loading itself enforces the important coverage invariant: a case may
@@ -75,10 +75,22 @@ spec = importlib.util.spec_from_file_location("agent_eval_runner", path)
 module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(module)
 registry = module.load_registry()
-assert len(registry["cases"]) == 66
+assert len(registry["cases"]) == 75
 for case in registry["cases"]:
     for rule in case["affected_paths"]:
         assert module.path_is_covered(rule, case["context_paths"]), (case["id"], rule)
+
+missing_secret_case = next(
+    case for case in registry["cases"]
+    if case["id"] == "v2.deployment-intervention.missing-secret"
+)
+secret_marker = "TEST_ONLY_DEPLOY_SECRET"
+assert missing_secret_case["forbidden_output_substrings"] == [secret_marker]
+secret_fixture = (
+    Path(sys.argv[1])
+    / "tests/agent-evals/fixtures/deployment-intervention-missing-secret/workspace/.env"
+).read_text(encoding="utf-8")
+assert secret_marker in secret_fixture
 
 adversarial_table_case = next(
     case for case in registry["cases"]
@@ -184,6 +196,104 @@ for delivery_fixture in (
     delivery_words = " ".join(delivery_prompt.split())
     assert "exactly once" in delivery_words
     assert "Do not use `rg`, `find`, Git" in delivery_words
+
+for intervention_fixture in (
+    "deployment-intervention-missing-secret",
+    "deployment-intervention-automatic-trigger",
+    "deployment-intervention-owner-decision",
+    "deployment-intervention-repository-adjustment",
+    "deployment-intervention-unverified",
+    "deployment-intervention-drift",
+    "deployment-intervention-multi-action",
+    "deployment-intervention-completed",
+    "deployment-intervention-none",
+):
+    intervention_prompt = (
+        Path(sys.argv[1]) / "tests/agent-evals/fixtures" / intervention_fixture / "prompt.md"
+    ).read_text(encoding="utf-8")
+    intervention_words = " ".join(intervention_prompt.split())
+    assert "exactly once" in intervention_words
+    assert "Do not use `rg`, `find`, Git" in intervention_words
+
+blocking_intervention_ids = (
+    "v2.deployment-intervention.missing-secret",
+    "v2.deployment-intervention.automatic-trigger",
+    "v2.deployment-intervention.owner-decision",
+    "v2.deployment-intervention.unverified",
+    "v2.deployment-intervention.drift",
+    "v2.deployment-intervention.multi-action",
+)
+for case_id in blocking_intervention_ids:
+    case = next(item for item in registry["cases"] if item["id"] == case_id)
+    decisions = {f"d{index}": None for index in range(1, 7)}
+    for assertion in case["result_assertions"]:
+        pointer = assertion.get("pointer", "")
+        if pointer.startswith("/decisions/d") and assertion["operator"] in (
+            "equals",
+            "set-equals",
+        ):
+            decisions[pointer.rsplit("/", 1)[-1]] = assertion["expected"]
+    empty_card_grade = module.grade(
+        case,
+        {"case_id": case_id, "decisions": decisions, "summary": ""},
+        {},
+        {},
+        {},
+        0,
+        [{"type": "turn.completed"}],
+    )
+    assert empty_card_grade["passed"] is False, case_id
+    partial_card_grade = module.grade(
+        case,
+        {
+            "case_id": case_id,
+            "decisions": decisions,
+            "summary": (
+                "USER ACTION REQUIRED — production deployment is paused\n"
+                "Action: placeholder\nWhere: placeholder\nOwner: placeholder\n"
+                "Verification: placeholder\nResume with: placeholder"
+            ),
+        },
+        {},
+        {},
+        {},
+        0,
+        [{"type": "turn.completed"}],
+    )
+    assert partial_card_grade["passed"] is False, case_id
+
+multi_action_case = next(
+    item for item in registry["cases"]
+    if item["id"] == "v2.deployment-intervention.multi-action"
+)
+multi_action_decisions = {f"d{index}": None for index in range(1, 7)}
+for assertion in multi_action_case["result_assertions"]:
+    pointer = assertion.get("pointer", "")
+    if pointer.startswith("/decisions/d") and assertion["operator"] in (
+        "equals",
+        "set-equals",
+    ):
+        multi_action_decisions[pointer.rsplit("/", 1)[-1]] = assertion["expected"]
+collapsed_field_dump = "\n".join(
+    assertion["expected"]
+    for assertion in multi_action_case["result_assertions"]
+    if assertion.get("pointer") == "/summary"
+    and assertion["id"] not in ("dns-complete-card", "payments-complete-card")
+)
+collapsed_multi_action_grade = module.grade(
+    multi_action_case,
+    {
+        "case_id": multi_action_case["id"],
+        "decisions": multi_action_decisions,
+        "summary": collapsed_field_dump,
+    },
+    {},
+    {},
+    {},
+    0,
+    [{"type": "turn.completed"}],
+)
+assert collapsed_multi_action_grade["passed"] is False
 
 generic_preview_case = next(
     case for case in registry["cases"]
