@@ -6,6 +6,7 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 TEST_ROOT="$(mktemp -d)"
 REAL_GIT="$(command -v git)"
 REAL_MKTEMP="$(command -v mktemp)"
+REAL_RM="$(command -v rm)"
 BULK_BRANCH="feature/import-agent-ecosystem-skills"
 export AGENTS_ECOSYSTEM_BULK_BRANCH="feature/ambient-branch-must-be-ignored"
 
@@ -142,6 +143,7 @@ git clone -q --bare "$target_source" "$target_remote"
 git_wrapper="$TEST_ROOT/bin/git"
 gh_wrapper="$TEST_ROOT/bin/gh"
 mktemp_wrapper="$TEST_ROOT/bin/mktemp"
+rm_wrapper="$TEST_ROOT/bin/rm"
 mkdir -p "$(dirname "$git_wrapper")"
 cat > "$git_wrapper" <<'WRAPPER'
 #!/usr/bin/env bash
@@ -219,7 +221,29 @@ if [[ "$*" == *agents-ecosystem-bulk-work.* ]] \
 fi
 printf '%s\n' "$result"
 WRAPPER
-chmod +x "$git_wrapper" "$gh_wrapper" "$mktemp_wrapper"
+cat > "$rm_wrapper" <<'WRAPPER'
+#!/usr/bin/env bash
+set -euo pipefail
+real_rm="${AGENTS_ECOSYSTEM_TEST_REAL_RM:-$(PATH=/usr/bin:/bin command -v rm)}"
+target="${*: -1}"
+mode="${AGENTS_ECOSYSTEM_TEST_WORK_CLEANUP_FAILURE_MODE:-}"
+if [ -n "$mode" ] \
+  && [[ "$target" =~ ^/tmp/agents-ecosystem-bulk-work\.[^/]+$ ]]; then
+  count=0
+  if [ -f "$AGENTS_ECOSYSTEM_TEST_WORK_CLEANUP_COUNT" ]; then
+    read -r count < "$AGENTS_ECOSYSTEM_TEST_WORK_CLEANUP_COUNT"
+  fi
+  count=$((count + 1))
+  printf '%s\n' "$count" > "$AGENTS_ECOSYSTEM_TEST_WORK_CLEANUP_COUNT"
+  printf '%s\n' "$target" > "$AGENTS_ECOSYSTEM_TEST_WORK_CLEANUP_PATH"
+  if [ "$mode" = always ] || [ "$count" -eq 1 ]; then
+    printf 'simulated transient cleanup failure\n' >&2
+    exit 1
+  fi
+fi
+exec "$real_rm" "$@"
+WRAPPER
+chmod +x "$git_wrapper" "$gh_wrapper" "$mktemp_wrapper" "$rm_wrapper"
 
 effect_log="$TEST_ROOT/effects.log"
 
@@ -317,6 +341,53 @@ if [ -e "$effect_log" ]; then
   exit 1
 fi
 [ -z "$(git --git-dir="$target_remote" for-each-ref --format='%(refname)' refs/heads/chore/)" ]
+
+cleanup_retry_plan="$TEST_ROOT/cleanup-retry-plan"
+cleanup_retry_count="$TEST_ROOT/cleanup-retry-count"
+cleanup_retry_path="$TEST_ROOT/cleanup-retry-path"
+AGENTS_ECOSYSTEM_TEST_WORK_CLEANUP_FAILURE_MODE=once \
+AGENTS_ECOSYSTEM_TEST_WORK_CLEANUP_COUNT="$cleanup_retry_count" \
+AGENTS_ECOSYSTEM_TEST_WORK_CLEANUP_PATH="$cleanup_retry_path" \
+AGENTS_ECOSYSTEM_TEST_REAL_RM="$REAL_RM" \
+PATH="$(dirname "$git_wrapper"):$PATH" \
+AGENTS_ECOSYSTEM_TEST_REAL_GIT="$REAL_GIT" \
+AGENTS_ECOSYSTEM_TEST_TARGET_REMOTE="$target_remote" \
+AGENTS_ECOSYSTEM_TEST_EFFECT_LOG="$effect_log" \
+  bash "$source_checkout/scripts/install-into-repos.sh" \
+    --ref "$release_ref" --branch "$BULK_BRANCH" \
+    --plan-dir "$cleanup_retry_plan" \
+    owner/repo >"$TEST_ROOT/cleanup-retry.out" 2>&1 || {
+  echo "bulk installer did not recover from one transient cleanup failure" >&2
+  cat "$TEST_ROOT/cleanup-retry.out" >&2
+  exit 1
+}
+[ "$(cat "$cleanup_retry_count")" -eq 2 ]
+cleanup_retry_work="$(cat "$cleanup_retry_path")"
+[ ! -e "$cleanup_retry_work" ] && [ ! -L "$cleanup_retry_work" ]
+
+cleanup_persistent_plan="$TEST_ROOT/cleanup-persistent-plan"
+cleanup_persistent_count="$TEST_ROOT/cleanup-persistent-count"
+cleanup_persistent_path="$TEST_ROOT/cleanup-persistent-path"
+if AGENTS_ECOSYSTEM_TEST_WORK_CLEANUP_FAILURE_MODE=always \
+  AGENTS_ECOSYSTEM_TEST_WORK_CLEANUP_COUNT="$cleanup_persistent_count" \
+  AGENTS_ECOSYSTEM_TEST_WORK_CLEANUP_PATH="$cleanup_persistent_path" \
+  AGENTS_ECOSYSTEM_TEST_REAL_RM="$REAL_RM" \
+  PATH="$(dirname "$git_wrapper"):$PATH" \
+  AGENTS_ECOSYSTEM_TEST_REAL_GIT="$REAL_GIT" \
+  AGENTS_ECOSYSTEM_TEST_TARGET_REMOTE="$target_remote" \
+  AGENTS_ECOSYSTEM_TEST_EFFECT_LOG="$effect_log" \
+    bash "$source_checkout/scripts/install-into-repos.sh" \
+      --ref "$release_ref" --branch "$BULK_BRANCH" \
+      --plan-dir "$cleanup_persistent_plan" \
+      owner/repo >"$TEST_ROOT/cleanup-persistent.out" 2>&1; then
+  echo "bulk installer hid a persistent work-directory cleanup failure" >&2
+  exit 1
+fi
+[ "$(cat "$cleanup_persistent_count")" -eq 3 ]
+grep -Fq 'failed to remove owned temporary work directory after 3 attempts' \
+  "$TEST_ROOT/cleanup-persistent.out"
+cleanup_persistent_work="$(cat "$cleanup_persistent_path")"
+"$REAL_RM" -rf -- "$cleanup_persistent_work"
 apply_author_args=(
   --author-name "Bulk Apply Test"
   --author-email "bulk-apply@example.invalid"
