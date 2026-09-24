@@ -81,6 +81,14 @@ release relevance and preparation/publication policy, deployment trigger
 coupling, durable checkpoint and terminal-evidence cutoff, and safe cleanup
 rules. `Unresolved` is a result, not permission to invent a default.
 
+Resolve deployment intervention separately from lifecycle and authority. If a
+direct or automatic deployment has state `required` or `unverified`, surface
+`USER ACTION REQUIRED` immediately and block every integration, tag, release,
+or other effect that would trigger it. `none` or verified `completed` resolves
+only this gate and never grants deployment authority. Resume a triggering
+effect only when safe verification reaches `completed` or evidence supports
+`none`.
+
 ### 3. Assess release and prepare the preview
 
 Route release relevance and mechanics to the `release` skill. It owns the
@@ -97,6 +105,9 @@ Route detailed references by requested work, including exact-effect requests:
   and cleanup completely: [reference](references/integration-and-cleanup.md).
 - Before any external effect or when resuming from recorded state, read delivery
   checkpoints completely: [reference](references/delivery-checkpoints.md).
+- For any direct or automatic deployment, readiness check, or user-owned
+  deployment prerequisite, read deployment interventions completely:
+  [reference](references/deployment-interventions.md).
 - For a confirmed provider, read its provider adapter before provider inspection
   or mutation. GitHub uses the [GitHub adapter](references/github.md).
 
@@ -114,6 +125,8 @@ messages, reviewed paths or hunks, and the complete lifecycle:
 - release disposition, artifacts, immutable identity, and verification;
 - any release, deployment, or provider-managed destructive cleanup trigger
   caused by integration, tagging, or release;
+- deployment intervention state, exact user actions or explicit evidence-backed
+  `User intervention: none`, and the dependent effects each action blocks;
 - recovery checkpoints and exact cleanup candidates with proof.
 
 Then ask once which Git effects to execute and which later delivery effects the
@@ -126,8 +139,12 @@ trigger; release authority never implies deployment authority.
 
 Immediately before each effect, revalidate its exact repository, account,
 source and target refs, reviewed head/base, checks, credentials, exposure,
-trigger coupling, and recovery. Record completed or ambiguous effects in the
-adopted secret-free checkpoint. Stored authority is historical evidence only.
+trigger coupling, recovery, and deployment-intervention evidence. Re-resolve
+every intervention action for the exact current target, configuration, scripts,
+and trigger; relevant drift invalidates stale `none` or `completed` state and
+blocks the triggering effect as `required` or `unverified`. Record completed or
+ambiguous effects in the adopted secret-free checkpoint. Stored authority and
+stored intervention state are historical evidence only.
 
 After any target/base drift, recompute the complete unreleased set, release
 artifacts, checks, automatic triggers, cleanup proof, and affected authority.
@@ -153,9 +170,15 @@ Quality: <tests, review, checks, and unavailable evidence>
 Commits: <hashes/subjects or preview/not done>
 Integration: <source/target, request, method, checks, revision, or disposition>
 Release: <disposition, version/tag/release identity, verification, or recovery>
+Deployment: <target, trigger, revision, identity, verification, or disposition>
+Resolved intervention form: User intervention: none
+Blocked intervention form: USER ACTION REQUIRED — <exact effect> is paused
 Cleanup: <completed, retained, blocked, and proof>
 Preserved: <unrelated work and recovery state>
 ```
+
+Render only one intervention form. Do not prefix the blocked form with
+`User intervention:`; the canonical warning heading starts the action card.
 
 Facts created after the selected terminal repository handoff live in the
 adopted external evidence and final report. Do not create recursive bookkeeping

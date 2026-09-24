@@ -86,7 +86,10 @@ target, resources, costs, and recovery approach before deploying.
 monorepos and separate repositories. It uses the official Cloud CLI, preserves
 existing project choices, and verifies the deployed application. Cloud account
 access and authorization for paid resources or production changes are handled
-when needed.
+when needed. If a secret, dashboard setting, owner decision, or other user-owned
+prerequisite is required, the agent pauses the dependent effect, presents a
+conspicuous names-only action checklist, and explains safe verification and the
+non-secret resume signal. Otherwise it reports `User intervention: none`.
 
 ## Default Stack
 
@@ -133,7 +136,7 @@ This self-cleaning variant isolates the temporary checkout:
 ### Stable installation
 
 Stable installation uses the full commit SHA in the
-[v1.9.0 release record](https://github.com/marcus-friction/agents/releases/tag/v1.9.0).
+[v1.10.0 release record](https://github.com/marcus-friction/agents/releases/tag/v1.10.0).
 A version becomes stable only when its release record binds that exact SHA.
 
 <!-- stable-project-quickstart -->

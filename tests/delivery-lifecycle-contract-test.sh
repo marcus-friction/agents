@@ -5,13 +5,15 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
 WRAP="$ROOT/.agents/skills/wrap/SKILL.md"
 RELEASE="$ROOT/.agents/skills/release/SKILL.md"
+DEPLOY="$ROOT/.agents/skills/deploy/SKILL.md"
 CHECKPOINTS="$ROOT/.agents/skills/wrap/references/delivery-checkpoints.md"
+INTERVENTIONS="$ROOT/.agents/skills/wrap/references/deployment-interventions.md"
 INTEGRATION="$ROOT/.agents/skills/wrap/references/integration-and-cleanup.md"
 GIT_SETUP="$ROOT/.agents/skills/wrap/references/git-setup.md"
 WRAP_GITHUB="$ROOT/.agents/skills/wrap/references/github.md"
 RELEASE_GITHUB="$ROOT/.agents/skills/release/references/github.md"
 
-for required in "$RELEASE" "$CHECKPOINTS" "$INTEGRATION" "$WRAP_GITHUB" "$RELEASE_GITHUB"; do
+for required in "$RELEASE" "$DEPLOY" "$CHECKPOINTS" "$INTERVENTIONS" "$INTEGRATION" "$WRAP_GITHUB" "$RELEASE_GITHUB"; do
   [ -f "$required" ] || {
     echo "Missing delivery lifecycle artifact: ${required#"$ROOT/"}" >&2
     exit 1
@@ -37,6 +39,7 @@ candidate = words("project-templates/base/CONTRIBUTING.md")
 agents = words("AGENTS.md")
 candidate_agents = words("project-templates/base/AGENTS.md")
 deploy = words(".agents/skills/deploy/SKILL.md")
+interventions = words(".agents/skills/wrap/references/deployment-interventions.md")
 release_github = words(".agents/skills/release/references/github.md")
 wrap_github = words(".agents/skills/wrap/references/github.md")
 
@@ -114,6 +117,45 @@ for text in (agents, candidate_agents):
     ))
     assert "new tracked increment" in text
 assert "repository release does not authorize deployment" in deploy
+for text in (wrap, release, deploy):
+    assert "deployment intervention" in text
+    assert "deployment-interventions.md" in text
+for fragment in (
+    "`none`",
+    "`required`",
+    "`unverified`",
+    "`completed`",
+    "blocked effect",
+    "required before",
+    "secure configuration location",
+    "never ask",
+    "do not substitute",
+    "do not paraphrase",
+    "aggregate with strict precedence",
+    "every intervention action",
+    "stale `none` or `completed` state never survives relevant drift",
+    "user action required",
+    "user intervention: none",
+):
+    assert fragment in interventions, fragment
+assert "both `required` and `unverified`" in interventions
+assert "must not proceed" in interventions
+assert "user action required" in deploy
+assert "user intervention: none" in deploy
+assert "automatic deployment" in release
+assert "automatic deployment" in wrap
+for text in (wrap, release):
+    assert "`required` or `unverified`" in text
+    assert "safe verification reaches `completed`" in text
+assert "block every integration, tag, release" in wrap
+assert "blocks the integration, tag, or release" in release
+for text in (wrap, release, deploy):
+    assert "re-resolve" in text
+    assert "stale `none` or `completed`" in text
+assert "do not prefix the blocked form" in wrap
+assert "blocked intervention form: user action required" in wrap
+for text in (wrap, deploy, interventions):
+    assert "user intervention: completed and verified" not in text
 assert "requires exact authority" in git_setup
 assert "generic wrap" in git_setup and "must not initialize" in git_setup
 assert "content-bearing" in contributing
@@ -121,6 +163,27 @@ assert "no evidence" in contributing or "otherwise the verified content-bearing"
 for fragment in ("delivery actor", "dedicated secret-free", "distinct", "authority"):
     assert fragment in contributing, fragment
 for fragment in ("checkpoint owner", "durable location", "separately authorized"):
+    assert fragment in candidate, fragment
+for text in (contributing, candidate):
+    assert "deployment prerequisites and intervention" in text
+for fragment in (
+    "environment/target",
+    "variable or setting",
+    "sensitivity",
+    "secure configuration location",
+    "required before",
+    "verification",
+    "associated scripts",
+    "manual action",
+    "reason",
+    "blocked effect",
+    "consequence",
+    "evidence owner",
+    "resume signal",
+    "recovery",
+):
+    assert fragment in candidate, fragment
+for fragment in ("retain trigger/blocked effect", "verification, resume, and recovery"):
     assert fragment in candidate, fragment
 assert "authority readiness is separate" in release
 assert "missing authority does not change" in release
