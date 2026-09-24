@@ -11,7 +11,9 @@ building Laravel and Nuxt web applications.
 - Gives agents Laravel, Nuxt, Vue, Nitro, Pinia, Vite, Vitest, VueUse, testing,
   security, performance, and delivery guidance when relevant.
 - Keeps product context, architecture, plans, and decisions in the repository.
-- Uses a `plan → implement → review → wrap` workflow for meaningful changes.
+- Uses a `plan → implement → review → wrap` workflow, with integration,
+  applicable release, and safe cleanup governed by each project's delivery
+  contract.
 - Preserves project-owned documents and unrelated work.
 - Requires explicit approval for destructive, privileged, production,
   publication, and other difficult-to-reverse actions.
@@ -57,8 +59,14 @@ as `review`. The Claude plugin adds `ma:`, for example `ma:review`; never `ma-`.
 | Diagnose a bug | `systematic-debugging` |
 | Review completed work | `review` |
 | Finish and hand off | `wrap` |
+| Prepare or publish a release | `release` |
 | Plan a rewrite | `migrate-project` |
 | Deploy Laravel and Nuxt to Laravel Cloud | `deploy` |
+
+`wrap` prepares the complete delivery preview but never silently commits,
+pushes, integrates, releases, deploys, or cleans up. Project-specific delivery
+variables belong in active `CONTRIBUTING.md`; `release` owns provider-neutral
+release preparation, publication, verification, and recovery.
 
 For a deployment readiness report, ask:
 
@@ -125,7 +133,7 @@ This self-cleaning variant isolates the temporary checkout:
 ### Stable installation
 
 Stable installation uses the full commit SHA in the
-[v1.8.0 release record](https://github.com/marcus-friction/agents/releases/tag/v1.8.0).
+[v1.9.0 release record](https://github.com/marcus-friction/agents/releases/tag/v1.9.0).
 A version becomes stable only when its release record binds that exact SHA.
 
 <!-- stable-project-quickstart -->

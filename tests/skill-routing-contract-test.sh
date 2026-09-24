@@ -13,6 +13,7 @@ done
 
 compound="$SKILLS/compound/SKILL.md"
 wrap="$SKILLS/wrap/SKILL.md"
+release="$SKILLS/release/SKILL.md"
 copywriting="$SKILLS/copywriting/SKILL.md"
 contribute="$SKILLS/contribute-back/SKILL.md"
 update="$SKILLS/update-agents/SKILL.md"
@@ -34,7 +35,17 @@ content = " ".join(Path(sys.argv[1]).read_text(encoding="utf-8").lower().split()
 assert "for every generic wrap where the user did not explicitly exclude both commit and push" in content
 assert "prepare its exact read-only preview of atomic commit groups" in content
 assert "then ask once which git effects to execute" in content
+assert "for every commit or push preview or execution" in content
+assert "read git handoff" in content
+assert "for any change-request, integration, drift, or cleanup work" in content
+assert "read integration and cleanup" in content
+assert "before any external effect or when resuming" in content
+assert "read delivery checkpoints" in content
+assert "confirmed provider" in content and "provider adapter" in content
 PY
+grep -Eqi 'explicit.*release|release.*explicit' "$release"
+grep -Eqi 'complete unreleased change set' "$release"
+grep -Eqi 'invocation alone.*(does not|never).*authori[sz]|never grants.*authori[sz]' "$release"
 grep -Eqi 'code or configuration only when it helps' "$compound"
 grep -Eqi 'dead ends only when' "$compound"
 grep -Eqi 'prevention only when' "$compound"

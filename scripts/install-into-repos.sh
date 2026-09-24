@@ -36,13 +36,35 @@ cleanup() {
 trap cleanup EXIT
 
 cleanup_work() {
-  case "$1" in
+  local attempt
+  local work="$1"
+
+  case "$work" in
     /tmp/agents-ecosystem-bulk-work.*)
-      if [ -d "$1" ] && [ ! -L "$1" ]; then
-        rm -rf "$1"
-      fi
+      ;;
+    *)
+      return 0
       ;;
   esac
+
+  for attempt in 1 2 3; do
+    if [ ! -e "$work" ] && [ ! -L "$work" ]; then
+      return 0
+    fi
+    if [ -L "$work" ] || [ ! -d "$work" ]; then
+      echo "Error: refusing unsafe temporary work cleanup target: $work" >&2
+      return 1
+    fi
+    if rm -rf -- "$work"; then
+      return 0
+    fi
+    if [ "$attempt" -lt 3 ]; then
+      sleep 0.1
+    fi
+  done
+
+  echo "Error: failed to remove owned temporary work directory after 3 attempts: $work" >&2
+  return 1
 }
 
 usage() {

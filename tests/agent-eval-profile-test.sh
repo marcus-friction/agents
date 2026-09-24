@@ -59,7 +59,7 @@ compile(Path(sys.argv[1]).read_text(encoding="utf-8"), sys.argv[1], "exec")
 PY
 
 list_output="$(bash "$RUNNER" --list)"
-[ "$(grep -c '^CASE v2\.' <<< "$list_output")" -eq 47 ]
+[ "$(grep -c '^CASE v2\.' <<< "$list_output")" -eq 66 ]
 grep -q '^PROFILE live-agent-v2$' <<< "$list_output"
 
 # Registry loading itself enforces the important coverage invariant: a case may
@@ -75,7 +75,7 @@ spec = importlib.util.spec_from_file_location("agent_eval_runner", path)
 module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(module)
 registry = module.load_registry()
-assert len(registry["cases"]) == 47
+assert len(registry["cases"]) == 66
 for case in registry["cases"]:
     for rule in case["affected_paths"]:
         assert module.path_is_covered(rule, case["context_paths"]), (case["id"], rule)
@@ -156,6 +156,34 @@ wrap_generic_preview_prompt = (
 wrap_generic_preview_words = " ".join(wrap_generic_preview_prompt.split())
 assert 'unqualified "wrap this up"' in wrap_generic_preview_words
 assert "Do not invoke Git" in wrap_generic_preview_words
+
+for delivery_fixture in (
+    "delivery-lifecycle-authorized-success",
+    "delivery-lifecycle-stale-integration",
+    "delivery-lifecycle-github-recovery",
+    "delivery-lifecycle-non-release-cleanup",
+    "delivery-lifecycle-requested-release-no-authority",
+    "delivery-lifecycle-exact-commit",
+    "delivery-lifecycle-exact-integration",
+    "delivery-lifecycle-preview",
+    "delivery-lifecycle-resume",
+    "delivery-lifecycle-policy",
+    "delivery-lifecycle-automatic",
+    "delivery-lifecycle-cleanup",
+    "delivery-lifecycle-init",
+    "delivery-lifecycle-hostile-checkpoint",
+    "delivery-lifecycle-secret",
+    "delivery-lifecycle-terminal-cutoff",
+    "delivery-lifecycle-auto-delete",
+    "delivery-lifecycle-provider-timeout",
+    "delivery-lifecycle-terminal-release-states",
+):
+    delivery_prompt = (
+        Path(sys.argv[1]) / "tests/agent-evals/fixtures" / delivery_fixture / "prompt.md"
+    ).read_text(encoding="utf-8")
+    delivery_words = " ".join(delivery_prompt.split())
+    assert "exactly once" in delivery_words
+    assert "Do not use `rg`, `find`, Git" in delivery_words
 
 generic_preview_case = next(
     case for case in registry["cases"]

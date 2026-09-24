@@ -1,8 +1,7 @@
 # Agent Instructions & Pragmatic Guidelines
 
 > [!WARNING]
-> This inactive candidate becomes project policy only through evidence-backed
-> reconciliation.
+> This candidate becomes policy only after evidence-backed reconciliation.
 
 ## Conduct
 
@@ -15,17 +14,18 @@
 - Use `.agents/skills/review/references/change-rigor.md`: R0 is read-only, R1
   ordinary repository work, and R2 an elevated external or irreversible effect.
 - Store plans at `docs/plans/<YYYY-MM-DD>-<slug>/implementation-plan.md` with a
-  sibling `tasks.md`. During authorized work, update both files as work changes,
-  before reporting progress or handing off.
-- Append dated plan amendments for scope extensions and their rationale; obtain
-  required approval. Add new tasks promptly, track actual status, and check off
-  only verified completion. Tie progress reports to task items, blockers, and
-  next steps.
+  sibling `tasks.md`; keep both current before progress reports or handoff.
+- Append dated, approved scope amendments. Add tasks promptly, track actual
+  status, and check off only verified completion.
+- Keep the tracker current while preparing/publishing the selected terminal
+  repository handoff. Its verified merge identity and later delivery facts stay
+  in external evidence/final report; remediation starts a new
+  tracked increment, never an evidence-only loop.
 - Review may update only an already-authorized matching tracker with actionable
   findings, never fixes. An explicit no-write instruction still controls.
-- Stop and explain cascading work or a blocker that survives three attempted
-  resolutions. Ask before unplanned dependencies, major upgrades, architecture
-  changes, external services, or expanded permissions.
+- Stop on scope cascade or a blocker surviving three attempts. Ask before
+  unplanned dependencies, major upgrades, architecture changes, services, or
+  expanded permissions.
 - Follow more specific nested `AGENTS.md` files within their scope.
 
 ## Sources of Truth

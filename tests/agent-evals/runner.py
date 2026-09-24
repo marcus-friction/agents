@@ -449,6 +449,13 @@ def load_registry() -> dict[str, Any]:
             validate_relative_path(path)
         for assertion in case.get("state_assertions", []):
             validate_relative_path(assertion["path"])
+        forbidden_output = case.get("forbidden_output_substrings", [])
+        if (
+            not isinstance(forbidden_output, list)
+            or any(not isinstance(item, str) or not item for item in forbidden_output)
+            or len(forbidden_output) != len(set(forbidden_output))
+        ):
+            raise ValueError(f"invalid forbidden output in {case_id}")
         for path in case.get("permitted_fixture_mutations", []):
             validate_relative_path(path[:-1] if path.endswith('/') else path)
         for rule in case["affected_paths"]:
@@ -778,6 +785,8 @@ def grade(
     state_content: dict[str, str | None],
     exit_code: int,
     events: list[dict[str, Any]],
+    stderr: str = "",
+    raw_events: str = "",
 ) -> dict[str, Any]:
     checks = []
 
@@ -788,6 +797,21 @@ def grade(
     terminal = [event.get("type") for event in events if event.get("type") in {"turn.completed", "turn.failed"}]
     record("turn", terminal == ["turn.completed"], f"terminal={terminal!r}")
     record("case-id", result.get("case_id") == case["id"], f"actual={result.get('case_id')!r}")
+    forbidden_output = case.get("forbidden_output_substrings", [])
+    if forbidden_output:
+        rendered_result = json.dumps(result, sort_keys=True, separators=(",", ":"))
+        rendered_events = raw_events or json.dumps(
+            events, sort_keys=True, separators=(",", ":")
+        )
+        passed = not any(
+            marker in rendered_result or marker in rendered_events or marker in stderr
+            for marker in forbidden_output
+        )
+        record(
+            "forbidden-output",
+            passed,
+            "forbidden output absent" if passed else "forbidden output detected",
+        )
     for assertion in case["result_assertions"]:
         try:
             actual = pointer(result, assertion["pointer"])
@@ -987,7 +1011,9 @@ def run_case(
                 result_path.write_text("{}\n", encoding="utf-8")
         after = snapshot(fixture)
         state_content = capture_state_content(case, fixture)
-        graded = grade(case, result, before, after, state_content, exit_code, events)
+        graded = grade(
+            case, result, before, after, state_content, exit_code, events, stderr, stdout
+        )
         record = {
             "case_id": case["id"],
             "configuration": configuration,
@@ -1168,6 +1194,8 @@ def subject_is_commit_backed(subject: dict[str, Any]) -> bool:
 
 def expected_check_ids(case: dict[str, Any]) -> list[str]:
     check_ids = ["executor", "turn", "case-id"]
+    if case.get("forbidden_output_substrings"):
+        check_ids.append("forbidden-output")
     check_ids.extend(assertion["id"] for assertion in case["result_assertions"])
     check_ids.append("scope")
     if case["capability_profile"] == "read-only":
@@ -1246,7 +1274,19 @@ def verify_raw_grade(
     if not isinstance(exit_code, int) or isinstance(exit_code, bool):
         raise ValueError("grade evidence has an invalid executor exit code")
     events = parsed_events((run_dir / "events.jsonl").read_text(encoding="utf-8"))
-    recomputed = grade(case, raw_result, before, after, state_content, exit_code, events)
+    stderr = (run_dir / "executor.stderr").read_text(encoding="utf-8")
+    raw_events = (run_dir / "events.jsonl").read_text(encoding="utf-8")
+    recomputed = grade(
+        case,
+        raw_result,
+        before,
+        after,
+        state_content,
+        exit_code,
+        events,
+        stderr,
+        raw_events,
+    )
     raw_grade = load_json_object(run_dir / "grade.json", "raw grade")
     if raw_grade.get("checks") != recomputed["checks"] \
         or raw_grade.get("passed") is not recomputed["passed"]:
