@@ -84,7 +84,9 @@ recovery, and exact current authority.
 When the effect triggers deployment, also re-resolve every intervention action
 against the exact current target, configuration, scripts, trigger, and safe
 verification evidence. Relevant drift invalidates stale `none` or `completed`
-state and blocks the triggering effect as `required` or `unverified`.
+evidence. Rediscover actions and recompute the state; a verified empty inventory
+returns `none`, while an incomplete assessment pauses the effect without
+inventing a user action.
 
 If integration itself automatically creates the release, observe and verify the
 result rather than triggering it twice. If any step triggers production or

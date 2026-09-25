@@ -141,10 +141,12 @@ Immediately before each effect, revalidate its exact repository, account,
 source and target refs, reviewed head/base, checks, credentials, exposure,
 trigger coupling, recovery, and deployment-intervention evidence. Re-resolve
 every intervention action for the exact current target, configuration, scripts,
-and trigger; relevant drift invalidates stale `none` or `completed` state and
-blocks the triggering effect as `required` or `unverified`. Record completed or
-ambiguous effects in the adopted secret-free checkpoint. Stored authority and
-stored intervention state are historical evidence only.
+and trigger; relevant drift invalidates stale `none` or `completed` evidence.
+Recompute the state from current identified actions: a verified empty inventory
+returns `none`, while an incomplete assessment pauses the effect without
+inventing a user action. Record completed or ambiguous effects in the adopted
+secret-free checkpoint. Stored authority and stored intervention state are
+historical evidence only.
 
 After any target/base drift, recompute the complete unreleased set, release
 artifacts, checks, automatic triggers, cleanup proof, and affected authority.
