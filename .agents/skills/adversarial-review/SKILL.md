@@ -77,6 +77,9 @@ mandatory checklist.
 3. Trace the path from input through state and side effects to user impact,
    recovery, or rollback. Inspect the exact code, configuration, and tests that
    support or contradict it.
+   Challenge whether all affected tests were updated or remain valid and whether
+   changed outcomes and meaningful failure paths have coverage evidence. Treat
+   a passing suite without that trace as insufficient evidence.
 4. Use only inspection and commands known to be non-mutating under the current
    authority. Otherwise specify the smallest reproduction or test that would
    resolve the uncertainty without executing it.
@@ -136,8 +139,9 @@ scenarios, and risks remain independently visible:
 
 Cover each qualifying executor route and any missing coverage. Report route
 results as shared and unique findings. Also cover gaps in the primary review,
-blocking scenarios, non-blocking residual risks, and tracker tasks added,
-deduplicated, or unavailable.
+including affected tests and coverage evidence, blocking scenarios,
+non-blocking residual risks, and tracker tasks added, deduplicated, or
+unavailable.
 
 End with the same Decision table used by `review`, containing exactly one
 decision and its evidence-bounded basis:
@@ -146,9 +150,10 @@ decision and its evidence-bounded basis:
 |---|---|
 
 Use `GO` only when no blocking scenario remains under the observed evidence, or
-`NO-GO` when a confirmed blocker or critical unresolved uncertainty remains.
-Use `Withheld` when the independence gate or other required coverage is missing
-and the workflow cannot issue `GO` or `NO-GO`.
+`NO-GO` when a confirmed blocker, a material missing test update or coverage gap,
+or critical unresolved uncertainty remains. Use `Withheld` when the independence
+gate or other required coverage evidence is missing and the workflow cannot
+issue `GO` or `NO-GO`.
 
 End the Basis cell with the strongest specific finding or the concrete
 no-blocker rationale. A decision is evidence-bounded, not proof that no defect
