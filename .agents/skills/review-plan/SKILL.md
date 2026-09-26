@@ -61,10 +61,14 @@ Do not require unrelated auth, database, observability, or edge controls.
 ### Testing and delivery
 
 Map changed observable behavior and meaningful failure paths to real tests.
-Preserve the 100% line and branch target for testable production behavior while
-documenting legitimate generated, declarative, unreachable, or behavior-free
-exclusions. Verify commands, fixtures, compatibility, and rollback or rebuild
-paths. Do not claim unavailable tools as passed.
+Inventory existing tests that the change affects and plan updates to their
+expectations, fixtures, mocks, contracts, or integration flows; state when an
+existing test remains valid and why. Preserve the 100% line and branch target
+for testable production behavior while documenting legitimate generated,
+declarative, unreachable, or behavior-free exclusions. Name the coverage
+measurement or specific test-to-behavior evidence that implementation review
+will inspect, as well as verification commands, fixtures, compatibility, and
+rollback or rebuild paths. Do not claim unavailable tools as passed.
 
 ## Required plan content
 
@@ -73,7 +77,7 @@ A ready plan states:
 - the accepted increment and explicit exclusions;
 - evidence, assumptions, adopted components, and unresolved decisions;
 - file ownership and implementation sequence;
-- test coverage map and verification commands;
+- affected-test update map, test coverage evidence, and verification commands;
 - failure modes and safe recovery;
 - existing patterns and knowledge to reuse;
 - completion criteria.

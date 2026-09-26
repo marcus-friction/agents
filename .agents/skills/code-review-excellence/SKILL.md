@@ -70,7 +70,10 @@ For the `review` workflow, follow this sequence:
 5. **Performance** — any scalability concerns?
 6. **Architecture** — does it respect layer boundaries?
 7. **Accessibility** — UI changes meet WCAG AA?
-8. **Tests** — adequate coverage for new/changed code?
+8. **Tests** — trace affected tests and confirm each is updated or still valid;
+   map changed outcomes and meaningful failures to executed tests and coverage
+   evidence. A passing suite alone does not establish coverage. For
+   behavior-free edits, explain why tests are not applicable.
 9. **Report** — organized by severity, with specific fixes
 
 ## Anti-Patterns

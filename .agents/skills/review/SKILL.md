@@ -46,7 +46,9 @@ always selected. Select other passes only when evidence makes them relevant:
 
 - **Standards:** applicable `AGENTS.md`, `CONTRIBUTING.md`, architecture or
   design decisions, established structure, and reusable project knowledge.
-- **Testing:** changed behavior, failure handling, or an affected test harness.
+- **Testing:** testable changed behavior, failure handling, contracts, or an
+  affected test harness. For behavior-free changes, record why it is not
+  applicable.
 - **Security:** use `security-review` for changed trust, data, identity,
   permission, dependency, or destructive-operation boundaries.
 - **Performance:** use `performance-review` when runtime cost, capacity,
@@ -61,6 +63,21 @@ always selected. Select other passes only when evidence makes them relevant:
 Framework-specific rules apply only to components the project marks Adopted.
 All selected passes inspect the complete accepted scope; one finding does not
 end the review.
+
+For the testing pass, inventory existing tests for the affected behavior and
+trace the changed outcomes, meaningful failure paths, and branches to them.
+Identify tests that need updates because their expectations, fixtures, mocks,
+contracts, or integration flows changed; confirm each was updated or explain
+with evidence why its existing assertions remain valid. Check missing tests as
+well as stale tests. Establish coverage with an available line/branch report or
+a specific test-to-behavior trace and execution results; a green suite or an
+unchanged test file alone does not establish coverage. Apply the project's
+coverage target to testable production behavior, with reasoned exclusions for
+generated, declarative, unreachable, or behavior-free code. Report any
+unavailable test execution or measurement separately from a proven gap. Record
+each proven stale or missing test or material uncovered path as an actionable
+finding with a narrow location and verification. Review authority does not
+permit adding or changing tests.
 
 ## 3. Execute and synthesize
 
@@ -134,8 +151,10 @@ passes remain independently visible:
 
 Cover scope and intent; each explicit requirement as complete, partial, missing,
 or equivalently met; every pass as completed, not applicable, or missing
-coverage; tests and inspections run; unavailable evidence; pre-existing issues;
-residual risks; and tracker tasks added, deduplicated, or unavailable.
+coverage; affected tests updated or evidenced as still valid; the coverage
+basis for changed testable behavior and meaningful failures; tests and
+inspections run; unavailable evidence; pre-existing issues; residual risks; and
+tracker tasks added, deduplicated, or unavailable.
 
 End with the same Decision table used by `adversarial-review`, containing exactly
 one decision and its evidence-bounded basis:
@@ -143,8 +162,9 @@ one decision and its evidence-bounded basis:
 | Decision | Basis |
 |---|---|
 
-Use `Not ready` for unresolved P0/P1 findings or an incomplete explicit
-requirement. Use `Withheld` when missing required coverage or unavailable
-material evidence prevents a defensible verdict. Otherwise use `Ready`. If there
-are no findings, say so directly, but never call the change `Ready` when a
-required pass did not complete.
+Use `Not ready` for unresolved P0/P1 findings, an incomplete explicit
+requirement, a relevant test left stale, or a material gap in coverage of
+testable changed behavior. Use `Withheld` when a required pass or material test
+or coverage evidence is unavailable and prevents a defensible verdict.
+Otherwise use `Ready`. If there are no findings, say so directly, but never
+call the change `Ready` when a required pass did not complete.

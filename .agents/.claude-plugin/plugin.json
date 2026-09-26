@@ -1,7 +1,7 @@
 {
   "name": "ma",
   "description": "Agent ecosystem for Laravel, Nuxt, and pragmatic software delivery",
-  "version": "1.10.0",
+  "version": "1.11.0",
   "license": "MIT AND Apache-2.0",
   "repository": "https://github.com/marcus-friction/agents"
 }
