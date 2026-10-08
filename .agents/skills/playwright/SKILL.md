@@ -12,6 +12,25 @@ setup, `baseURL`, data helpers, and locator conventions. Reuse valid project
 infrastructure and run against the explicitly supplied or project-configured
 environment; do not invent a deployment target.
 
+## Prepare browser execution
+
+When executing a Playwright browser test, use a browser-capable subagent whenever
+one is available. The orchestrating agent must first ensure the application and
+required local services are running and ready.
+
+If a browser-capable subagent is available, configure the active tool's port
+forwarding for remote services when needed, then confirm that the subagent's
+browser can open the target URL before running a spec or interactive test flow. A
+host-local `localhost` request or configured `baseURL` alone is not proof of
+subagent access. If the target remains unreachable, resolve readiness or
+forwarding within the authorized scope or report the browser run as blocked;
+do not switch to the host harness merely because forwarding failed.
+
+If no browser-capable subagent is available, verify the target is ready from
+the host browser and use the host browser harness. Do not expose a service
+publicly merely to make it reachable. Writing or reviewing test source without
+browser execution does not require this handoff.
+
 ## Select elements by contract
 
 Prefer accessible semantic locators that match how a user perceives the page:

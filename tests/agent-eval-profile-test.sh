@@ -38,6 +38,7 @@ printf '%s\n' '{"auth_mode":"chatgpt","last_refresh":"2099-01-01T00:00:00Z","tok
 chmod 600 "$AGENTS_ECOSYSTEM_TEST_SOURCE_CODEX_HOME/auth.json"
 export CODEX_HOME="$AGENTS_ECOSYSTEM_TEST_SOURCE_CODEX_HOME"
 export AGENTS_ECOSYSTEM_TEST_SOURCE_CODEX_HOME
+export AGENT_EVAL_TEST_EXECUTOR=1
 # The runner must not trust ambient temporary-directory placement or credential
 # overrides when it constructs the evaluated executor environment.
 export TMPDIR="$AGENTS_ECOSYSTEM_TEST_SOURCE_CODEX_HOME"
@@ -59,14 +60,18 @@ compile(Path(sys.argv[1]).read_text(encoding="utf-8"), sys.argv[1], "exec")
 PY
 
 list_output="$(bash "$RUNNER" --list)"
-[ "$(grep -c '^CASE v2\.' <<< "$list_output")" -eq 75 ]
+[ "$(grep -c '^CASE v2\.' <<< "$list_output")" -eq 82 ]
 grep -q '^PROFILE live-agent-v2$' <<< "$list_output"
 
 # Registry loading itself enforces the important coverage invariant: a case may
 # not claim a changed path it does not provide to the evaluated model.
 PYTHONDONTWRITEBYTECODE=1 python3 - "$REPO_ROOT" <<'PY'
 import importlib.util
+import os
 from pathlib import Path
+from types import SimpleNamespace
+from unittest.mock import patch
+import stat
 import sys
 import tempfile
 
@@ -75,7 +80,74 @@ spec = importlib.util.spec_from_file_location("agent_eval_runner", path)
 module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(module)
 registry = module.load_registry()
-assert len(registry["cases"]) == 75
+assert len(registry["cases"]) == 82
+browser_cases = {case["id"]: case for case in registry["cases"] if case["id"].startswith("v2.browser-subagent.")}
+assert len(browser_cases) == 7
+assert browser_cases["v2.browser-subagent.end2end-unavailable"]["context_paths"] == [
+    ".agents/skills/end2end/SKILL.md"
+]
+assert browser_cases["v2.browser-subagent.playwright-unreachable"]["context_paths"] == [
+    ".agents/skills/playwright/SKILL.md"
+]
+assert {item["id"] for item in browser_cases["v2.browser-subagent.available"]["result_assertions"]} >= {
+    "handoff-flow", "handoff-outcome", "handoff-effects", "handoff-url",
+}
+browser_case = next(case for case in registry["cases"] if case["id"] == "v2.browser-subagent.available")
+with tempfile.TemporaryDirectory() as rendered_root:
+    rendered = Path(rendered_root)
+    browser_prompt = module.render_prompt(
+        browser_case,
+        Path(sys.argv[1]) / browser_case["prompt"],
+        rendered / "context",
+        rendered / "workspace",
+    )
+    assert str(rendered / "context/.agents/skills/end2end/SKILL.md") in browser_prompt
+socket_directory = Path(tempfile.mkdtemp())
+try:
+    socket_directory.chmod(0o000)
+    try:
+        module.require_private_codex_socket_directory(socket_directory)
+    except ValueError as error:
+        assert "host shell" in str(error)
+    else:
+        raise AssertionError("masked Codex socket directory was accepted")
+    socket_directory.chmod(0o700)
+    module.require_private_codex_socket_directory(socket_directory)
+    with patch.object(Path, "lstat", return_value=SimpleNamespace(
+        st_mode=stat.S_IFDIR | 0o700, st_uid=os.geteuid() + 1,
+    )):
+        try:
+            module.require_private_codex_socket_directory(socket_directory)
+        except ValueError:
+            pass
+        else:
+            raise AssertionError("foreign-owned socket directory was accepted")
+finally:
+    socket_directory.chmod(0o700)
+    socket_directory.rmdir()
+module.require_private_codex_socket_directory(socket_directory)
+with tempfile.TemporaryDirectory() as invalid_root:
+    root = Path(invalid_root)
+    regular = root / "regular"
+    regular.write_text("not a directory")
+    link = root / "link"
+    link.symlink_to(root)
+    for invalid in (regular, link):
+        try:
+            module.require_private_codex_socket_directory(invalid)
+        except ValueError:
+            pass
+        else:
+            raise AssertionError(f"unsafe socket path was accepted: {invalid}")
+with tempfile.TemporaryDirectory() as executor_root:
+    root = Path(executor_root)
+    fake = root / "fake"
+    fake.write_bytes(b"#!/usr/bin/env python3\n# agents-ecosystem-eval-fake-v1\n")
+    real_override = root / "real-override"
+    real_override.write_bytes(b"#!/usr/bin/env node\n")
+    assert module.is_profile_fake_executor(fake, "test-model")
+    assert not module.is_profile_fake_executor(fake, "gpt-5.6-sol")
+    assert not module.is_profile_fake_executor(real_override, "test-model")
 for case in registry["cases"]:
     for rule in case["affected_paths"]:
         assert module.path_is_covered(rule, case["context_paths"]), (case["id"], rule)
@@ -514,6 +586,7 @@ PY
 fake_codex="$TEST_ROOT/codex"
 cat > "$fake_codex" <<'PY'
 #!/usr/bin/env python3
+# agents-ecosystem-eval-fake-v1
 import json
 import os
 from pathlib import Path
@@ -522,6 +595,10 @@ import sys
 import time
 
 args = sys.argv[1:]
+if os.environ.get("AGENT_EVAL_TEST_EXECUTOR") != "1":
+    raise SystemExit("fake executor was not identified in the bound environment")
+if 'model_reasoning_effort="low"' not in args:
+    raise SystemExit("runner did not bound evaluator reasoning effort")
 if Path(sys.argv[0]).is_symlink():
     raise SystemExit("runner invoked the executor through an unresolved symlink")
 source_codex_home = Path(os.environ["AGENTS_ECOSYSTEM_TEST_SOURCE_CODEX_HOME"])
@@ -575,6 +652,8 @@ workspace = Path(args[args.index("--cd") + 1])
 if os.environ.get("AGENT_EVAL_MUTATE_RUNTIME_AUTH") and "current" in output.parts:
     runtime_auth.write_text('{"mutated":true}\n')
 prompt = args[-1]
+if "Use the available system shell tools" not in prompt:
+    raise SystemExit("runner did not describe its restricted command set")
 case_id = re.search(r"Use case_id ([a-z0-9.-]+)\. Return", prompt).group(1)
 if os.environ.get("AGENT_EVAL_MUTATE_PATH"):
     Path(os.environ["AGENT_EVAL_MUTATE_PATH"]).write_text("changed during execution\n")

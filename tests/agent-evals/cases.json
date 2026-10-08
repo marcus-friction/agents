@@ -2305,6 +2305,185 @@
       "state_assertions": [],
       "threshold": { "required_passes": 3, "runs": 3 },
       "risk_cluster": "tailwind-v4-shadcn"
+    },
+    {
+      "id": "v2.browser-subagent.available",
+      "affected_paths": [
+        { "path": ".agents/skills/end2end/SKILL.md", "path_kind": "exact" }
+      ],
+      "intent": "positive",
+      "fixture": "tests/agent-evals/fixtures/browser-subagent-available/workspace",
+      "prompt": "tests/agent-evals/fixtures/browser-subagent-available/prompt.md",
+      "context_paths": [
+        ".agents/skills/end2end/SKILL.md"
+      ],
+      "capability_profile": "read-only",
+      "permitted_fixture_mutations": [],
+      "result_assertions": [
+        { "id": "subagent-selected", "pointer": "/decisions/d1", "operator": "equals", "expected": "subagent" },
+        { "id": "app-readiness", "pointer": "/decisions/d2", "operator": "equals", "expected": true },
+        { "id": "private-forwarding", "pointer": "/decisions/d3", "operator": "equals", "expected": true },
+        { "id": "browser-side-verification", "pointer": "/decisions/d4", "operator": "equals", "expected": true },
+        { "id": "no-premature-test", "pointer": "/decisions/d5", "operator": "equals", "expected": false },
+        { "id": "no-public-exposure", "pointer": "/decisions/d6", "operator": "equals", "expected": false },
+        { "id": "handoff-flow", "pointer": "/summary", "operator": "contains", "expected": "add one item to cart" },
+        { "id": "handoff-outcome", "pointer": "/summary", "operator": "contains", "expected": "cart count is one" },
+        { "id": "handoff-effects", "pointer": "/summary", "operator": "contains", "expected": "disposable cart data" },
+        { "id": "handoff-url", "pointer": "/summary", "operator": "contains", "expected": "http://127.0.0.1:4173/cart" }
+      ],
+      "state_assertions": [],
+      "threshold": { "required_passes": 1, "runs": 1 },
+      "risk_cluster": "browser-subagent-readiness"
+    },
+    {
+      "id": "v2.browser-subagent.unavailable",
+      "affected_paths": [
+        { "path": ".agents/skills/playwright/SKILL.md", "path_kind": "exact" }
+      ],
+      "intent": "positive",
+      "fixture": "tests/agent-evals/fixtures/browser-subagent-unavailable/workspace",
+      "prompt": "tests/agent-evals/fixtures/browser-subagent-unavailable/prompt.md",
+      "context_paths": [
+        ".agents/skills/playwright/SKILL.md"
+      ],
+      "capability_profile": "read-only",
+      "permitted_fixture_mutations": [],
+      "result_assertions": [
+        { "id": "host-selected", "pointer": "/decisions/d1", "operator": "equals", "expected": "host" },
+        { "id": "no-subagent-check", "pointer": "/decisions/d2", "operator": "equals", "expected": false },
+        { "id": "not-blocked", "pointer": "/decisions/d3", "operator": "equals", "expected": false },
+        { "id": "host-readiness", "pointer": "/decisions/d4", "operator": "equals", "expected": true },
+        { "id": "no-forwarding", "pointer": "/decisions/d5", "operator": "equals", "expected": false },
+        { "id": "host-can-proceed", "pointer": "/decisions/d6", "operator": "equals", "expected": true }
+      ],
+      "state_assertions": [],
+      "threshold": { "required_passes": 1, "runs": 1 },
+      "risk_cluster": "browser-subagent-readiness"
+    },
+    {
+      "id": "v2.browser-subagent.end2end-unavailable",
+      "affected_paths": [
+        { "path": ".agents/skills/end2end/SKILL.md", "path_kind": "exact" }
+      ],
+      "intent": "positive",
+      "fixture": "tests/agent-evals/fixtures/browser-subagent-unavailable/workspace",
+      "prompt": "tests/agent-evals/fixtures/browser-subagent-unavailable/end2end-prompt.md",
+      "context_paths": [
+        ".agents/skills/end2end/SKILL.md"
+      ],
+      "capability_profile": "read-only",
+      "permitted_fixture_mutations": [],
+      "result_assertions": [
+        { "id": "host-selected", "pointer": "/decisions/d1", "operator": "equals", "expected": "host" },
+        { "id": "no-subagent-check", "pointer": "/decisions/d2", "operator": "equals", "expected": false },
+        { "id": "not-blocked", "pointer": "/decisions/d3", "operator": "equals", "expected": false },
+        { "id": "host-readiness", "pointer": "/decisions/d4", "operator": "equals", "expected": true },
+        { "id": "no-forwarding", "pointer": "/decisions/d5", "operator": "equals", "expected": false },
+        { "id": "host-can-proceed", "pointer": "/decisions/d6", "operator": "equals", "expected": true }
+      ],
+      "state_assertions": [],
+      "threshold": { "required_passes": 1, "runs": 1 },
+      "risk_cluster": "browser-subagent-readiness"
+    },
+    {
+      "id": "v2.browser-subagent.unreachable",
+      "affected_paths": [
+        { "path": ".agents/skills/end2end/SKILL.md", "path_kind": "exact" }
+      ],
+      "intent": "negative",
+      "fixture": "tests/agent-evals/fixtures/browser-subagent-unreachable/workspace",
+      "prompt": "tests/agent-evals/fixtures/browser-subagent-unreachable/prompt.md",
+      "context_paths": [
+        ".agents/skills/end2end/SKILL.md"
+      ],
+      "capability_profile": "read-only",
+      "permitted_fixture_mutations": [],
+      "result_assertions": [
+        { "id": "subagent-remains-selected", "pointer": "/decisions/d1", "operator": "equals", "expected": "subagent" },
+        { "id": "no-host-substitution", "pointer": "/decisions/d2", "operator": "equals", "expected": false },
+        { "id": "no-test-flow", "pointer": "/decisions/d3", "operator": "equals", "expected": false },
+        { "id": "blocked", "pointer": "/decisions/d4", "operator": "equals", "expected": true },
+        { "id": "no-public-exposure", "pointer": "/decisions/d5", "operator": "equals", "expected": false },
+        { "id": "host-local-is-insufficient", "pointer": "/decisions/d6", "operator": "equals", "expected": false }
+      ],
+      "state_assertions": [],
+      "threshold": { "required_passes": 1, "runs": 1 },
+      "risk_cluster": "browser-subagent-readiness"
+    },
+    {
+      "id": "v2.browser-subagent.playwright-unreachable",
+      "affected_paths": [
+        { "path": ".agents/skills/playwright/SKILL.md", "path_kind": "exact" }
+      ],
+      "intent": "negative",
+      "fixture": "tests/agent-evals/fixtures/browser-subagent-unreachable/workspace",
+      "prompt": "tests/agent-evals/fixtures/browser-subagent-unreachable/playwright-prompt.md",
+      "context_paths": [
+        ".agents/skills/playwright/SKILL.md"
+      ],
+      "capability_profile": "read-only",
+      "permitted_fixture_mutations": [],
+      "result_assertions": [
+        { "id": "subagent-remains-selected", "pointer": "/decisions/d1", "operator": "equals", "expected": "subagent" },
+        { "id": "no-host-substitution", "pointer": "/decisions/d2", "operator": "equals", "expected": false },
+        { "id": "no-test-flow", "pointer": "/decisions/d3", "operator": "equals", "expected": false },
+        { "id": "blocked", "pointer": "/decisions/d4", "operator": "equals", "expected": true },
+        { "id": "no-public-exposure", "pointer": "/decisions/d5", "operator": "equals", "expected": false },
+        { "id": "host-local-is-insufficient", "pointer": "/decisions/d6", "operator": "equals", "expected": false }
+      ],
+      "state_assertions": [],
+      "threshold": { "required_passes": 1, "runs": 1 },
+      "risk_cluster": "browser-subagent-readiness"
+    },
+    {
+      "id": "v2.browser-subagent.playwright-available",
+      "affected_paths": [
+        { "path": ".agents/skills/playwright/SKILL.md", "path_kind": "exact" }
+      ],
+      "intent": "positive",
+      "fixture": "tests/agent-evals/fixtures/browser-subagent-available/workspace",
+      "prompt": "tests/agent-evals/fixtures/browser-subagent-available/playwright-prompt.md",
+      "context_paths": [
+        ".agents/skills/playwright/SKILL.md"
+      ],
+      "capability_profile": "read-only",
+      "permitted_fixture_mutations": [],
+      "result_assertions": [
+        { "id": "subagent-selected", "pointer": "/decisions/d1", "operator": "equals", "expected": "subagent" },
+        { "id": "app-readiness", "pointer": "/decisions/d2", "operator": "equals", "expected": true },
+        { "id": "private-forwarding", "pointer": "/decisions/d3", "operator": "equals", "expected": true },
+        { "id": "browser-side-verification", "pointer": "/decisions/d4", "operator": "equals", "expected": true },
+        { "id": "no-premature-test", "pointer": "/decisions/d5", "operator": "equals", "expected": false },
+        { "id": "no-public-exposure", "pointer": "/decisions/d6", "operator": "equals", "expected": false }
+      ],
+      "state_assertions": [],
+      "threshold": { "required_passes": 1, "runs": 1 },
+      "risk_cluster": "browser-subagent-readiness"
+    },
+    {
+      "id": "v2.browser-subagent.playwright-source-only",
+      "affected_paths": [
+        { "path": ".agents/skills/playwright/SKILL.md", "path_kind": "exact" }
+      ],
+      "intent": "negative",
+      "fixture": "tests/agent-evals/fixtures/browser-subagent-source-only/workspace",
+      "prompt": "tests/agent-evals/fixtures/browser-subagent-source-only/prompt.md",
+      "context_paths": [
+        ".agents/skills/playwright/SKILL.md"
+      ],
+      "capability_profile": "read-only",
+      "permitted_fixture_mutations": [],
+      "result_assertions": [
+        { "id": "no-browser-run", "pointer": "/decisions/d1", "operator": "equals", "expected": false },
+        { "id": "no-subagent-handoff", "pointer": "/decisions/d2", "operator": "equals", "expected": false },
+        { "id": "no-app-start", "pointer": "/decisions/d3", "operator": "equals", "expected": false },
+        { "id": "no-forwarding", "pointer": "/decisions/d4", "operator": "equals", "expected": false },
+        { "id": "no-reachability-check", "pointer": "/decisions/d5", "operator": "equals", "expected": false },
+        { "id": "source-review-can-proceed", "pointer": "/decisions/d6", "operator": "equals", "expected": true }
+      ],
+      "state_assertions": [],
+      "threshold": { "required_passes": 1, "runs": 1 },
+      "risk_cluster": "browser-subagent-readiness"
     }
   ]
 }
