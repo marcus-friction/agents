@@ -6,6 +6,7 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
 
 python3 - "$REPO_ROOT" <<'PY'
 from pathlib import Path
+import re
 import sys
 
 root = Path(sys.argv[1])
@@ -64,6 +65,19 @@ playwright = skill("playwright")
 assert "last resort" in playwright.lower()
 assert "structural css" in playwright.lower()
 assert "existing Playwright" in playwright
+browser_execution = re.sub(
+    r"\s+", " ",
+    playwright.split("## Prepare browser execution", 1)[1].split(
+        "## Select elements by contract", 1
+    )[0],
+)
+assert "If a browser-capable subagent is available," in browser_execution
+subagent_path, host_path = browser_execution.split(
+    "If no browser-capable subagent is available,", 1
+)
+assert "port forwarding" in subagent_path
+assert "subagent's browser" in subagent_path
+assert "host browser" in host_path and "ready" in host_path
 
 print("Laravel and Nuxt stack skill contracts passed")
 PY

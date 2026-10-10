@@ -47,6 +47,7 @@ EXECUTOR_ENVIRONMENT_NAMES = (
     "XDG_DATA_DIRS",
     "XDG_RUNTIME_DIR",
     # Deterministic fake-executor controls used only by the regression harness.
+    "AGENT_EVAL_TEST_EXECUTOR",
     "AGENT_EVAL_EXECUTOR_MARKER",
     "AGENT_EVAL_TIMEOUT_AFTER_OUTPUT",
     "AGENT_EVAL_MUTATE_RUNTIME_AUTH",
@@ -184,6 +185,34 @@ def bound_executor_environment() -> dict[str, str]:
         for name in EXECUTOR_ENVIRONMENT_NAMES
         if name in os.environ
     }
+
+
+def require_private_codex_socket_directory(path: Path) -> None:
+    """Fail early when an outer sandbox masks Codex's local socket directory."""
+    try:
+        metadata = path.lstat()
+    except FileNotFoundError:
+        return  # Codex creates the directory on first use.
+    if (
+        not stat.S_ISDIR(metadata.st_mode)
+        or metadata.st_uid != os.geteuid()
+        or stat.S_IMODE(metadata.st_mode) != 0o700
+    ):
+        raise ValueError(
+            f"Codex app-server socket directory is unavailable: {path}; "
+            "run the live evaluator from a trusted host shell where it is "
+            "user-owned mode 0700"
+        )
+
+
+def is_profile_fake_executor(executor: Path, model: str) -> bool:
+    """Recognize only the deterministic offline profile executor."""
+    if model != "test-model":
+        return False
+    with executor.open("rb") as handle:
+        return handle.read(64).startswith(
+            b"#!/usr/bin/env python3\n# agents-ecosystem-eval-fake-v1\n"
+        )
 
 
 def private_authentication(home: Path) -> bytes:
@@ -897,8 +926,13 @@ def render_prompt(case: dict[str, Any], prompt: Path, context: Path, fixture: Pa
     return template.replace("{context_root}", str(context)).replace(
         "{fixture_root}", str(fixture)
     ) + (
+        "\nSupplied context files: "
+        + ", ".join(str(context / relative) for relative in case["context_paths"])
+        + ". "
         f"\nUse case_id {case['id']}. Return only one JSON object matching the supplied schema. "
         "The decisions object must contain d1 through d6; set unused keys to null. "
+        "Use the available system shell tools (find, sed, cat) for local inspection; "
+        "do not rely on rg in this restricted environment. "
         "Do not use network, browser, remote Git, or external services.\n"
     )
 
@@ -972,6 +1006,7 @@ def run_case(
             "--disable", "image_generation", "--disable", "multi_agent", "--disable", "plugins",
             "--disable", "remote_plugin", "-c", 'approval_policy="never"',
             "-c", 'default_permissions="agent-eval"',
+            "-c", 'model_reasoning_effort="low"',
             "-c", f"permissions.agent-eval.filesystem={filesystem_config}",
             "-c", "permissions.agent-eval.network.enabled=false", "-c", 'web_search="disabled"',
             "-c", (
@@ -1473,6 +1508,11 @@ def main() -> int:
         authentication = private_authentication(source_codex_home())
         credential = credential_identity(authentication)
         executor_environment = bound_executor_environment()
+        test_executor = executor_environment.get("AGENT_EVAL_TEST_EXECUTOR")
+        if test_executor not in (None, "1"):
+            raise ValueError("AGENT_EVAL_TEST_EXECUTOR must be 1 when set")
+        if test_executor and not os.environ.get("AGENT_EVAL_CODEX_BIN"):
+            raise ValueError("fake executor marker requires AGENT_EVAL_CODEX_BIN")
         require_credential_window(
             credential, planned_executions, args.jobs, args.timeout_seconds
         )
@@ -1527,6 +1567,10 @@ def main() -> int:
             return 0
 
         verify_live_subject(subject)
+        if not (test_executor and is_profile_fake_executor(executor, args.model)):
+            require_private_codex_socket_directory(
+                PRIVATE_RUNTIME_PARENT / f"codex-daemon-{os.geteuid()}"
+            )
 
         tasks = []
         execution_index = 0

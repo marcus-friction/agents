@@ -43,11 +43,25 @@ Chat is the default for the plan, progress, and result. Create a durable plan,
 task list, trace, or report only when requested or when the user accepts it as a
 useful handoff. Keep temporary test evidence in a verified test-owned location.
 
-## 3. Execute progressively
+## 3. Prepare browser access and execute progressively
 
-Test one flow or page area at a time so failures remain attributable. Prefer
-the host's browser capability and follow the `playwright` skill when Playwright
-is used.
+Use a browser-capable subagent for browser execution whenever one is available.
+Give it the bounded flows, expected outcomes, allowed effects, and a URL it can
+open. If no browser subagent is available, use the host's browser capability.
+Follow the `playwright` skill when Playwright is used.
+
+Before starting any browser test, ensure the application and required local
+services are running, starting them with the project's existing command when
+needed, and wait for a meaningful readiness response. When using a subagent,
+configure port forwarding through the active browser tool for remote services
+and verify that the subagent's browser can open the target URL before the first
+test flow. A successful request from the host to `localhost` alone does not
+establish subagent access. If the target remains unreachable, fix readiness or
+forwarding within the authorized scope, then report the browser work as blocked
+if it cannot be reached. Do not expose a service publicly or change shared or
+production state merely to make it reachable.
+
+Test one flow or page area at a time so failures remain attributable.
 
 For each flow:
 
