@@ -139,6 +139,23 @@ for fragment in (
 ):
     assert fragment in interventions, fragment
 assert "both `required` and `unverified`" in interventions
+for text in (wrap, release, deploy, interventions):
+    assert "verified empty inventory" in text
+    assert "without inventing" in text
+assert "drift alone is not an action" in interventions
+assert "unresolved evidence gap" in interventions
+for text in (wrap, deploy):
+    assert "emit neither intervention form nor an intervention state" in text
+for fragment in (
+    "carrier may be composite",
+    "future effect `pending` without inventing its identity",
+    "attempt identifier and source revision",
+    "reconcile every selected checkpoint carrier",
+    "not-yet-created external record",
+    "verify that the effect has not already occurred",
+    "recursive bookkeeping commit",
+):
+    assert fragment in checkpoints, fragment
 assert "must not proceed" in interventions
 assert "user action required" in deploy
 assert "user intervention: none" in deploy
@@ -412,6 +429,32 @@ spec = importlib.util.spec_from_file_location("delivery_eval_runner", runner_pat
 runner = importlib.util.module_from_spec(spec)
 assert spec.loader is not None
 spec.loader.exec_module(runner)
+
+# The new boundary cases must reject the specific unsafe outcomes they cover.
+# This checks grading sensitivity; registered cases require separate live runs.
+for case_id, wrong_decisions in {
+    "v2.deployment-intervention.drift-empty-inventory": {
+        "d1": "required", "d2": True, "d3": True, "d4": False,
+        "d5": True, "d6": "USER ACTION REQUIRED",
+    },
+    "v2.deployment-intervention.drift-unknown-inventory": {
+        "d1": False, "d2": ["USER ACTION REQUIRED"], "d3": True, "d4": True,
+        "d5": True, "d6": True,
+    },
+    "v2.delivery-lifecycle.checkpoint-continuation": {
+        "d1": True, "d2": False, "d3": True, "d4": True,
+        "d5": True, "d6": True,
+    },
+}.items():
+    case = cases[case_id]
+    grade = runner.grade(
+        case, {"case_id": case_id, "decisions": wrong_decisions, "summary": ""},
+        {}, {}, {}, 0, [{"type": "turn.completed"}],
+    )
+    checks = {item["id"]: item["passed"] for item in grade["checks"]}
+    for assertion in case["result_assertions"]:
+        assert checks[assertion["id"]] is False, (case_id, assertion["id"])
+
 unsafe_retry = {
     "case_id": recovery["id"],
     "decisions": {

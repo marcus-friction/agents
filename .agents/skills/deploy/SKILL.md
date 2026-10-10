@@ -109,8 +109,11 @@ unchanged facts. Revalidate targets, staged settings and material evidence
 immediately before acting; changed facts invalidate only affected authorization.
 Immediately before deployment, re-resolve intervention state and its safe
 verification evidence for the exact target, configuration, scripts, and trigger.
-Relevant drift invalidates stale `none` or `completed` state and blocks deployment
-as `required` or `unverified` until resolved again.
+Relevant drift invalidates stale `none` or `completed` evidence. Rediscover
+actions and recompute the state: a verified empty inventory resolves to `none`,
+while identified `required` or `unverified` actions still block deployment.
+Incomplete discovery pauses deployment for missing evidence without inventing
+a user-owned action or intervention state.
 
 ## Deploy and verify
 
@@ -134,10 +137,13 @@ when the same blocker survives three attempted resolutions.
 
 Finish with URLs, deployed revisions and deployment IDs, checks actually run,
 remaining failures or unverified behavior, and the next release/recovery method.
-Include exact `User intervention: none` when no user action remains, otherwise
-include the unresolved `USER ACTION REQUIRED` checklist. Record verified
+When discovery establishes the inventory, include exact `User intervention: none`
+when no user action remains, otherwise include the unresolved `USER ACTION REQUIRED`
+checklist. If discovery is incomplete, report the paused effect and missing
+evidence under the deployment result; emit neither intervention form nor an
+intervention state. Record verified
 `completed` state under the deployment result without introducing a third
 user-intervention label. Do not report deployment as ready or verified while
-intervention is `required` or `unverified`.
+intervention is `required` or `unverified`, or discovery remains incomplete.
 Update the deployment record when authorized. Report partial deployment as
 partial; do not call an application verified solely because the build passed.
