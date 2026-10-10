@@ -11,9 +11,9 @@
 - [x] COH-C2 — Align deploy's direct drift contract; include it in empty/unknown
   inventory evaluation contexts and verify both outcomes.
 - [x] TEST-001 — Update both stale registry counts to 85; run profile/full suite.
-- [ ] Inspect the exact accepted payload for sensitive artifacts; commit/push.
-- [ ] Publish and verify the replacement PR against current master.
-- [ ] Comment on and close #9 as superseded; preserve its source branch.
+- [x] Inspect the exact accepted payload for sensitive artifacts; commit/push.
+- [x] Publish and verify the replacement PR against current master.
+- [x] Comment on and close #9 as superseded; preserve its source branch.
 
 Merge, release publication and branch deletion are outside this approved batch.
 
@@ -39,3 +39,17 @@ Merge, release publication and branch deletion are outside this approved batch.
   payload (`offline-deterministic=passed`, `live-agent-v2=not-run`, 85 registered
   cases). `git diff --check` passed. The redaction-safe payload check accounted
   for all 22 regular files and found no unexpected paths or credential patterns.
+
+## Verified repository handoff — 2026-10-10
+
+- Published substantive commit `467fcd0dcfd4d99f3a53f7b1230472476b7d130d`
+  on `fix/delivery-state-coherence-v1.13.1`, based on the unchanged v1.13.0
+  `master` revision named in the plan.
+- Replacement PR [#13](https://github.com/marcus-friction/agents/pull/13)
+  is open against `master`; its published substantive head was verified.
+- [Supersession comment](https://github.com/marcus-friction/agents/pull/9#issuecomment-6101882357)
+  links #9 to #13. PR #9 is closed; its remote branch remains at
+  `93f801e4a2bc8fc289e5ce3ef959c76204d3ca8e`.
+- This final tracker update records observed handoff facts before the terminal
+  merge cutoff. Exact final PR head/CI outcomes remain host evidence. Human
+  review, merge, release publication and cleanup remain later delivery gates.
