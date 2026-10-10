@@ -12,6 +12,19 @@ description: |
 
 Perform a deep technical SEO, Core Web Vitals, and structural review of the provided files or codebase.
 
+## Review dispatch
+
+For an applicable authorized direct review, prefer a fresh clean-context
+subagent when available. Tell it that it is the executor and must not delegate
+this pass again. Provide only the accepted target, intent, relevant evidence,
+applicable rules, and this skill's finding contract. Collect its result and
+validate findings before synthesizing; a failed or malformed pass is missing
+coverage. If you received this pass by delegation, execute it here without
+further delegation, regardless of which reviewer sent it. When subagents are
+unavailable, run it here and label it `same-context`, not independent
+corroboration. Do not send review data to an external service without separate
+authority.
+
 ## The Checklist
 
 ### 1. Technical SEO & Indexability

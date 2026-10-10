@@ -8,6 +8,19 @@ description: Review code and plans for proportionate, evidence-backed security c
 Review outcomes at real trust and data boundaries. Do not apply a framework
 checklist to components the project has not adopted.
 
+## Review dispatch
+
+For an applicable direct review, prefer a fresh clean-context subagent when
+available. Tell it that it is the executor and must not delegate this pass
+again. Provide only the accepted scope, intent, applicable code diff or plan,
+relevant evidence, applicable rules, and this skill's finding contract.
+Collect its result and validate findings before synthesizing; a failed or
+malformed pass is missing coverage. If you received this pass by delegation,
+execute it here without further delegation, regardless of which reviewer sent
+it. When subagents are unavailable, run it here and label it `same-context`, not
+independent corroboration. Do not send review data to an external service
+without separate authority.
+
 ## Applicability preflight
 
 Before detailed checks:

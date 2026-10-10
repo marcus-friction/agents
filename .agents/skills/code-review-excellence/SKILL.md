@@ -10,6 +10,16 @@ guidance for the `review` workflow — the domain-specific checklists (security,
 performance, architecture, accessibility) tell you *what* to check; this skill
 tells you *how* to review well.
 
+When conducting a standalone review with this method, prefer fresh
+clean-context subagents for separable passes when available. Give each the same
+bounded scope, intent, diff and evidence, applicable rules, and finding
+contract; tell each that it is the executor and must not delegate its pass
+again. Collect results before validating findings and synthesizing. If you
+received a pass by delegation, execute it without further delegation,
+regardless of which reviewer sent it. If subagents are unavailable, label direct
+passes `same-context` and do not count them as independent corroboration. Do not send
+review data to an external service without separate authority.
+
 ## Principles
 
 ### Read for Intent First

@@ -19,15 +19,15 @@
     },
     "stack-architecture-review": {
       "entries": 2,
-      "sha256": "53307b20837ee50814579176496b293cd015bcc54ab8ea5f89988f118a4292f9"
+      "sha256": "7729eca5c3ab26a39522cebe7a660a784a6a75ba1191e5aa3ba6c81aad1a53c9"
     },
     "stack-performance-review": {
       "entries": 2,
-      "sha256": "25e75f1d2a23b5175b8791a2a515e3e71af752fd926e3e8066c5fc6a4c0abf95"
+      "sha256": "20b1339bb99128704725a874fe50f7699f9b9b6766281fdd3c5a59d3cec47dac"
     },
     "stack-security-review": {
       "entries": 2,
-      "sha256": "61f89d40107011cff414bdea784fced72a59456cd98be5b44ec94c7e41939c01"
+      "sha256": "de379f78cb71fda8c2d4c674acff3c4fb6d44c861013286819e94b4bfb786086"
     },
     "vite": {
       "entries": 10,
