@@ -18,14 +18,15 @@ derive exactly one aggregate intervention state:
 - **`completed`** — every identified user-owned action passed its adopted safe
   verification for the current target and effect.
 
-When a structured result requests the intervention state, emit exactly one of
-those four lowercase tokens. Do not substitute lifecycle or authority words
+When discovery establishes the action inventory and a structured result requests
+the intervention state, emit exactly one of those four lowercase tokens. Do not
+substitute lifecycle or authority words
 such as `blocked`, `pending`, `not-required`, or `ready`.
 
 Aggregate with strict precedence: any action in `required` makes the aggregate
 `required`; otherwise any action in `unverified` makes it `unverified`; otherwise
-one or more identified actions all in `completed` makes it `completed`; no
-identified user-owned actions makes it `none`. Never let progress on one action
+one or more identified actions all in `completed` makes it `completed`; a verified
+empty inventory makes it `none`. Never let progress on one action
 hide another action's stronger blocking state. Emit one action card for every
 action in `required` or `unverified`.
 
@@ -34,8 +35,12 @@ action moves only that action to `unverified`; only successful verification
 moves it to `completed`. Failed verification returns that action to `required`
 when it is still missing and otherwise leaves it `unverified` with the evidence
 gap. Target, configuration, script, or trigger drift invalidates the affected
-`none` or `completed` evidence and must move the aggregate back to `required` or
-`unverified` as the current evidence establishes.
+`none` or `completed` evidence. Rediscover user-owned actions for the exact
+current effect before deriving a new aggregate. Drift alone is not an action:
+a verified empty inventory returns `none`, while identified actions use the
+precedence above. If the inventory cannot be established, pause the dependent
+effect for an unresolved evidence gap without inventing a user-action card or
+assigning `required` or `unverified` to a nonexistent action.
 
 Both `required` and `unverified` block the dependent effect. The agent must not
 proceed with a direct deployment or an integration, tag, release, or other
@@ -142,5 +147,7 @@ Immediately before a direct deployment or an integration, tag, release, or
 other effect that triggers deployment, re-resolve every intervention action
 against the exact current target, configuration, scripts, trigger, and safe
 verification evidence. Stale `none` or `completed` state never survives relevant
-drift. If current evidence cannot re-establish the resolved state, use
-`unverified` or `required` and keep the dependent effect blocked.
+drift. Recompute from current identified actions and evidence; a verified empty
+inventory resolves to `none`. If prerequisite discovery cannot be completed,
+keep the dependent effect paused as an unresolved evidence gap without claiming
+a user-owned intervention state.

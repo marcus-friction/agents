@@ -60,7 +60,7 @@ compile(Path(sys.argv[1]).read_text(encoding="utf-8"), sys.argv[1], "exec")
 PY
 
 list_output="$(bash "$RUNNER" --list)"
-[ "$(grep -c '^CASE v2\.' <<< "$list_output")" -eq 82 ]
+[ "$(grep -c '^CASE v2\.' <<< "$list_output")" -eq 85 ]
 grep -q '^PROFILE live-agent-v2$' <<< "$list_output"
 
 # Registry loading itself enforces the important coverage invariant: a case may
@@ -80,7 +80,7 @@ spec = importlib.util.spec_from_file_location("agent_eval_runner", path)
 module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(module)
 registry = module.load_registry()
-assert len(registry["cases"]) == 82
+assert len(registry["cases"]) == 85
 browser_cases = {case["id"]: case for case in registry["cases"] if case["id"].startswith("v2.browser-subagent.")}
 assert len(browser_cases) == 7
 assert browser_cases["v2.browser-subagent.end2end-unavailable"]["context_paths"] == [

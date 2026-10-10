@@ -2484,6 +2484,219 @@
       "state_assertions": [],
       "threshold": { "required_passes": 1, "runs": 1 },
       "risk_cluster": "browser-subagent-readiness"
+    },
+    {
+      "id": "v2.deployment-intervention.drift-empty-inventory",
+      "affected_paths": [
+        {
+          "path": ".agents/skills/wrap/SKILL.md",
+          "path_kind": "exact"
+        },
+        {
+          "path": ".agents/skills/release/SKILL.md",
+          "path_kind": "exact"
+        },
+        {
+          "path": ".agents/skills/wrap/references/deployment-interventions.md",
+          "path_kind": "exact"
+        },
+        {
+          "path": ".agents/skills/deploy/SKILL.md",
+          "path_kind": "exact"
+        }
+      ],
+      "intent": "positive",
+      "fixture": "tests/agent-evals/fixtures/deployment-intervention-drift-empty/workspace",
+      "prompt": "tests/agent-evals/fixtures/deployment-intervention-drift-empty/prompt.md",
+      "context_paths": [
+        ".agents/skills/wrap/SKILL.md",
+        ".agents/skills/release/SKILL.md",
+        ".agents/skills/wrap/references/deployment-interventions.md",
+        ".agents/skills/deploy/SKILL.md"
+      ],
+      "capability_profile": "read-only",
+      "permitted_fixture_mutations": [],
+      "result_assertions": [
+        {
+          "id": "none-state",
+          "pointer": "/decisions/d1",
+          "operator": "equals",
+          "expected": "none"
+        },
+        {
+          "id": "no-invented-card",
+          "pointer": "/decisions/d2",
+          "operator": "equals",
+          "expected": false
+        },
+        {
+          "id": "no-stale-evidence",
+          "pointer": "/decisions/d3",
+          "operator": "equals",
+          "expected": false
+        },
+        {
+          "id": "prerequisite-resolved",
+          "pointer": "/decisions/d4",
+          "operator": "equals",
+          "expected": true
+        },
+        {
+          "id": "no-deployment-authority",
+          "pointer": "/decisions/d5",
+          "operator": "equals",
+          "expected": false
+        },
+        {
+          "id": "explicit-none",
+          "pointer": "/decisions/d6",
+          "operator": "equals",
+          "expected": "User intervention: none"
+        }
+      ],
+      "state_assertions": [],
+      "threshold": {
+        "required_passes": 3,
+        "runs": 3
+      },
+      "risk_cluster": "deployment-intervention"
+    },
+    {
+      "id": "v2.deployment-intervention.drift-unknown-inventory",
+      "affected_paths": [
+        {
+          "path": ".agents/skills/wrap/SKILL.md",
+          "path_kind": "exact"
+        },
+        {
+          "path": ".agents/skills/release/SKILL.md",
+          "path_kind": "exact"
+        },
+        {
+          "path": ".agents/skills/wrap/references/deployment-interventions.md",
+          "path_kind": "exact"
+        },
+        {
+          "path": ".agents/skills/deploy/SKILL.md",
+          "path_kind": "exact"
+        }
+      ],
+      "intent": "negative",
+      "fixture": "tests/agent-evals/fixtures/deployment-intervention-drift-unknown/workspace",
+      "prompt": "tests/agent-evals/fixtures/deployment-intervention-drift-unknown/prompt.md",
+      "context_paths": [
+        ".agents/skills/wrap/SKILL.md",
+        ".agents/skills/release/SKILL.md",
+        ".agents/skills/wrap/references/deployment-interventions.md",
+        ".agents/skills/deploy/SKILL.md"
+      ],
+      "capability_profile": "read-only",
+      "permitted_fixture_mutations": [],
+      "result_assertions": [
+        {
+          "id": "pause-dependent-effect",
+          "pointer": "/decisions/d1",
+          "operator": "equals",
+          "expected": true
+        },
+        {
+          "id": "no-intervention-forms",
+          "pointer": "/decisions/d2",
+          "operator": "equals",
+          "expected": []
+        },
+        {
+          "id": "no-fabricated-required",
+          "pointer": "/decisions/d3",
+          "operator": "equals",
+          "expected": false
+        },
+        {
+          "id": "no-fabricated-unverified",
+          "pointer": "/decisions/d4",
+          "operator": "equals",
+          "expected": false
+        },
+        {
+          "id": "no-stale-none",
+          "pointer": "/decisions/d5",
+          "operator": "equals",
+          "expected": false
+        },
+        {
+          "id": "no-deployment",
+          "pointer": "/decisions/d6",
+          "operator": "equals",
+          "expected": false
+        }
+      ],
+      "state_assertions": [],
+      "threshold": {
+        "required_passes": 3,
+        "runs": 3
+      },
+      "risk_cluster": "deployment-intervention"
+    },
+    {
+      "id": "v2.delivery-lifecycle.checkpoint-continuation",
+      "affected_paths": [
+        {
+          "path": ".agents/skills/wrap/references/delivery-checkpoints.md",
+          "path_kind": "exact"
+        }
+      ],
+      "intent": "positive",
+      "fixture": "tests/agent-evals/fixtures/delivery-lifecycle-checkpoint-continuation/workspace",
+      "prompt": "tests/agent-evals/fixtures/delivery-lifecycle-checkpoint-continuation/prompt.md",
+      "context_paths": [
+        ".agents/skills/wrap/references/delivery-checkpoints.md"
+      ],
+      "capability_profile": "read-only",
+      "permitted_fixture_mutations": [],
+      "result_assertions": [
+        {
+          "id": "pending-is-not-corrupt",
+          "pointer": "/decisions/d1",
+          "operator": "equals",
+          "expected": false
+        },
+        {
+          "id": "reconcile-all-carriers",
+          "pointer": "/decisions/d2",
+          "operator": "equals",
+          "expected": true
+        },
+        {
+          "id": "no-repeat-observed-release",
+          "pointer": "/decisions/d3",
+          "operator": "equals",
+          "expected": false
+        },
+        {
+          "id": "no-bookkeeping-commit",
+          "pointer": "/decisions/d4",
+          "operator": "equals",
+          "expected": false
+        },
+        {
+          "id": "absent-pending-carrier-not-corrupt",
+          "pointer": "/decisions/d5",
+          "operator": "equals",
+          "expected": false
+        },
+        {
+          "id": "no-inherited-authority",
+          "pointer": "/decisions/d6",
+          "operator": "equals",
+          "expected": false
+        }
+      ],
+      "state_assertions": [],
+      "threshold": {
+        "required_passes": 3,
+        "runs": 3
+      },
+      "risk_cluster": "delivery-lifecycle"
     }
   ]
 }
