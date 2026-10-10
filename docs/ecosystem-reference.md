@@ -93,7 +93,7 @@ use its full 40-character commit SHA for both acquisition and installation:
 This verifies source consistency after a revision is selected; it does not by
 itself authenticate the publisher. A version becomes stable only when a release
 record binds its full commit SHA. Use the
-[v1.12.0 release record](https://github.com/marcus-friction/agents/releases/tag/v1.12.0).
+[v1.13.0 release record](https://github.com/marcus-friction/agents/releases/tag/v1.13.0).
 
 ### User-level installation
 
@@ -433,6 +433,10 @@ to the legal files for the authoritative classification.
 
 ## Releases
 
+- **v1.13.0 — prepared 2026-10-10:** Applicable review skills now send
+  separable passes to fresh subagents when available, identify delegated
+  reviewers as terminal executors, and keep fallback evidence labeled. See
+  [`2026-10-10-independent-review-dispatch.md`](releases/2026-10-10-independent-review-dispatch.md).
 - **v1.12.0 — prepared 2026-10-07:** Browser testing now uses an available
   browser subagent and verifies application readiness, private port forwarding,
   and browser-side reachability before a test flow. See

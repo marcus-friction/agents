@@ -34,6 +34,16 @@ When both qualifying routes are available for the accepted scope, run them
 independently before sharing either result, then synthesize their overlap and
 unique findings. Record which route each result used.
 
+Prefer a fresh clean-context subagent whenever that route is available. Run
+separate qualifying routes concurrently within capacity and give each only the
+bounded packet below, with an explicit executor role. A delegated executor
+completes its own pass without delegating it again. The invoking reviewer retains evidence validation and
+final synthesis; the same-context fallback used by ordinary reviews never
+satisfies this independence gate.
+Do not send the review packet or code to an external model or provider without
+separate authority; an unauthorized external route is unavailable, not a reason
+to skip an available local independent route.
+
 Do not synthesize while a started route is still running. Wait until every
 started route has completed or reached a bounded failure.
 

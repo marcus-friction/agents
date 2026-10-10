@@ -20,6 +20,20 @@ facts.
 Ask only questions whose answers materially change the plan. Present concrete
 options and a recommendation. Group related decisions when clearer.
 
+## Review dispatch
+
+After selecting applicable passes, delegate separable plan-review passes to
+fresh clean-context subagents when available. Give each the accepted request,
+plan, scope, evidence, applicable rules, and an explicit executor role: it must
+complete the assigned pass without delegating it again. Run independent passes
+concurrently within capacity, collect their results before synthesis, and keep
+the final verdict with the invoking reviewer. A delegated pass executes here without
+delegating again. A failed or malformed delegated pass is missing coverage. When
+subagents are unavailable, run the pass in this context and label it
+`same-context`; it is not independent corroboration. For the elevated-scope
+outside-voice gate below, a same-context pass does not qualify. Do not send the
+plan or review packet to an external service without separate authority.
+
 ## Review passes
 
 Mark every pass **applicable** or **not applicable**, with a reason.

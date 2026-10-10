@@ -81,9 +81,17 @@ permit adding or changing tests.
 
 ## 3. Execute and synthesize
 
+When subagents are available, dispatch separable selected passes to fresh
+clean-context subagents and run independent passes concurrently within capacity.
+The orchestrator retains correctness and final synthesis. When subagents are
+unavailable, run the pass here and label it `same-context`; it is not
+independent corroboration. A delegated reviewer executes its assigned pass
+without delegating it again.
+
 Give every delegated pass the same compact review packet: target and intent,
 base/head, accepted file list and diff, explicit requirements, applicable
-standards, boundary facts, and the finding contract. Follow the dispatch,
+standards, boundary facts, the finding contract, and an explicit executor role
+that forbids redelegating the assigned pass. Follow the dispatch,
 collection, independence, failure, evidence-search, and deduplication rules in
 `scope-and-orchestration.md`.
 
