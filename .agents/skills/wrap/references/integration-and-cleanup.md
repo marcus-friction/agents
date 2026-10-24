@@ -52,4 +52,8 @@ missing/contradictory proof, an unowned worktree, partial publication, or needed
 recovery state. Never force-delete to make cleanup appear complete. Preview
 remote branch deletion and local branch/worktree removal separately, revalidate
 their exact physical targets, execute only authorized deletions, and report each
-as completed, retained, or blocked with the proof/reason.
+as completed, retained, or blocked with the proof/reason. When an isolated
+worktree or temporary clone integrates to the remote default branch and the
+primary repository checkout is clean on that default branch, fast-forward the
+primary checkout (`git merge --ff-only`) as part of cleanup so subsequent
+sessions do not observe a stale base and spawn redundant worktrees.

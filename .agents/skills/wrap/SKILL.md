@@ -187,4 +187,7 @@ Do not prefix the blocked form with
 
 Facts created after the selected terminal repository handoff live in the
 adopted external evidence and final report. Do not create recursive bookkeeping
-commits; a remediation after the cutoff is a new tracked increment.
+commits or mutate tracked repository files with post-cutoff receipts and leave
+the working tree dirty; keep ephemeral post-cutoff scratch in an untracked,
+gitignored runtime directory. A remediation after the cutoff is a new tracked
+increment.
