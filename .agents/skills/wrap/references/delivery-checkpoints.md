@@ -28,7 +28,10 @@ The repository part contains only facts known by its cutoff. Afterward, the
 selected durable external record continues the same checkpoint, bound by the
 attempt identifier and source revision, and records newly observed identities,
 statuses, verification, and cleanup proof. Do not require a future identity
-in a committed repository record or create a recursive bookkeeping commit.
+in a committed repository record, create a recursive bookkeeping commit, or
+mutate tracked repository files (`tasks.md`, delivery docs, or runbooks) with
+post-cutoff identities and leave the working tree dirty. Keep any local
+post-cutoff scratch inside an untracked, gitignored runtime directory.
 If an effect has no durable external record, select an authorized carrier
 before that effect or leave it pending.
 
